@@ -1,0 +1,83 @@
+import time, sys
+import u3
+import Gnuplot
+import json
+import serial
+
+d = u3.U3()
+#d.debug = True
+
+spi_conf_temp = {
+	"AutoCS": True,
+	"DisableDirConfig": False,
+	"SPIMode": 'C',
+	"SPIClockFactor": 0,
+	"CSPINNum": 14,
+	"CLKPinNum": 15,
+	"MISOPinNum": 17,
+	"MOSIPinNum": 16
+	}
+
+spi_conf_pga = {
+	"AutoCS": True,
+	"DisableDirConfig": False,
+	"SPIMode": 'C',
+	"SPIClockFactor": 0,
+	"CSPINNum": 18,
+	"CLKPinNum": 15,
+	"MISOPinNum": 19,
+	"MOSIPinNum": 16
+}
+
+ser1 = serial.Serial('/dev/ttyUSB0', 4800,
+        bytesize=serial.EIGHTBITS,
+        parity=serial.PARITY_NONE,
+        stopbits=serial.STOPBITS_ONE,timeout=1.0)
+print ser1
+
+aa = open("temp_log.txt", "a+",0)
+
+def read_temp():
+	#make sure pga CS is high
+	d.setDOState(spi_conf_pga['CSPINNum'], 1)
+	data = d.spi([0x50, 0x00, 0x00, 0x00], **spi_conf_temp)
+	res = data['SPIBytes']
+        temp = (res[1] << 8 | res[2]) / 128.0
+        return temp
+
+def setup_temp():
+	#make sure pga CS is high
+	d.setDOState(spi_conf_pga['CSPINNum'], 1)
+	data = d.spi([0x08, 0x80], **spi_conf_temp)
+
+def read_gain():
+	#make sure temp chip CS is high
+	d.setDOState(spi_conf_temp['CSPINNum'], 1)
+
+        res = d.spi([0x83, 0x00], **spi_conf_pga)
+	gain_read = res['SPIBytes'][1]
+        return ( 26.0 - gain_read / 4.0 )
+
+if __name__ == "__main__":
+
+	for i in range(500000):
+#		time.sleep(1)
+		temp=read_temp()
+                gain=read_gain()
+
+                ser1.write('MEAS:VOLT?\n')
+	        volt = float(ser1.read(64).split('\n',1)[0])
+
+                ser1.write('MEAS:CURR?\n')
+	        curr = float(ser1.read(64).split('\n',1)[0])
+
+                print >> aa, time.strftime("%Y/%m/%d %H:%M:%S"), temp, gain, volt, curr
+
+                data = {'Time': time.strftime("%Y/%m/%d %H:%M:%S"),
+                        'Temperature': temp, 'Gain': gain, 'HV' : volt, 'I' :
+                        curr}
+                json_file = open("test.json","w")
+                json.dump(data, json_file)
+                json_file.close()
+
+aa.close()

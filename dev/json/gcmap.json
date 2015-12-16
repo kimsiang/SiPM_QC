@@ -1,0 +1,33 @@
+{
+    "data sources": [
+        "http://www.gcmap.com/"
+        ], 
+    "metros": [
+    {
+        "code": "SCL", 
+        "continent": "South America", 
+        "coordinates": {
+            "S": 33, 
+            "W": 71
+        }, 
+        "country": "CL", 
+        "name": "Santiago", 
+        "population": 6000000, 
+        "region": 1, 
+        "timezone": -4
+    }, 
+    {
+        "code": "LIM", 
+        "continent": "South America", 
+        "coordinates": {
+            "S": 12, 
+            "W": 77
+        }, 
+        "country": "PE", 
+        "name": "Lima", 
+        "population": 9050000, 
+        "region": 1, 
+        "timezone": -5
+    }
+    ]
+}

@@ -1,0 +1,215 @@
+#!/usr/bin/python
+#-*- coding: utf-8 -*-
+
+#calculator.py
+
+import wx
+import u3
+import time
+d = u3.U3 ()
+
+
+def led1():
+	d.getFeedback(u3.BitStateWrite(10,0))
+	d.getFeedback(u3.BitStateWrite(11,0))
+	d.getFeedback(u3.BitStateWrite(12,0))
+	d.getFeedback(u3.BitStateWrite(13,0))
+
+def led2():
+	d.getFeedback(u3.BitStateWrite(10,0))
+	d.getFeedback(u3.BitStateWrite(11,0))
+	d.getFeedback(u3.BitStateWrite(12,1))
+	d.getFeedback(u3.BitStateWrite(13,0))
+
+def led3():
+	d.getFeedback(u3.BitStateWrite(10,0))
+	d.getFeedback(u3.BitStateWrite(11,0))
+	d.getFeedback(u3.BitStateWrite(12,0))
+	d.getFeedback(u3.BitStateWrite(13,1))
+
+def led4():
+	d.getFeedback(u3.BitStateWrite(10,0))
+	d.getFeedback(u3.BitStateWrite(11,0))
+	d.getFeedback(u3.BitStateWrite(12,1))
+	d.getFeedback(u3.BitStateWrite(13,1))
+
+def led5():
+	d.getFeedback(u3.BitStateWrite(10,1))
+	d.getFeedback(u3.BitStateWrite(11,0))
+	d.getFeedback(u3.BitStateWrite(12,0))
+	d.getFeedback(u3.BitStateWrite(13,0))
+
+def led6():
+	d.getFeedback(u3.BitStateWrite(10,1))
+	d.getFeedback(u3.BitStateWrite(11,0))
+	d.getFeedback(u3.BitStateWrite(12,1))
+	d.getFeedback(u3.BitStateWrite(13,0))
+
+def led7():
+	d.getFeedback(u3.BitStateWrite(10,1))
+	d.getFeedback(u3.BitStateWrite(11,0))
+	d.getFeedback(u3.BitStateWrite(12,0))
+	d.getFeedback(u3.BitStateWrite(13,1))
+
+def led8():
+	d.getFeedback(u3.BitStateWrite(10,1))
+	d.getFeedback(u3.BitStateWrite(11,0))
+	d.getFeedback(u3.BitStateWrite(12,1))
+	d.getFeedback(u3.BitStateWrite(13,1))
+
+def led9():
+	d.getFeedback(u3.BitStateWrite(10,0))
+	d.getFeedback(u3.BitStateWrite(11,1))
+	d.getFeedback(u3.BitStateWrite(12,0))
+	d.getFeedback(u3.BitStateWrite(13,0))
+
+def led10():
+	d.getFeedback(u3.BitStateWrite(10,0))
+	d.getFeedback(u3.BitStateWrite(11,1))
+	d.getFeedback(u3.BitStateWrite(12,1))
+	d.getFeedback(u3.BitStateWrite(13,0))
+
+def led11():
+	d.getFeedback(u3.BitStateWrite(10,0))
+	d.getFeedback(u3.BitStateWrite(11,1))
+	d.getFeedback(u3.BitStateWrite(12,0))
+	d.getFeedback(u3.BitStateWrite(13,1))
+
+def led12():
+	d.getFeedback(u3.BitStateWrite(10,0))
+	d.getFeedback(u3.BitStateWrite(11,1))
+	d.getFeedback(u3.BitStateWrite(12,1))
+	d.getFeedback(u3.BitStateWrite(13,1))
+
+def led13():
+	d.getFeedback(u3.BitStateWrite(10,0))
+	d.getFeedback(u3.BitStateWrite(11,0))
+	d.getFeedback(u3.BitStateWrite(12,1))
+	d.getFeedback(u3.BitStateWrite(13,1))
+
+def led14():
+	d.getFeedback(u3.BitStateWrite(10,1))
+	d.getFeedback(u3.BitStateWrite(11,1))
+	d.getFeedback(u3.BitStateWrite(12,1))
+	d.getFeedback(u3.BitStateWrite(13,0))
+
+def led15():
+	d.getFeedback(u3.BitStateWrite(10,1))
+	d.getFeedback(u3.BitStateWrite(11,1))
+	d.getFeedback(u3.BitStateWrite(12,0))
+	d.getFeedback(u3.BitStateWrite(13,1))
+
+def led16():
+	d.getFeedback(u3.BitStateWrite(10,1))
+	d.getFeedback(u3.BitStateWrite(11,1))
+	d.getFeedback(u3.BitStateWrite(12,1))
+	d.getFeedback(u3.BitStateWrite(13,1))
+
+
+class Example (wx.Frame):
+
+    def __init__ (self, parent, title):
+        super (Example, self).__init__ (parent, title = title,
+                size = (400, 400))
+        self.InitUI ()
+        self.Centre ()
+        self.Show ()
+
+    def InitUI (self):
+        menubar = wx.MenuBar ()
+        fileMenu = wx.Menu ()
+        menubar.Append (fileMenu, '&File')
+        self.SetMenuBar (menubar)
+        vbox = wx.BoxSizer (wx.VERTICAL)
+
+        self.display = wx.TextCtrl (self, style = wx.TE_RIGHT)
+
+        vbox.Add (self.display, flag = wx.EXPAND | wx.TOP | wx.BOTTOM, border = 4)
+        gs = wx.GridSizer (4, 4, 4, 4)
+#        self.button_1 = wx.Button (self, label = '1')
+        self.button_1 = wx.Button(self, wx.ID_LED1)
+        self.button_2 = wx.Button(self, 10, '&2')
+        self.button_3 = wx.Button(self, 10, '&3')
+        self.button_4 = wx.Button(self, 10, '&4')
+        self.button_5 = wx.Button(self, 10, '&5')
+        self.button_6 = wx.Button(self, 10, '&6')
+        self.button_7 = wx.Button(self, 10, '&7')
+        self.button_8 = wx.Button(self, 10, '&8')
+        self.button_9 = wx.Button(self, 10, '&9')
+        self.button_10 = wx.Button(self, 10, '&10')
+        self.button_11 = wx.Button(self, 10, '&11')
+        self.button_12 = wx.Button(self, 10, '&12')
+        self.button_13 = wx.Button(self, 10, '&13')
+        self.button_14 = wx.Button(self, 10, '&14')
+        self.button_15 = wx.Button(self, 10, '&15')
+        self.button_16 = wx.Button(self, 10, '&16')
+
+        gs.AddMany ([(self.button_1, 0, wx.EXPAND),
+            (self.button_2, 0, wx.EXPAND),
+            (self.button_3, 0, wx.EXPAND),
+            (self.button_4, 0, wx.EXPAND),
+            (self.button_5, 0, wx.EXPAND),
+            (self.button_6, 0, wx.EXPAND),
+            (self.button_7, 0, wx.EXPAND),
+            (self.button_8, 0, wx.EXPAND),
+            (self.button_9, 0, wx.EXPAND),
+            (self.button_10, 0, wx.EXPAND),
+            (self.button_11, 0, wx.EXPAND),
+            (self.button_12, 0, wx.EXPAND),
+            (self.button_13, 0, wx.EXPAND),
+            (self.button_14, 0, wx.EXPAND),
+            (self.button_15, 0, wx.EXPAND),
+            (self.button_16, 0, wx.EXPAND)])
+        vbox.Add (gs, proportion = 1, flag = wx.EXPAND)
+
+        self.SetSizer (vbox)
+
+        #Bind an event for the button
+        self.Bind (wx.EVT_BUTTON, self.Led(1), self.button_1)
+        self.Bind (wx.EVT_BUTTON, self.Led(2), self.button_2)
+        self.Bind (wx.EVT_BUTTON, self.Led(3), self.button_3)
+        self.Bind (wx.EVT_BUTTON, self.Led(4), self.button_4)
+        self.Bind (wx.EVT_BUTTON, self.Led(5), self.button_5)
+        self.Bind (wx.EVT_BUTTON, self.Led(6), self.button_6)
+        self.Bind (wx.EVT_BUTTON, self.Led(7), self.button_7)
+        self.Bind (wx.EVT_BUTTON, self.Led(8), self.button_8)
+        self.Bind (wx.EVT_BUTTON, self.Led(9), self.button_9)
+        self.Bind (wx.EVT_BUTTON, self.Led(10), self.button_10)
+        self.Bind (wx.EVT_BUTTON, self.Led(11), self.button_11)
+        self.Bind (wx.EVT_BUTTON, self.Led(12), self.button_12)
+        self.Bind (wx.EVT_BUTTON, self.Led(13), self.button_13)
+        self.Bind (wx.EVT_BUTTON, self.Led(14), self.button_14)
+        self.Bind (wx.EVT_BUTTON, self.Led(15), self.button_15)
+        self.Bind (wx.EVT_BUTTON, self.Led(16), self.button_16)
+
+    def Led(self, number):
+        if number==1:
+            led1()
+        if number==2:
+            led2()
+        if number==3:
+            led3()
+        if number==4:
+            led4()
+            print 'led 4'
+        if number==5:
+            led5()
+        if number==6:
+            led6()
+        if number==7:
+            led7()
+        if number==8:
+            led8()
+        if number==9:
+            led9()
+        if number==10:
+            led10()
+
+
+if __name__== '__main__':
+
+    app = wx.App ()
+    Example (None, title = 'LED Control Panel')
+    app.MainLoop ()
+
+
