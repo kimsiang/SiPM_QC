@@ -1,6 +1,8 @@
 # SiPM_QC
+A GUI program for the quality control station of the SiPMs for the Muon (g-2) experiment.
+
 ## Introduction
-This is a program for the quality control of the SiPM for muon (g-2) experiment.
+This document is intended to give a summary of the GUI program for the quality control station of the SiPM for the Muon (g-2) experiment.
 
 ## GUI
 wxpython is used for designing the GUI of the SiPM QC Control Panel
