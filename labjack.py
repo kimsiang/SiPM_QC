@@ -4,6 +4,7 @@
 
 import u3
 d = u3.U3 ()
+#d.debug = True
 
 spi_conf_temp = {
 	"AutoCS": True,
@@ -40,6 +41,9 @@ spi_conf_eeprom = {
 
 class labjack():
 
+    def __init__(self):
+        print '>>> LabJack U3-LV initiated!'
+
     def read_temperature(self):
 	#make sure pga and eeprom CS are high
 	d.setDOState(spi_conf_pga['CSPINNum'], 1)
@@ -74,39 +78,39 @@ class labjack():
 
         res = d.spi([0x03, gain_value], **spi_conf_pga)
 
-        res = d.spi([0x83, 0x00], **spi_conf_pga)
-	gain_read = res['SPIBytes'][1]
+        #res = d.spi([0x83, 0x00], **spi_conf_pga)
+	#gain_read = res['SPIBytes'][1]
         #print "new gain readout: %d = %f dB" % (gain_read, 26 - gain_read / 4.0)
 
     def check_eeprom_status(self):
 	#make sure temp and pga chips CS are high
-	d.setDOState(spi_conf_eeprom['CSPINNum'], 0)
+	#d.setDOState(spi_conf_eeprom['CSPINNum'], 0)
 	d.setDOState(spi_conf_temp['CSPINNum'], 1)
 	d.setDOState(spi_conf_pga['CSPINNum'], 1)
 
         res = d.spi([0x05, 0x00], **spi_conf_eeprom)
-	print "eeprom status 0x%02x\n" % res['SPIBytes'][1]
+#	print "eeprom status 0x%02x\n" % res['SPIBytes'][1]
 
     def write_eeprom(self, page, msg):
-	print "writing %s to page %d\n" % (msg, page)
+#	print "writing %s to page %d\n" % (msg, page)
 	self.check_eeprom_status()
 
 	page <<= 4
 
-	print "enable write latch"
+#	print "enable write latch"
 	res = d.spi([0x06], **spi_conf_eeprom)
 	self.check_eeprom_status()
 
-	print "write page"
+#	print "write page"
 	cmd = [0x02, page] + msg
         res = d.spi(cmd, **spi_conf_eeprom)
-	print res['SPIBytes']
+#	print res['SPIBytes']
 	self.check_eeprom_status()
 
-	print "read page"
+#	print "read page"
         cmd = [0x03, page] + [0 for i in range(16)]
         res = d.spi(cmd, **spi_conf_eeprom)
-        print res['SPIBytes']
+ #       print res['SPIBytes'][2:]
 	self.check_eeprom_status()
 
 	#print "read eeprom"
@@ -117,12 +121,13 @@ class labjack():
 
 
     def read_eeprom(self, page):
-        print "reading page %d\n" % page
+#        print "Reading page %d of EEPROM ......\n" % page
 	page <<= 4
         cmd = [0x03, page] + [0 for i in range(16)]
         res = d.spi(cmd, **spi_conf_eeprom)
-        print res['SPIBytes'][2]
-        return res['SPIBytes'][2]
+      #  print res['SPIBytes'][2]
+      #  return res['SPIBytes'][2]
+        return res['SPIBytes'][2:]
 	check_eeprom_status()
 
 
