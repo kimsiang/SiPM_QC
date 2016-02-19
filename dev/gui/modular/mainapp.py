@@ -9,6 +9,8 @@ class MainApp(gui.MainFrame):
         self.panelTwo = Panel2(self)
         self.panelTwo.Hide()
 
+
+
 class Panel1(gui.panel_one):
     def __init__(self, parent):
         gui.panel_one.__init__(self, parent)
