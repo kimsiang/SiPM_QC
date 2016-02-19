@@ -5,13 +5,6 @@
 import wx
 from numpy import arange, sin, pi
 import numpy as np
-import matplotlib.pyplot as plt
-#from numpy.random import normal
-#gaussian_numbers = normal(size=1000)
-import matplotlib
-from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg as FigureCanvas
-from matplotlib.backends.backend_wx import NavigationToolbar2Wx
-from matplotlib.figure import Figure
 
 
 class MainFrame ( wx.Frame ):
