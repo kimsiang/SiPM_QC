@@ -5,7 +5,8 @@ from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg as FigureCanvas
 import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
 import numpy as np
-
+from datetime import date,datetime,tzinfo,timedelta
+print wx.__file__
 
 class display_panel(wx.Panel):
 
@@ -297,6 +298,15 @@ class control_panel(wx.Panel):
         self.Bind(wx.EVT_BUTTON, self.OnClick, self.lblname3s)
         self.Bind(wx.EVT_BUTTON, self.OnClick, self.lblname5s)
         self.Bind(wx.EVT_BUTTON, self.OnClick, self.lblname6s)
+
+        self.Bind(wx.EVT_BUTTON, self.OnClick, self.button1)
+        self.Bind(wx.EVT_BUTTON, self.OnClick, self.button2)
+        self.Bind(wx.EVT_BUTTON, self.OnClick, self.button3)
+        self.Bind(wx.EVT_BUTTON, self.OnClick, self.button4)
+        self.Bind(wx.EVT_BUTTON, self.OnClick, self.button5)
+        self.Bind(wx.EVT_BUTTON, self.OnClick, self.button6)
+        self.Bind(wx.EVT_BUTTON, self.OnClick, self.button7)
+        self.Bind(wx.EVT_BUTTON, self.OnClick, self.button8)
 
         self.Bind(wx.EVT_BUTTON, self.OnClick, self.led1)
         self.Bind(wx.EVT_BUTTON, self.OnClick, self.led2)
