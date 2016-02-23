@@ -13,6 +13,7 @@ class display_panel(wx.Panel):
 
     def __init__(self, parent):
         wx.Panel.__init__(self, parent)
+        self.SetBackgroundColour("Silver")
         # create some sizers
         mainSizer = wx.BoxSizer(wx.VERTICAL)
         hSizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -64,16 +65,16 @@ class control_panel(wx.Panel):
         self.quote1 = wx.StaticText(self, label="BK Precision")
 
         # BK V[V]
-        self.lblname1 = wx.StaticText(self, label="V [V]")
-        self.lblname1r = wx.StaticText(self, label="0.00")
+        self.lblname1 = wx.StaticText(self, label='V [V]')
+        self.lblname1r = wx.StaticText(self, label='0.00')
         self.lblname1w = wx.SpinCtrlDouble(
-            self, value="0.00", name="Preset V [V]")
+            self, value='0.00', name="Preset V [V]")
         self.lblname1s = wx.Button(self, label="Set V")
 
         # BK I[A]
-        self.lblname2 = wx.StaticText(self, label="I [mA]")
-        self.lblname2r = wx.StaticText(self, label="0.00")
-        self.lblname2w = wx.SpinCtrl(self, value="5", name="Preset I [mA]")
+        self.lblname2 = wx.StaticText(self, label='I [mA]')
+        self.lblname2r = wx.StaticText(self, label='0.00')
+        self.lblname2w = wx.SpinCtrl(self, value='5.00', name="Preset I [mA]")
         self.lblname2s = wx.Button(self, label="Set I")
 
         # SiPM Board Label
@@ -86,12 +87,12 @@ class control_panel(wx.Panel):
         self.lblname3s = wx.Button(self, label="Set SiPM#")
 
         # T [C]
-        self.lblname4 = wx.StaticText(self, label="T [' + u'\u2103]")
+        self.lblname4 = wx.StaticText(self, label='T [' + u'\u2103]')
         self.lblname4r = wx.StaticText(self, label="25.00")
         self.lblname4w = wx.StaticText(self, label="")
 
         # Gain [dB]
-        self.lblname5 = wx.StaticText(self, label="Gain [dB]")
+        self.lblname5 = wx.StaticText(self, label='Gain [dB]')
         self.lblname5r = wx.StaticText(self, label="10")
         self.lblname5w = wx.SpinCtrl(self, value='10', name="Preset Gain [dB]")
         self.lblname5s = wx.Button(self, label="Set Gain")
@@ -156,6 +157,7 @@ class control_panel(wx.Panel):
         self.logger.SetBackgroundColour("Black")
         self.logger.SetForegroundColour("White")
 
+        self.lblname1w.SetDigits(1)
         self.lblname1w.SetRange(0.0, 70.0)
         self.lblname1w.SetIncrement(0.1)
 
@@ -404,7 +406,7 @@ class control_panel(wx.Panel):
         elif labeltext == 'Set LED#':
             value = self.lblname6w.GetValue()
             unit = ''
-        self.logger.AppendText("%s to %1.f %s\n" % (labeltext, value, unit))
+        self.logger.AppendText("%s to %.1f %s\n" % (labeltext, value, unit))
         event.Skip()
 
     def EvtText(self, event):
