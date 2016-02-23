@@ -86,7 +86,7 @@ class control_panel(wx.Panel):
         self.lblname3s = wx.Button(self, label="Set SiPM#")
 
         # T [C]
-        self.lblname4 = wx.StaticText(self, label="T [C]")
+        self.lblname4 = wx.StaticText(self, label="T [' + u'\u2103]")
         self.lblname4r = wx.StaticText(self, label="25.00")
         self.lblname4w = wx.StaticText(self, label="")
 
@@ -144,7 +144,7 @@ class control_panel(wx.Panel):
         # A multiline TextCtrl - This is here to show how the events work in
         # this program, don't pay too much attention to it
         self.logger = wx.TextCtrl(
-            self, size=(300, 400), style=wx.TE_MULTILINE | wx.TE_READONLY)
+            self, size=(300, 400), style=wx.TE_MULTILINE | wx.TE_READONLY | wx.TE_RICH2 | wx.BORDER_SUNKEN)
 
         self.__set_properties()
         self.__do_layout()
@@ -152,6 +152,10 @@ class control_panel(wx.Panel):
 
     def __set_properties(self):
         # set the properties of the items created
+
+        self.logger.SetBackgroundColour("Black")
+        self.logger.SetForegroundColour("White")
+
         self.lblname1w.SetRange(0.0, 70.0)
         self.lblname1w.SetIncrement(0.1)
 
