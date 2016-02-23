@@ -5,14 +5,14 @@ from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg as FigureCanvas
 import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
 import numpy as np
-from datetime import date,datetime,tzinfo,timedelta
-#print wx.__file__
+from datetime import date, datetime, tzinfo, timedelta
+# print wx.__file__
+
 
 class display_panel(wx.Panel):
 
     def __init__(self, parent):
         wx.Panel.__init__(self, parent)
-
         # create some sizers
         mainSizer = wx.BoxSizer(wx.VERTICAL)
         hSizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -66,7 +66,8 @@ class control_panel(wx.Panel):
         # BK V[V]
         self.lblname1 = wx.StaticText(self, label="V [V]")
         self.lblname1r = wx.StaticText(self, label="0.00")
-        self.lblname1w = wx.SpinCtrlDouble(self, value="0.00", name="Preset V [V]")
+        self.lblname1w = wx.SpinCtrlDouble(
+            self, value="0.00", name="Preset V [V]")
         self.lblname1s = wx.Button(self, label="Set V")
 
         # BK I[A]
@@ -160,7 +161,8 @@ class control_panel(wx.Panel):
         self.lblname6w.SetRange(1, 16)
 
         font = wx.Font(16, wx.ROMAN, wx.NORMAL, wx.NORMAL, False, u'Consolas')
-        bigfont = wx.Font(20, wx.ROMAN, wx.NORMAL, wx.NORMAL, False, u'Consolas')
+        bigfont = wx.Font(
+            20, wx.ROMAN, wx.NORMAL, wx.NORMAL, False, u'Consolas')
 
         self.quote1.SetFont(bigfont)
         self.quote2.SetFont(bigfont)
@@ -228,7 +230,6 @@ class control_panel(wx.Panel):
         self.led15.SetFont(font)
         self.led16.SetFont(font)
 
-
     def __do_layout(self):
         # create some sizers
         mainSizer = wx.BoxSizer(wx.VERTICAL)
@@ -242,35 +243,41 @@ class control_panel(wx.Panel):
         grid.Add(self.quote1, pos=(0, 1), span=(1, 2), flag=wx.TE_CENTER)
 
         grid.Add(self.lblname1, pos=(1, 0), flag=wx.TE_RIGHT | wx.ALIGN_CENTER)
-        grid.Add(self.lblname1r, pos=(1, 1), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
+        grid.Add(
+            self.lblname1r, pos=(1, 1), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
         grid.Add(self.lblname1w, pos=(1, 2), flag=wx.TE_CENTER)
         grid.Add(self.lblname1s, pos=(1, 3), flag=wx.TE_CENTER)
 
         grid.Add(self.lblname2, pos=(2, 0), flag=wx.TE_RIGHT | wx.ALIGN_CENTER)
-        grid.Add(self.lblname2r, pos=(2, 1), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
+        grid.Add(
+            self.lblname2r, pos=(2, 1), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
         grid.Add(self.lblname2w, pos=(2, 2), flag=wx.TE_CENTER)
         grid.Add(self.lblname2s, pos=(2, 3), flag=wx.TE_CENTER)
 
         grid.Add(self.quote2, pos=(3, 1), span=(1, 2), flag=wx.TE_CENTER)
 
         grid.Add(self.lblname3, pos=(4, 0), flag=wx.TE_RIGHT | wx.ALIGN_CENTER)
-        grid.Add(self.lblname3r, pos=(4, 1), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
+        grid.Add(
+            self.lblname3r, pos=(4, 1), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
         grid.Add(self.lblname3w, pos=(4, 2), flag=wx.TE_CENTER)
         grid.Add(self.lblname3s, pos=(4, 3), flag=wx.TE_CENTER)
 
         grid.Add(self.lblname4, pos=(5, 0), flag=wx.TE_RIGHT | wx.ALIGN_CENTER)
-        grid.Add(self.lblname4r, pos=(5, 1), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
+        grid.Add(
+            self.lblname4r, pos=(5, 1), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
         grid.Add(self.lblname4w, pos=(5, 2), flag=wx.TE_CENTER)
 
         grid.Add(self.lblname5, pos=(6, 0), flag=wx.TE_RIGHT | wx.ALIGN_CENTER)
-        grid.Add(self.lblname5r, pos=(6, 1), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
+        grid.Add(
+            self.lblname5r, pos=(6, 1), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
         grid.Add(self.lblname5w, pos=(6, 2), flag=wx.TE_CENTER)
         grid.Add(self.lblname5s, pos=(6, 3), flag=wx.TE_CENTER)
 
         grid.Add(self.quote3, pos=(7, 1), span=(1, 2), flag=wx.TE_CENTER)
 
         grid.Add(self.lblname6, pos=(8, 0), flag=wx.TE_RIGHT | wx.ALIGN_CENTER)
-        grid.Add(self.lblname6r, pos=(8, 1), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
+        grid.Add(
+            self.lblname6r, pos=(8, 1), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
         grid.Add(self.lblname6w, pos=(8, 2), flag=wx.TE_CENTER)
         grid.Add(self.lblname6s, pos=(8, 3), flag=wx.TE_CENTER)
 
@@ -279,10 +286,10 @@ class control_panel(wx.Panel):
         # start of grid2
         grid2.Add(self.quote4, pos=(0, 1), span=(1, 2), flag=wx.TE_CENTER)
 
-        grid2.Add(self.button1, pos=(1, 0), flag=wx.TE_CENTER)
-        grid2.Add(self.button2, pos=(1, 1), flag=wx.TE_CENTER)
-        grid2.Add(self.button3, pos=(1, 2), flag=wx.TE_CENTER)
-        grid2.Add(self.button4, pos=(1, 3), flag=wx.TE_CENTER)
+        grid2.Add(self.button1, pos=(1, 0), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
+        grid2.Add(self.button2, pos=(1, 1), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
+        grid2.Add(self.button3, pos=(1, 2), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
+        grid2.Add(self.button4, pos=(1, 3), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
 
         grid2.Add(self.quote5, pos=(2, 1), span=(1, 2), flag=wx.TE_CENTER)
 
@@ -380,15 +387,20 @@ class control_panel(wx.Panel):
         labeltext = event.GetEventObject().GetLabelText()
         if labeltext == 'Set V':
             value = self.lblname1w.GetValue()
+            unit = 'V'
         elif labeltext == 'Set I':
             value = self.lblname2w.GetValue()
+            unit = 'mA'
         elif labeltext == 'Set SiPM#':
             value = self.lblname3w.GetValue()
+            unit = ''
         elif labeltext == 'Set Gain':
             value = self.lblname5w.GetValue()
+            unit = 'dB'
         elif labeltext == 'Set LED#':
             value = self.lblname6w.GetValue()
-        self.logger.AppendText("%s to %1.f\n" % (labeltext, value) )
+            unit = ''
+        self.logger.AppendText("%s to %1.f %s\n" % (labeltext, value, unit))
         event.Skip()
 
     def EvtText(self, event):
@@ -442,6 +454,7 @@ class Panel1(control_panel):
         control_panel.__init__(self, parent)
         self.parent = parent
         self.parent.SetTitle("SiPM QC Station - L0 (Control Panel)")
+        self.SetBackgroundColour('silver')
 
     def changeIntroPanel(self, event):
         if self.IsShown():
