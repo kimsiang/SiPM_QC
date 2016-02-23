@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
 import numpy as np
 from datetime import date,datetime,tzinfo,timedelta
-print wx.__file__
+#print wx.__file__
 
 class display_panel(wx.Panel):
 
@@ -65,15 +65,13 @@ class control_panel(wx.Panel):
 
         # BK V[V]
         self.lblname1 = wx.StaticText(self, label="V [V]")
-        self.lblname1r = wx.StaticText(
-            self, label="0", size=(50, 50), style=wx.TE_CENTER)
-        self.lblname1w = wx.SpinCtrlDouble(
-            self, value='0', name="Preset V [V]")
+        self.lblname1r = wx.StaticText(self, label="0.00")
+        self.lblname1w = wx.SpinCtrlDouble(self, value="0.00", name="Preset V [V]")
         self.lblname1s = wx.Button(self, label="Set V")
 
         # BK I[A]
         self.lblname2 = wx.StaticText(self, label="I [mA]")
-        self.lblname2r = wx.StaticText(self, label="0")
+        self.lblname2r = wx.StaticText(self, label="0.00")
         self.lblname2w = wx.SpinCtrl(self, value="5", name="Preset I [mA]")
         self.lblname2s = wx.Button(self, label="Set I")
 
@@ -88,7 +86,7 @@ class control_panel(wx.Panel):
 
         # T [C]
         self.lblname4 = wx.StaticText(self, label="T [C]")
-        self.lblname4r = wx.StaticText(self, label="25")
+        self.lblname4r = wx.StaticText(self, label="25.00")
         self.lblname4w = wx.StaticText(self, label="")
 
         # Gain [dB]
@@ -161,7 +159,16 @@ class control_panel(wx.Panel):
         self.lblname5w.SetRange(6, 26)
         self.lblname6w.SetRange(1, 16)
 
-        font = wx.Font(17, wx.ROMAN, wx.NORMAL, wx.NORMAL, False, u'Consolas')
+        font = wx.Font(16, wx.ROMAN, wx.NORMAL, wx.NORMAL, False, u'Consolas')
+        bigfont = wx.Font(20, wx.ROMAN, wx.NORMAL, wx.NORMAL, False, u'Consolas')
+
+        self.quote1.SetFont(bigfont)
+        self.quote2.SetFont(bigfont)
+        self.quote3.SetFont(bigfont)
+        self.quote4.SetFont(bigfont)
+        self.quote5.SetFont(bigfont)
+        self.quote6.SetFont(bigfont)
+
         self.lblname1.SetFont(font)
         self.lblname1r.SetFont(font)
         self.lblname1w.SetFont(font)
@@ -191,11 +198,42 @@ class control_panel(wx.Panel):
         self.lblname6w.SetFont(font)
         self.lblname6s.SetFont(font)
 
+        self.button1.SetFont(font)
+        self.button2.SetFont(font)
+        self.button3.SetFont(font)
+        self.button4.SetFont(font)
+
+        self.button5.SetFont(font)
+        self.button6.SetFont(font)
+        self.button7.SetFont(font)
+        self.button8.SetFont(font)
+
+        self.led1.SetFont(font)
+        self.led2.SetFont(font)
+        self.led3.SetFont(font)
+        self.led4.SetFont(font)
+
+        self.led5.SetFont(font)
+        self.led6.SetFont(font)
+        self.led7.SetFont(font)
+        self.led8.SetFont(font)
+
+        self.led9.SetFont(font)
+        self.led10.SetFont(font)
+        self.led11.SetFont(font)
+        self.led12.SetFont(font)
+
+        self.led13.SetFont(font)
+        self.led14.SetFont(font)
+        self.led15.SetFont(font)
+        self.led16.SetFont(font)
+
+
     def __do_layout(self):
         # create some sizers
         mainSizer = wx.BoxSizer(wx.VERTICAL)
-        grid = wx.GridBagSizer(hgap=5, vgap=5)
-        grid2 = wx.GridBagSizer(hgap=5, vgap=5)
+        grid = wx.GridBagSizer(hgap=10, vgap=10)
+        grid2 = wx.GridBagSizer(hgap=10, vgap=10)
         hSizer = wx.BoxSizer(wx.HORIZONTAL)
 
         mainSizer.Add(self.m_button2, 0, wx.ALL, 5)
@@ -203,36 +241,36 @@ class control_panel(wx.Panel):
         # start of grid1
         grid.Add(self.quote1, pos=(0, 1), span=(1, 2), flag=wx.TE_CENTER)
 
-        grid.Add(self.lblname1, pos=(1, 0), flag=wx.TE_RIGHT)
-        grid.Add(self.lblname1r, pos=(1, 1), flag=wx.TE_CENTER)
+        grid.Add(self.lblname1, pos=(1, 0), flag=wx.TE_RIGHT | wx.ALIGN_CENTER)
+        grid.Add(self.lblname1r, pos=(1, 1), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
         grid.Add(self.lblname1w, pos=(1, 2), flag=wx.TE_CENTER)
         grid.Add(self.lblname1s, pos=(1, 3), flag=wx.TE_CENTER)
 
-        grid.Add(self.lblname2, pos=(2, 0), flag=wx.TE_RIGHT)
-        grid.Add(self.lblname2r, pos=(2, 1), flag=wx.TE_CENTER)
+        grid.Add(self.lblname2, pos=(2, 0), flag=wx.TE_RIGHT | wx.ALIGN_CENTER)
+        grid.Add(self.lblname2r, pos=(2, 1), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
         grid.Add(self.lblname2w, pos=(2, 2), flag=wx.TE_CENTER)
         grid.Add(self.lblname2s, pos=(2, 3), flag=wx.TE_CENTER)
 
         grid.Add(self.quote2, pos=(3, 1), span=(1, 2), flag=wx.TE_CENTER)
 
-        grid.Add(self.lblname3, pos=(4, 0), flag=wx.TE_RIGHT)
-        grid.Add(self.lblname3r, pos=(4, 1), flag=wx.TE_CENTER)
+        grid.Add(self.lblname3, pos=(4, 0), flag=wx.TE_RIGHT | wx.ALIGN_CENTER)
+        grid.Add(self.lblname3r, pos=(4, 1), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
         grid.Add(self.lblname3w, pos=(4, 2), flag=wx.TE_CENTER)
         grid.Add(self.lblname3s, pos=(4, 3), flag=wx.TE_CENTER)
 
-        grid.Add(self.lblname4, pos=(5, 0), flag=wx.TE_RIGHT)
-        grid.Add(self.lblname4r, pos=(5, 1), flag=wx.TE_CENTER)
+        grid.Add(self.lblname4, pos=(5, 0), flag=wx.TE_RIGHT | wx.ALIGN_CENTER)
+        grid.Add(self.lblname4r, pos=(5, 1), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
         grid.Add(self.lblname4w, pos=(5, 2), flag=wx.TE_CENTER)
 
-        grid.Add(self.lblname5, pos=(6, 0), flag=wx.TE_RIGHT)
-        grid.Add(self.lblname5r, pos=(6, 1), flag=wx.TE_CENTER)
+        grid.Add(self.lblname5, pos=(6, 0), flag=wx.TE_RIGHT | wx.ALIGN_CENTER)
+        grid.Add(self.lblname5r, pos=(6, 1), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
         grid.Add(self.lblname5w, pos=(6, 2), flag=wx.TE_CENTER)
         grid.Add(self.lblname5s, pos=(6, 3), flag=wx.TE_CENTER)
 
         grid.Add(self.quote3, pos=(7, 1), span=(1, 2), flag=wx.TE_CENTER)
 
-        grid.Add(self.lblname6, pos=(8, 0), flag=wx.TE_RIGHT)
-        grid.Add(self.lblname6r, pos=(8, 1), flag=wx.TE_CENTER)
+        grid.Add(self.lblname6, pos=(8, 0), flag=wx.TE_RIGHT | wx.ALIGN_CENTER)
+        grid.Add(self.lblname6r, pos=(8, 1), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
         grid.Add(self.lblname6w, pos=(8, 2), flag=wx.TE_CENTER)
         grid.Add(self.lblname6s, pos=(8, 3), flag=wx.TE_CENTER)
 
@@ -293,11 +331,11 @@ class control_panel(wx.Panel):
         self.Bind(wx.EVT_SPINCTRL, self.EvtSpinText, self.lblname5w)
         self.Bind(wx.EVT_SPINCTRL, self.EvtSpinText, self.lblname6w)
 
-        self.Bind(wx.EVT_BUTTON, self.OnClick, self.lblname1s)
-        self.Bind(wx.EVT_BUTTON, self.OnClick, self.lblname2s)
-        self.Bind(wx.EVT_BUTTON, self.OnClick, self.lblname3s)
-        self.Bind(wx.EVT_BUTTON, self.OnClick, self.lblname5s)
-        self.Bind(wx.EVT_BUTTON, self.OnClick, self.lblname6s)
+        self.Bind(wx.EVT_BUTTON, self.OnSet, self.lblname1s)
+        self.Bind(wx.EVT_BUTTON, self.OnSet, self.lblname2s)
+        self.Bind(wx.EVT_BUTTON, self.OnSet, self.lblname3s)
+        self.Bind(wx.EVT_BUTTON, self.OnSet, self.lblname5s)
+        self.Bind(wx.EVT_BUTTON, self.OnSet, self.lblname6s)
 
         self.Bind(wx.EVT_BUTTON, self.OnClick, self.button1)
         self.Bind(wx.EVT_BUTTON, self.OnClick, self.button2)
@@ -334,8 +372,23 @@ class control_panel(wx.Panel):
         event.Skip()
 
     def OnClick(self, event):
-        self.logger.AppendText(
-            " Clicked on %s\n" % event.GetEventObject().GetLabelText())
+        labeltext = event.GetEventObject().GetLabelText()
+        self.logger.AppendText(" Clicked on %s\n" % labeltext)
+        event.Skip()
+
+    def OnSet(self, event):
+        labeltext = event.GetEventObject().GetLabelText()
+        if labeltext == 'Set V':
+            value = self.lblname1w.GetValue()
+        elif labeltext == 'Set I':
+            value = self.lblname2w.GetValue()
+        elif labeltext == 'Set SiPM#':
+            value = self.lblname3w.GetValue()
+        elif labeltext == 'Set Gain':
+            value = self.lblname5w.GetValue()
+        elif labeltext == 'Set LED#':
+            value = self.lblname6w.GetValue()
+        self.logger.AppendText("%s to %1.f\n" % (labeltext, value) )
         event.Skip()
 
     def EvtText(self, event):
@@ -370,7 +423,7 @@ class MainFrame (wx.Frame):
         wx.Frame.__init__(self, parent, id=wx.ID_ANY,
                           title=wx.EmptyString,
                           pos=wx.DefaultPosition,
-                          size=wx.Size(1100, 550),
+                          size=wx.Size(1200, 550),
                           style=wx.DEFAULT_FRAME_STYLE |
                           wx.TAB_TRAVERSAL)
 
