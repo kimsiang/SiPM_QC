@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-# sipm_qc_v2.py
+# sipm_qc_v3.py
 
 print '##########################################################'
 
@@ -20,8 +20,10 @@ import glob
 
 ## Import system process for process handling
 import time, sys, subprocess, os, threading, signal
-p = subprocess.Popen(['ps', '-A'], stdout=subprocess.PIPE)
+
+p = subprocess.Popen(['ps', '-A'], stdout=subprocess.PIPE, shell=True)
 (out, err) = p.communicate()
+p_status = p.wait()
 
 ## Kill any instances of drs4_exam
 for line in out.splitlines():
@@ -532,7 +534,7 @@ class MyFrame(wx.Frame):
 
         time.sleep(1)
 
-        while False:
+        while True:
             infile = open("./data/sipm_%d_%02d/sipm_%d_%d.txt" % (sipm_no,
                 test_no, sipm_no,
                 led_no), 'r+')

@@ -8,7 +8,7 @@ import numpy as np
 from datetime import date, datetime, tzinfo, timedelta
 # print wx.__file__
 
-
+## Define display panel here
 class display_panel(wx.Panel):
 
     def __init__(self, parent):
@@ -19,7 +19,7 @@ class display_panel(wx.Panel):
         hSizer = wx.BoxSizer(wx.HORIZONTAL)
 
         self.m_button2 = wx.Button(self, wx.ID_ANY, "Control Panel",
-                                   wx.DefaultPosition, wx.DefaultSize, 0)
+                wx.DefaultPosition, wx.DefaultSize, 0)
 
         # Connect Events
         self.m_button2.Bind(wx.EVT_BUTTON, self.changeIntroPanel)
@@ -49,14 +49,15 @@ class display_panel(wx.Panel):
         event.Skip()
 
 
+## Define control panel here
 class control_panel(wx.Panel):
 
     def __init__(self, parent):
         wx.Panel.__init__(self, parent)
 
         self.m_button2 = wx.Button(
-            self, wx.ID_ANY, "Display Panel ", wx.DefaultPosition,
-            wx.DefaultSize, 0)
+                self, wx.ID_ANY, "Display Panel ", wx.DefaultPosition,
+                wx.DefaultSize, 0)
 
         # A button
         self.button = wx.Button(self, label="Save")
@@ -68,7 +69,7 @@ class control_panel(wx.Panel):
         self.lblname1 = wx.StaticText(self, label='V [V]')
         self.lblname1r = wx.StaticText(self, label='0.00')
         self.lblname1w = wx.SpinCtrlDouble(
-            self, value='0.00', name="Preset V [V]")
+                self, value='0.00', name="Preset V [V]")
         self.lblname1s = wx.Button(self, label="Set V")
 
         # BK I[A]
@@ -142,11 +143,11 @@ class control_panel(wx.Panel):
         self.led15 = wx.Button(self, label="LED15")
         self.led16 = wx.Button(self, label="LED16")
 
-        # A multiline TextCtrl - This is here to show how the events work in
-        # this program, don't pay too much attention to it
+        # A multiline TextCtrl for logging purpose
         self.logger = wx.TextCtrl(
-            self, size=(400, 600), style=wx.TE_MULTILINE | wx.TE_READONLY | wx.TE_RICH2 | wx.BORDER_SUNKEN)
+                self, size=(400, 600), style=wx.TE_MULTILINE | wx.TE_READONLY | wx.TE_RICH2 | wx.BORDER_SUNKEN)
 
+        ## implement the settings in 3 other functions
         self.__set_properties()
         self.__do_layout()
         self.__do_binding()
@@ -168,7 +169,7 @@ class control_panel(wx.Panel):
 
         font = wx.Font(16, wx.ROMAN, wx.NORMAL, wx.NORMAL, False, u'Consolas')
         bigfont = wx.Font(
-            20, wx.ROMAN, wx.NORMAL, wx.NORMAL, False, u'Consolas')
+                20, wx.ROMAN, wx.NORMAL, wx.NORMAL, False, u'Consolas')
 
         self.quote1.SetFont(bigfont)
         self.quote2.SetFont(bigfont)
@@ -250,13 +251,13 @@ class control_panel(wx.Panel):
 
         grid.Add(self.lblname1, pos=(1, 0), flag=wx.TE_RIGHT | wx.ALIGN_CENTER)
         grid.Add(
-            self.lblname1r, pos=(1, 1), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
+                self.lblname1r, pos=(1, 1), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
         grid.Add(self.lblname1w, pos=(1, 2), flag=wx.TE_CENTER)
         grid.Add(self.lblname1s, pos=(1, 3), flag=wx.TE_CENTER)
 
         grid.Add(self.lblname2, pos=(2, 0), flag=wx.TE_RIGHT | wx.ALIGN_CENTER)
         grid.Add(
-            self.lblname2r, pos=(2, 1), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
+                self.lblname2r, pos=(2, 1), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
         grid.Add(self.lblname2w, pos=(2, 2), flag=wx.TE_CENTER)
         grid.Add(self.lblname2s, pos=(2, 3), flag=wx.TE_CENTER)
 
@@ -264,18 +265,18 @@ class control_panel(wx.Panel):
 
         grid.Add(self.lblname3, pos=(4, 0), flag=wx.TE_RIGHT | wx.ALIGN_CENTER)
         grid.Add(
-            self.lblname3r, pos=(4, 1), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
+                self.lblname3r, pos=(4, 1), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
         grid.Add(self.lblname3w, pos=(4, 2), flag=wx.TE_CENTER)
         grid.Add(self.lblname3s, pos=(4, 3), flag=wx.TE_CENTER)
 
         grid.Add(self.lblname4, pos=(5, 0), flag=wx.TE_RIGHT | wx.ALIGN_CENTER)
         grid.Add(
-            self.lblname4r, pos=(5, 1), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
+                self.lblname4r, pos=(5, 1), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
         grid.Add(self.lblname4w, pos=(5, 2), flag=wx.TE_CENTER)
 
         grid.Add(self.lblname5, pos=(6, 0), flag=wx.TE_RIGHT | wx.ALIGN_CENTER)
         grid.Add(
-            self.lblname5r, pos=(6, 1), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
+                self.lblname5r, pos=(6, 1), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
         grid.Add(self.lblname5w, pos=(6, 2), flag=wx.TE_CENTER)
         grid.Add(self.lblname5s, pos=(6, 3), flag=wx.TE_CENTER)
 
@@ -283,7 +284,7 @@ class control_panel(wx.Panel):
 
         grid.Add(self.lblname6, pos=(8, 0), flag=wx.TE_RIGHT | wx.ALIGN_CENTER)
         grid.Add(
-            self.lblname6r, pos=(8, 1), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
+                self.lblname6r, pos=(8, 1), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
         grid.Add(self.lblname6w, pos=(8, 2), flag=wx.TE_CENTER)
         grid.Add(self.lblname6s, pos=(8, 3), flag=wx.TE_CENTER)
 
@@ -423,8 +424,7 @@ class control_panel(wx.Panel):
 
     def EvtSpinText(self, event):
         self.logger.AppendText(
-            '%s to %.1f\n' % (event.GetEventObject().GetName(),
-                              event.GetValue()))
+                '%s to %.1f\n' % (event.GetEventObject().GetName(),event.GetValue()))
         event.Skip()
 
     def __del__(self):
@@ -433,70 +433,3 @@ class control_panel(wx.Panel):
 
     def changeIntroPanel(self, event):
         event.Skip()
-
-
-class MainFrame (wx.Frame):
-
-    def __init__(self, parent):
-        wx.Frame.__init__(self, parent, id=wx.ID_ANY,
-                          title=wx.EmptyString,
-                          pos=wx.DefaultPosition,
-                          size=wx.Size(1350, 700),
-                          style=wx.DEFAULT_FRAME_STYLE |
-                          wx.TAB_TRAVERSAL)
-
-        #self.panelOne = ControlPanel(self)
-        #self.panelTwo = DisplayPanel(self)
-        # self.panelTwo.Hide()
-        self.Centre(wx.BOTH)
-
-    def __del__(self):
-        pass
-
-
-class Panel1(control_panel):
-
-    def __init__(self, parent):
-        control_panel.__init__(self, parent)
-        self.parent = parent
-        self.parent.SetTitle("SiPM QC Station - L0 (Control Panel)")
-        self.SetBackgroundColour('silver')
-
-    def changeIntroPanel(self, event):
-        if self.IsShown():
-            self.parent.SetTitle("SiPM QC Station - L0 (Display Panel)")
-            self.Hide()
-            self.parent.panelTwo.Show()
-
-
-class Panel2(display_panel):
-
-    def __init__(self, parent):
-        display_panel.__init__(self, parent)
-        self.parent = parent
-
-    def changeIntroPanel(self, event):
-        if self.IsShown():
-            self.parent.SetTitle("SiPM QC Station - L0 (Control Panel)")
-            self.parent.panelOne.Show()
-            self.Hide()
-
-
-class MainApp(MainFrame):
-
-    def __init__(self, parent):
-        MainFrame.__init__(self, parent)
-
-        self.panelOne = Panel1(self)
-        self.panelTwo = Panel2(self)
-        self.panelTwo.Hide()
-
-
-def main():
-    app = wx.App()
-    window = MainApp(None)
-    window.Show(True)
-    app.MainLoop()
-
-if __name__ == '__main__':
-    main()
