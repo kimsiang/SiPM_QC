@@ -47,16 +47,17 @@ from datetime import date,datetime,tzinfo,timedelta
 from decimal import Decimal
 
 ## Import tools for fast plotting
+import matplotlib
+matplotlib.use('WxAgg')
+from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg as FigureCanvas
+from matplotlib.backends.backend_wx import NavigationToolbar2Wx
+from matplotlib.figure import Figure
+from scipy.optimize import curve_fit
 from numpy import arange, sin, pi
 import numpy as np
 import matplotlib.pyplot as plt
 from numpy.random import normal
 gaussian_numbers = normal(size=1000)
-import matplotlib
-from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg as FigureCanvas
-from matplotlib.backends.backend_wx import NavigationToolbar2Wx
-from matplotlib.figure import Figure
-from scipy.optimize import curve_fit
 
 # Define model function to be used to fit to the data above:
 def gauss(x, *p):
@@ -182,7 +183,7 @@ class MyFrame(wx.Frame):
 
         ## Create "Telephone" grid for controlling BK precision, temperature
         ## measurement, EEPROM R/W and LEDs
-        gsbutton = wx.GridSizer(5, 4, 10, 10)
+        gsbutton = wx.GridSizer(6, 4, 10, 10)
         gsbutton.AddMany([
                         (wx.Button(self, 24, 'Update T', size=(80,50)), 0, wx.EXPAND),
                         (wx.Button(self, 17, 'BK OFF'), 0, wx.EXPAND),
@@ -291,9 +292,8 @@ class MyFrame(wx.Frame):
         self.display1.AppendText(bk.meas_volt())
         self.display1.SetBackgroundColour("green")
         self.label1.SetBackgroundColour("green")
-        self.eeprom_read()
-	self.display4.Clear()
-        self.display4.AppendText(self.check_serial())
+#	self.display4.Clear()
+#        self.display4.AppendText(self.check_serial())
 
     def Update(self, event):
         print 'Updating HV and EEPROM ......'
@@ -448,6 +448,7 @@ class MyFrame(wx.Frame):
             self.display4.SetBackgroundColour("green")
             self.label4.SetBackgroundColour("green")
             print 'Serial# found! It is %s ......' % str(int(er_array[0]))
+            self.display4.Clear()
             self.display4.AppendText(str(int(er_array[0])))
             return str(int(er_array[0]))
         else:
@@ -531,7 +532,7 @@ class MyFrame(wx.Frame):
 
         time.sleep(1)
 
-        while True:
+        while False:
             infile = open("./data/sipm_%d_%02d/sipm_%d_%d.txt" % (sipm_no,
                 test_no, sipm_no,
                 led_no), 'r+')
@@ -582,17 +583,18 @@ class MyFrame(wx.Frame):
         self.axes1.clear()
         self.axes2.clear()
         plt.figure(2)
-        n, bins, patches = plt.hist(floats,25)
-        bin_centres = (bins[:-1] + bins[1:])/2
-        # p0 is the initial guess for the fitting coefficients (A, mu and sigma
-        # above)
-        coeff, var_matrix = curve_fit(gauss, bin_centres, n, p0=[100.,average,5.])
-        hist_fit = gauss(bin_centres, *coeff)
-        plt.plot(bin_centres, hist_fit, label='Fitted data', linewidth=2)
-        print 'Fitted mean = ', coeff[1]
-        print 'Fitted standard deviation = ', coeff[2]
-        fdata = open("vbd.txt", "a+")
-        print >> fdata, float(bk.meas_volt()), ' ', coeff[1], ' ', coeff[2]
+        if False:
+            n, bins, patches = plt.hist(floats,25)
+            bin_centres = (bins[:-1] + bins[1:])/2
+            # p0 is the initial guess for the fitting coefficients (A, mu and sigma
+            # above)
+            coeff, var_matrix = curve_fit(gauss, bin_centres, n, p0=[100.,average,5.])
+            hist_fit = gauss(bin_centres, *coeff)
+            plt.plot(bin_centres, hist_fit, label='Fitted data', linewidth=2)
+            print 'Fitted mean = ', coeff[1]
+            print 'Fitted standard deviation = ', coeff[2]
+            fdata = open("vbd.txt", "a+")
+            print >> fdata, float(bk.meas_volt()), ' ', coeff[1], ' ', coeff[2]
         plt.title("Amplitude Histogram")
         plt.xlabel("Amplitude [mV]")
         plt.ylabel("Frequency")
