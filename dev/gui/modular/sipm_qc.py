@@ -6,7 +6,7 @@
 import wx
 from bk_precision import BKPrecision
 from labjack import labjack
-from sipm_qc_gui import control_panel, display_panel, eeprom_panel
+from sipm_qc_gui import control_panel, display_panel, eeprom_panel, logger_panel
 import time, sys, subprocess, os, threading, signal
 
 ## Define the MainFrame
@@ -16,11 +16,11 @@ class MainFrame (wx.Frame):
         wx.Frame.__init__(self, parent, id=wx.ID_ANY,
                           title=wx.EmptyString,
                           pos=wx.DefaultPosition,
-                          size=wx.Size(1350, 700),
+                          size=wx.Size(1450, 620),
                           style=wx.DEFAULT_FRAME_STYLE |
                           wx.TAB_TRAVERSAL)
 
-        self.Centre(wx.BOTH)
+#        self.Centre(wx.BOTH)
 
     def __del__(self):
         pass
@@ -30,35 +30,14 @@ class Panel1(control_panel):
     def __init__(self, parent):
         control_panel.__init__(self, parent)
         self.parent = parent
-        #self.parent.SetTitle("SiPM QC Station - L0 - Control Panel")
         self.SetBackgroundColour('silver')
-
-    def changeIntroPanel(self, event):
-        if self.IsShown():
-            label = event.GetEventObject().GetLabelText()
-        #    self.parent.SetTitle("SiPM QC Station - L0 (%s)" % label)
-            self.Hide()
-            if label == 'Display Panel':
-                self.parent.panelTwo.Show()
-            if label == 'EEPROM Panel':
-                self.parent.panelThree.Show()
-
 
 class Panel2(display_panel):
 
     def __init__(self, parent):
         display_panel.__init__(self, parent)
         self.parent = parent
-
-    def changeIntroPanel(self, event):
-        if self.IsShown():
-            label = event.GetEventObject().GetLabelText()
-       #     self.parent.SetTitle("SiPM QC Station - L0 (%s)" % label)
-            self.Hide()
-            if label == 'Control Panel':
-                self.parent.panelOne.Show()
-            if label == 'EEPROM Panel':
-                self.parent.panelThree.Show()
+        self.SetBackgroundColour('silver')
 
 class Panel3(eeprom_panel):
 
@@ -66,45 +45,171 @@ class Panel3(eeprom_panel):
         eeprom_panel.__init__(self, parent)
         self.parent = parent
 
-    def changeIntroPanel(self, event):
-        if self.IsShown():
-            label = event.GetEventObject().GetLabelText()
-      #      self.parent.SetTitle("SiPM QC Station - L0 (%s)" % label)
-            self.Hide()
-            if label == 'Control Panel':
-                self.parent.panelOne.Show()
-            if label == 'Display Panel':
-                self.parent.panelTwo.Show()
+class Panel4(logger_panel):
 
-class NoteBook(wx.Frame):
     def __init__(self, parent):
-        wx.Frame.__init__(self, parent)
+        logger_panel.__init__(self, parent)
+        self.parent = parent
+
+class NoteBook(MainFrame):
+    def __init__(self, parent):
+        MainFrame.__init__(self, parent)
 
         # Here we create a panel and a notebook on the panel
         p = wx.Panel(self)
         nb = wx.Notebook(p)
 
         # create the page windows as children of the notebook
-        page1 = Panel1(nb)
-        page2 = Panel2(nb)
-        page3 = Panel3(nb)
+        self.page1 = Panel1(nb)
+        self.page2 = Panel2(nb)
+        self.page3 = Panel3(nb)
+        self.page4 = Panel4(p)
 
         # add the pages to the notebook with the label to show on the tab
-        nb.AddPage(page1, "Page 1")
-        nb.AddPage(page2, "Page 2")
-        nb.AddPage(page3, "Page 3")
+        nb.AddPage(self.page1, "Control")
+        nb.AddPage(self.page2, "Display")
+        nb.AddPage(self.page3, "EEPROM")
+
+        self.__do_binding()
+
+    def __do_binding(self):
+
+        # do all the event binding here
+        self.Bind(wx.EVT_BUTTON, self.OnClick, self.page1.button)
+
+        self.Bind(wx.EVT_SPINCTRLDOUBLE, self.EvtSpinText, self.page1.lblname2w)
+        self.Bind(wx.EVT_SPINCTRL, self.EvtSpinText, self.page1.lblname3w)
+        self.Bind(wx.EVT_SPINCTRL, self.EvtSpinText, self.page1.lblname4w)
+        self.Bind(wx.EVT_SPINCTRL, self.EvtSpinText, self.page1.lblname6w)
+        self.Bind(wx.EVT_SPINCTRL, self.EvtSpinText, self.page1.lblname7w)
+
+        self.Bind(wx.EVT_BUTTON, self.OnSwitch, self.page1.lblname1s)
+        self.Bind(wx.EVT_BUTTON, self.OnSet, self.page1.lblname2s)
+        self.Bind(wx.EVT_BUTTON, self.OnSet, self.page1.lblname3s)
+        self.Bind(wx.EVT_BUTTON, self.OnSet, self.page1.lblname4s)
+        self.Bind(wx.EVT_BUTTON, self.OnSet, self.page1.lblname6s)
+        self.Bind(wx.EVT_BUTTON, self.OnSet, self.page1.lblname7s)
+
+        self.Bind(wx.EVT_BUTTON, self.OnClick, self.page1.button1)
+        self.Bind(wx.EVT_BUTTON, self.OnClick, self.page1.button2)
+        self.Bind(wx.EVT_BUTTON, self.OnClick, self.page1.button3)
+        self.Bind(wx.EVT_BUTTON, self.OnClick, self.page1.button4)
+        self.Bind(wx.EVT_BUTTON, self.OnClick, self.page1.button5)
+        self.Bind(wx.EVT_BUTTON, self.OnClick, self.page1.button6)
+        self.Bind(wx.EVT_BUTTON, self.OnClick, self.page1.button7)
+        self.Bind(wx.EVT_BUTTON, self.OnClick, self.page1.button8)
+
+        self.Bind(wx.EVT_BUTTON, self.OnClick, self.page1.led1)
+        self.Bind(wx.EVT_BUTTON, self.OnClick, self.page1.led2)
+        self.Bind(wx.EVT_BUTTON, self.OnClick, self.page1.led3)
+        self.Bind(wx.EVT_BUTTON, self.OnClick, self.page1.led4)
+        self.Bind(wx.EVT_BUTTON, self.OnClick, self.page1.led5)
+        self.Bind(wx.EVT_BUTTON, self.OnClick, self.page1.led6)
+        self.Bind(wx.EVT_BUTTON, self.OnClick, self.page1.led7)
+        self.Bind(wx.EVT_BUTTON, self.OnClick, self.page1.led8)
+        self.Bind(wx.EVT_BUTTON, self.OnClick, self.page1.led9)
+        self.Bind(wx.EVT_BUTTON, self.OnClick, self.page1.led10)
+        self.Bind(wx.EVT_BUTTON, self.OnClick, self.page1.led11)
+        self.Bind(wx.EVT_BUTTON, self.OnClick, self.page1.led12)
+        self.Bind(wx.EVT_BUTTON, self.OnClick, self.page1.led13)
+        self.Bind(wx.EVT_BUTTON, self.OnClick, self.page1.led14)
+        self.Bind(wx.EVT_BUTTON, self.OnClick, self.page1.led15)
+        self.Bind(wx.EVT_BUTTON, self.OnClick, self.page1.led16)
+
+    def get_time(self):
+        return datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S')
+
+    def EvtRadioBox(self, event):
+        self.page4.logger.AppendText('EvtRadioBox: %d\n' % event.GetInt())
+        event.Skip()
+
+    def get_time(self):
+        return datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S')
+
+    def EvtRadioBox(self, event):
+        self.page4.logger.AppendText('EvtRadioBox: %d\n' % event.GetInt())
+        event.Skip()
+
+    def EvtComboBox(self, event):
+        self.page4.logger.AppendText('EvtComboBox: %s\n' % event.GetString())
+        event.Skip()
+
+    def OnSwitch(self, event):
+        labeltext = event.GetEventObject().GetLabelText()
+        self.page4.logger.AppendText("[%s] Clicked on %s\n" % (self.get_time(), labeltext))
+        if labeltext == 'Turn ON':
+            self.page1.lblname1r.SetLabel('ON')
+            self.page1.lblname1s.SetLabel('Turn OFF')
+        if labeltext == 'Turn OFF':
+            self.page1.lblname1r.SetLabel('OFF')
+            self.page1.lblname1s.SetLabel('Turn ON')
+        event.Skip()
+
+    def OnClick(self, event):
+        labeltext = event.GetEventObject().GetLabelText()
+        self.page4.logger.AppendText("[%s] Clicked on %s\n" % (self.get_time(), labeltext))
+        event.Skip()
+
+    def OnSet(self, event):
+        labeltext = event.GetEventObject().GetLabelText()
+        if labeltext == 'Set V':
+            value = self.page1.lblname2w.GetValue()
+            unit = 'V'
+        elif labeltext == 'Set I':
+            value = self.page1.lblname3w.GetValue()
+            unit = 'mA'
+        elif labeltext == 'Set SiPM#':
+            value = self.page1.lblname4w.GetValue()
+            unit = ''
+        elif labeltext == 'Set Gain':
+            value = self.page1.lblname6w.GetValue()
+            unit = 'dB'
+        elif labeltext == 'Set LED#':
+            value = self.page1.lblname7w.GetValue()
+            unit = ''
+        self.page4.logger.AppendText("[%s] %s to %.1f %s\n" % (self.get_time(), labeltext, value, unit))
+        event.Skip()
+
+    def EvtText(self, event):
+        self.page4.logger.AppendText('EvtText: %s\n' % event.GetString())
+        event.Skip()
+
+    def EvtChar(self, event):
+        self.page4.logger.AppendText('EvtChar: %d\n' % event.GetKeyCode())
+        event.Skip()
+
+    def EvtCheckBox(self, event):
+        self.page4.logger.AppendText('EvtCheckBox: %d\n' % event.Checked())
+        event.Skip()
+
+    def EvtSpinText(self, event):
+        self.page4.logger.AppendText(
+                '[%s] %s to %.1f\n' % (self.get_time(), event.GetEventObject().GetName(),event.GetValue()))
+        event.Skip()
+
 
         # finally, put the notebook in a sizer for the panel to manage the layout
-        sizer = wx.BoxSizer()
-        sizer.Add(nb, 1, wx.EXPAND)
-        p.SetSizer(sizer)
+#        sizer = wx.BoxSizer(wx.HORIZONTAL)
+
+        grid = wx.GridBagSizer(hgap=10, vgap=10)
+
+        # start of grid
+        grid.Add(nb, pos=(0, 0), span=(1,2), flag=wx.TE_RIGHT | wx.ALIGN_CENTER)
+        grid.Add(logger, pos=(0, 2), flag=wx.TE_RIGHT)
+
+        #sizer.Add(nb, 1, wx.EXPAND)
+#        sizer.Add(nb, 0, wx.ALL | wx.EXPAND | wx.CENTER, 10)
+#        sizer.Add(logger, 0, wx.ALL | wx.EXPAND | wx.CENTER, 10)
+#        p.SetSizerAndFit(sizer)
+        p.SetSizerAndFit(grid)
+
+
 
 ## Define the MainApp
 class MainApp(MainFrame):
 
     def __init__(self, parent):
         MainFrame.__init__(self, parent)
-
 
         self.panelOne = Panel1(self)
         self.panelTwo = Panel2(self)
@@ -113,22 +218,22 @@ class MainApp(MainFrame):
         self.panelThree.Hide()
 
         ## initialize BK precision
-        self.panelOne.logger.AppendText("[%s] ### Start SiPM QC Station ###\n" % self.panelOne.get_time())
+#        self.panelOne.logger.AppendText("[%s] ### Start SiPM QC Station ###\n" % self.panelOne.get_time())
         self.bk = BKPrecision('/dev/ttyUSB0')
-        if self.bk:
-            self.panelOne.logger.AppendText("[%s] # BK initialized\n" % self.panelOne.get_time())
+#        if self.bk:
+#            self.panelOne.logger.AppendText("[%s] # BK initialized\n" % self.panelOne.get_time())
 
         ## initialize Labjack U3-LV
         self.lj = labjack()
-        if self.lj:
-            self.panelOne.logger.AppendText("[%s] # Labjack initialized\n" % self.panelOne.get_time())
+ #       if self.lj:
+ #           self.panelOne.logger.AppendText("[%s] # Labjack initialized\n" % self.panelOne.get_time())
 
         ## kill any running instances of drs_exam
         self.kill_drs4()
 
         ## initialize drs4
         self.run_drs4()
-        self.panelOne.logger.AppendText('[%s] #####################\n' % self.panelOne.get_time())
+  #      self.panelOne.logger.AppendText('[%s] #####################\n' % self.panelOne.get_time())
 
         ## do the binding here
         self.__bind_led()
@@ -153,8 +258,8 @@ class MainApp(MainFrame):
         fr = open("tmpout", "r")
         self.p = subprocess.Popen("/home/midas/KimWork/drs-5.0.3/drs_exam",
             stdin=subprocess.PIPE, stderr=fw,stdout=fw, bufsize=1)
-        if self.p:
-            self.panelOne.logger.AppendText('[%s] # DRS4 initialized\n' % self.panelOne.get_time())
+ #       if self.p:
+#            self.panelOne.logger.AppendText('[%s] # DRS4 initialized\n' % self.panelOne.get_time())
         return True
 
     def __bind_led(self):

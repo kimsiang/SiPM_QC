@@ -8,6 +8,29 @@ import numpy as np
 from datetime import date, datetime, tzinfo, timedelta
 # print wx.__file__
 
+
+## Define logger panel here
+class logger_panel(wx.Panel):
+    def __init__(self, parent):
+        wx.Panel.__init__(self, parent)
+
+        sizer = wx.BoxSizer()
+        self.SetBackgroundColour("Silver")
+
+        # a multiline TextCtrl for logging purpose
+        self.logger = wx.TextCtrl(
+                self, size=(400, 600), style=wx.TE_MULTILINE | wx.TE_READONLY | wx.TE_RICH2 | wx.BORDER_SUNKEN)
+
+        # set the properties of the items created
+        self.logger.SetBackgroundColour("Black")
+        self.logger.SetForegroundColour("White")
+
+        sizer.Add(self.logger, 0, wx.ALL, 5)
+        self.SetSizerAndFit(sizer)
+
+    def __del__(self):
+        pass
+
 ## Define display panel here
 class display_panel(wx.Panel):
 
@@ -18,21 +41,6 @@ class display_panel(wx.Panel):
         # create some sizers
         mainSizer = wx.BoxSizer(wx.VERTICAL)
         hSizer = wx.BoxSizer(wx.HORIZONTAL)
-        boxSizer = wx.BoxSizer(wx.HORIZONTAL)
-
-        self.m_button2 = wx.Button(self, wx.ID_ANY, "Control Panel",
-                wx.DefaultPosition, wx.DefaultSize, 0)
-        self.m_button3 = wx.Button(self, wx.ID_ANY, "EEPROM Panel",
-                wx.DefaultPosition, wx.DefaultSize, 0)
-
-        boxSizer.Add(self.m_button2, 0, wx.ALL, 5)
-        boxSizer.Add(self.m_button3, 0, wx.ALL, 5)
-
-        # connect Events
-        self.m_button2.Bind(wx.EVT_BUTTON, self.changeIntroPanel)
-        self.m_button3.Bind(wx.EVT_BUTTON, self.changeIntroPanel)
-
-        mainSizer.Add(boxSizer, 0, wx.ALL, 5)
 
         # add figure
         self.figure1 = plt.figure(1, dpi=60)
@@ -52,22 +60,11 @@ class display_panel(wx.Panel):
     def __del__(self):
         pass
 
-    # virtual event handlers, overide them in your derived class
-    def changeIntroPanel(self, event):
-        event.Skip()
-
-
 ## Define control panel here
 class control_panel(wx.Panel):
 
     def __init__(self, parent):
         wx.Panel.__init__(self, parent)
-
-        ## Define buttons for panel switching
-        self.m_button2 = wx.Button(self, wx.ID_ANY, "Display Panel",
-                wx.DefaultPosition, wx.DefaultSize, 0)
-        self.m_button3 = wx.Button(self, wx.ID_ANY, "EEPROM Panel",
-                wx.DefaultPosition, wx.DefaultSize, 0)
 
         # a save button
         self.button = wx.Button(self, label="Save")
@@ -159,10 +156,6 @@ class control_panel(wx.Panel):
         self.led15 = wx.Button(self, label="LED15")
         self.led16 = wx.Button(self, label="LED16")
 
-        # a multiline TextCtrl for logging purpose
-        self.logger = wx.TextCtrl(
-                self, size=(400, 600), style=wx.TE_MULTILINE | wx.TE_READONLY | wx.TE_RICH2 | wx.BORDER_SUNKEN)
-
         ## implement the settings in 3 other functions
         self.__set_properties()
         self.__do_layout()
@@ -171,8 +164,6 @@ class control_panel(wx.Panel):
     def __set_properties(self):
 
         # set the properties of the items created
-        self.logger.SetBackgroundColour("Black")
-        self.logger.SetForegroundColour("White")
 
         self.lblname2w.SetDigits(1)
         self.lblname2w.SetRange(0.0, 70.0)
@@ -265,12 +256,6 @@ class control_panel(wx.Panel):
         grid = wx.GridBagSizer(hgap=10, vgap=10)
         grid2 = wx.GridBagSizer(hgap=10, vgap=10)
         hSizer = wx.BoxSizer(wx.HORIZONTAL)
-        boxSizer = wx.BoxSizer(wx.HORIZONTAL)
-
-        boxSizer.Add(self.m_button2, 0, wx.ALL, 5)
-        boxSizer.Add(self.m_button3, 0, wx.ALL, 5)
-
-        mainSizer.Add(boxSizer, 0, wx.ALL, 5)
 
         # start of grid1
         grid.Add(self.quote1, pos=(0, 1), span=(1, 2), flag=wx.TE_CENTER)
@@ -358,128 +343,15 @@ class control_panel(wx.Panel):
 
         hSizer.Add(grid, 0, wx.ALL | wx.EXPAND | wx.CENTER, 10)
         hSizer.Add(grid2, 0, wx.ALL | wx.EXPAND | wx.CENTER, 10)
-        hSizer.Add(self.logger, 0, wx.ALL | wx.EXPAND | wx.CENTER, 10)
         mainSizer.Add(hSizer, 0, wx.ALL, 10)
         mainSizer.Add(self.button, 0, wx.CENTER)
         self.SetSizerAndFit(mainSizer)
 
     def __do_binding(self):
-
-        # do all the event binding here
-        self.Bind(wx.EVT_BUTTON, self.changeIntroPanel, self.m_button2)
-        self.Bind(wx.EVT_BUTTON, self.changeIntroPanel, self.m_button3)
-
-        self.Bind(wx.EVT_BUTTON, self.OnClick, self.button)
-
-        self.Bind(wx.EVT_SPINCTRLDOUBLE, self.EvtSpinText, self.lblname2w)
-        self.Bind(wx.EVT_SPINCTRL, self.EvtSpinText, self.lblname3w)
-        self.Bind(wx.EVT_SPINCTRL, self.EvtSpinText, self.lblname4w)
-        self.Bind(wx.EVT_SPINCTRL, self.EvtSpinText, self.lblname6w)
-        self.Bind(wx.EVT_SPINCTRL, self.EvtSpinText, self.lblname7w)
-
-        self.Bind(wx.EVT_BUTTON, self.OnSwitch, self.lblname1s)
-        self.Bind(wx.EVT_BUTTON, self.OnSet, self.lblname2s)
-        self.Bind(wx.EVT_BUTTON, self.OnSet, self.lblname3s)
-        self.Bind(wx.EVT_BUTTON, self.OnSet, self.lblname4s)
-        self.Bind(wx.EVT_BUTTON, self.OnSet, self.lblname6s)
-        self.Bind(wx.EVT_BUTTON, self.OnSet, self.lblname7s)
-
-        self.Bind(wx.EVT_BUTTON, self.OnClick, self.button1)
-        self.Bind(wx.EVT_BUTTON, self.OnClick, self.button2)
-        self.Bind(wx.EVT_BUTTON, self.OnClick, self.button3)
-        self.Bind(wx.EVT_BUTTON, self.OnClick, self.button4)
-        self.Bind(wx.EVT_BUTTON, self.OnClick, self.button5)
-        self.Bind(wx.EVT_BUTTON, self.OnClick, self.button6)
-        self.Bind(wx.EVT_BUTTON, self.OnClick, self.button7)
-        self.Bind(wx.EVT_BUTTON, self.OnClick, self.button8)
-
-        self.Bind(wx.EVT_BUTTON, self.OnClick, self.led1)
-        self.Bind(wx.EVT_BUTTON, self.OnClick, self.led2)
-        self.Bind(wx.EVT_BUTTON, self.OnClick, self.led3)
-        self.Bind(wx.EVT_BUTTON, self.OnClick, self.led4)
-        self.Bind(wx.EVT_BUTTON, self.OnClick, self.led5)
-        self.Bind(wx.EVT_BUTTON, self.OnClick, self.led6)
-        self.Bind(wx.EVT_BUTTON, self.OnClick, self.led7)
-        self.Bind(wx.EVT_BUTTON, self.OnClick, self.led8)
-        self.Bind(wx.EVT_BUTTON, self.OnClick, self.led9)
-        self.Bind(wx.EVT_BUTTON, self.OnClick, self.led10)
-        self.Bind(wx.EVT_BUTTON, self.OnClick, self.led11)
-        self.Bind(wx.EVT_BUTTON, self.OnClick, self.led12)
-        self.Bind(wx.EVT_BUTTON, self.OnClick, self.led13)
-        self.Bind(wx.EVT_BUTTON, self.OnClick, self.led14)
-        self.Bind(wx.EVT_BUTTON, self.OnClick, self.led15)
-        self.Bind(wx.EVT_BUTTON, self.OnClick, self.led16)
-
-    def get_time(self):
-        return datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S')
-
-    def EvtRadioBox(self, event):
-        self.logger.AppendText('EvtRadioBox: %d\n' % event.GetInt())
-        event.Skip()
-
-    def EvtComboBox(self, event):
-        self.logger.AppendText('EvtComboBox: %s\n' % event.GetString())
-        event.Skip()
-
-    def OnSwitch(self, event):
-        labeltext = event.GetEventObject().GetLabelText()
-        self.logger.AppendText("[%s] Clicked on %s\n" % (self.get_time(), labeltext))
-        if labeltext == 'Turn ON':
-            self.lblname1r.SetLabel('ON')
-            self.lblname1s.SetLabel('Turn OFF')
-        if labeltext == 'Turn OFF':
-            self.lblname1r.SetLabel('OFF')
-            self.lblname1s.SetLabel('Turn ON')
-        event.Skip()
-
-    def OnClick(self, event):
-        labeltext = event.GetEventObject().GetLabelText()
-        self.logger.AppendText("[%s] Clicked on %s\n" % (self.get_time(), labeltext))
-        event.Skip()
-
-    def OnSet(self, event):
-        labeltext = event.GetEventObject().GetLabelText()
-        if labeltext == 'Set V':
-            value = self.lblname2w.GetValue()
-            unit = 'V'
-        elif labeltext == 'Set I':
-            value = self.lblname3w.GetValue()
-            unit = 'mA'
-        elif labeltext == 'Set SiPM#':
-            value = self.lblname4w.GetValue()
-            unit = ''
-        elif labeltext == 'Set Gain':
-            value = self.lblname6w.GetValue()
-            unit = 'dB'
-        elif labeltext == 'Set LED#':
-            value = self.lblname7w.GetValue()
-            unit = ''
-        self.logger.AppendText("[%s] %s to %.1f %s\n" % (self.get_time(), labeltext, value, unit))
-        event.Skip()
-
-    def EvtText(self, event):
-        self.logger.AppendText('EvtText: %s\n' % event.GetString())
-        event.Skip()
-
-    def EvtChar(self, event):
-        self.logger.AppendText('EvtChar: %d\n' % event.GetKeyCode())
-        event.Skip()
-
-    def EvtCheckBox(self, event):
-        self.logger.AppendText('EvtCheckBox: %d\n' % event.Checked())
-        event.Skip()
-
-    def EvtSpinText(self, event):
-        self.logger.AppendText(
-                '[%s] %s to %.1f\n' % (self.get_time(), event.GetEventObject().GetName(),event.GetValue()))
-        event.Skip()
+        pass
 
     def __del__(self):
         pass
-
-    # virtual event handlers, overide them in your derived class
-    def changeIntroPanel(self, event):
-        event.Skip()
 
 ## define EEPROM Panel here
 class eeprom_panel(wx.Panel):
@@ -487,15 +359,8 @@ class eeprom_panel(wx.Panel):
     def __init__(self, parent):
         wx.Panel.__init__(self, parent)
 
-        self.m_button2 = wx.Button(self, wx.ID_ANY, "Control Panel",
-                wx.DefaultPosition, wx.DefaultSize, 0)
-
-        self.m_button3 = wx.Button(self, wx.ID_ANY, "Display Panel",
-                wx.DefaultPosition, wx.DefaultSize, 0)
-
         # eeprom Memory Map
         self.quote1 = wx.StaticText(self, label="EEPROM Map")
-
 
         self.mem1 = wx.StaticText(self, label='Page1')
         self.mem2 = wx.StaticText(self, label='Page2')
@@ -536,7 +401,6 @@ class eeprom_panel(wx.Panel):
         ## implement the settings in 3 other functions
         self.__set_properties()
         self.__do_layout()
-        self.__do_binding()
 
     def __set_properties(self):
 
@@ -592,10 +456,6 @@ class eeprom_panel(wx.Panel):
 
         mainSizer = wx.BoxSizer(wx.VERTICAL)
         grid = wx.GridBagSizer(hgap=20, vgap=20)
-        boxSizer = wx.BoxSizer(wx.HORIZONTAL)
-
-        boxSizer.Add(self.m_button2, 0, wx.ALL, 5)
-        boxSizer.Add(self.m_button3, 0, wx.ALL, 5)
 
         # start of grid
         grid.Add(self.mem1, pos=(1, 0), flag=wx.TE_RIGHT | wx.ALIGN_CENTER)
@@ -638,21 +498,10 @@ class eeprom_panel(wx.Panel):
         grid.Add(self.mem8w, pos=(8, 2), flag=wx.TE_CENTER | wx.EXPAND)
         grid.Add(self.mem8s, pos=(8, 3), flag=wx.TE_CENTER | wx.EXPAND)
 
-        mainSizer.Add(boxSizer, 0, wx.ALL, 5)
         mainSizer.Add(self.quote1, 0, flag=wx.TE_CENTER)
         mainSizer.Add(grid, 0, wx.ALL | wx.EXPAND | wx.CENTER, 10)
 
         self.SetSizerAndFit(mainSizer)
 
-    def __do_binding(self):
-        # connect Events
-        self.m_button2.Bind(wx.EVT_BUTTON, self.changeIntroPanel)
-        self.m_button3.Bind(wx.EVT_BUTTON, self.changeIntroPanel)
-
     def __del__(self):
         pass
-    # virtual event handlers, overide them in your derived class
-
-    def changeIntroPanel(self, event):
-        event.Skip()
-
