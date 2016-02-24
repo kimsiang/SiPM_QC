@@ -107,7 +107,7 @@ class control_panel(wx.Panel):
 
         # gain [dB]
         self.lblname6 = wx.StaticText(self, label='Gain [dB]')
-        self.lblname6r = wx.StaticText(self, label="10")
+        self.lblname6r = wx.StaticText(self, label="10.0")
         self.lblname6w = wx.SpinCtrl(self, value='10', name="Roll Gain [dB]")
         self.lblname6s = wx.Button(self, label="Set Gain")
 
@@ -159,7 +159,6 @@ class control_panel(wx.Panel):
         ## implement the settings in 3 other functions
         self.__set_properties()
         self.__do_layout()
-        self.__do_binding()
 
     def __set_properties(self):
 
@@ -346,9 +345,6 @@ class control_panel(wx.Panel):
         mainSizer.Add(hSizer, 0, wx.ALL, 10)
         mainSizer.Add(self.button, 0, wx.CENTER)
         self.SetSizerAndFit(mainSizer)
-
-    def __do_binding(self):
-        pass
 
     def __del__(self):
         pass

@@ -76,7 +76,7 @@ class labjack():
 	#make sure temp chip and eeprom CS are high
 	d.setDOState(spi_conf_temp['CSPINNum'], 1)
 	d.setDOState(spi_conf_eeprom['CSPINNum'], 1)
-
+        gain_value = 4 * (26 - gain_value)
         res = d.spi([0x03, gain_value], **spi_conf_pga)
 
         #res = d.spi([0x83, 0x00], **spi_conf_pga)
