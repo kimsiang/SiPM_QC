@@ -73,6 +73,8 @@ class NoteBook(MainFrame):
 
         self.__do_binding()
         self.__do_layout()
+        self.__bind_led()
+        self.__bind_pga()
 
     def __do_binding(self):
 
@@ -118,6 +120,16 @@ class NoteBook(MainFrame):
         self.Bind(wx.EVT_BUTTON, self.OnClick, self.page1.led15)
         self.Bind(wx.EVT_BUTTON, self.OnClick, self.page1.led16)
 
+        self.Bind(wx.EVT_BUTTON, self.OnSet, self.page3.mem1s)
+        self.Bind(wx.EVT_BUTTON, self.OnSet, self.page3.mem2s)
+        self.Bind(wx.EVT_BUTTON, self.OnSet, self.page3.mem3s)
+        self.Bind(wx.EVT_BUTTON, self.OnSet, self.page3.mem4s)
+        self.Bind(wx.EVT_BUTTON, self.OnSet, self.page3.mem5s)
+        self.Bind(wx.EVT_BUTTON, self.OnSet, self.page3.mem6s)
+        self.Bind(wx.EVT_BUTTON, self.OnSet, self.page3.mem7s)
+        self.Bind(wx.EVT_BUTTON, self.OnSet, self.page3.mem8s)
+
+
     def get_time(self):
         return datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S')
 
@@ -154,6 +166,7 @@ class NoteBook(MainFrame):
 
     def OnSet(self, event):
         labeltext = event.GetEventObject().GetLabelText()
+        unit = ''
         if labeltext == 'Set V':
             value = self.page1.lblname2w.GetValue()
             unit = 'V'
@@ -162,14 +175,29 @@ class NoteBook(MainFrame):
             unit = 'mA'
         elif labeltext == 'Set SiPM#':
             value = self.page1.lblname4w.GetValue()
-            unit = ''
         elif labeltext == 'Set Gain':
             value = self.page1.lblname6w.GetValue()
             unit = 'dB'
         elif labeltext == 'Set LED#':
             value = self.page1.lblname7w.GetValue()
-            unit = ''
-        self.page4.logger.AppendText("[%s] %s to %.1f %s\n" % (self.get_time(), labeltext, value, unit))
+        elif labeltext == 'Set Page1':
+            value = self.page3.mem1w.GetValue()
+        elif labeltext == 'Set Page2':
+            value = self.page3.mem2w.GetValue()
+        elif labeltext == 'Set Page3':
+            value = self.page3.mem3w.GetValue()
+        elif labeltext == 'Set Page4':
+            value = self.page3.mem4w.GetValue()
+        elif labeltext == 'Set Page5':
+            value = self.page3.mem5w.GetValue()
+        elif labeltext == 'Set Page6':
+            value = self.page3.mem6w.GetValue()
+        elif labeltext == 'Set Page7':
+            value = self.page3.mem7w.GetValue()
+        elif labeltext == 'Set Page8':
+            value = self.page3.mem8w.GetValue()
+
+        self.page4.logger.AppendText('[{0}] {1} to {2} {3}\n'.format(self.get_time(), labeltext, value, unit))
         event.Skip()
 
     def EvtText(self, event):
@@ -187,6 +215,57 @@ class NoteBook(MainFrame):
     def EvtSpinText(self, event):
         self.page4.logger.AppendText(
                 '[%s] %s to %.1f\n' % (self.get_time(), event.GetEventObject().GetName(),event.GetValue()))
+        event.Skip()
+
+    def __bind_led(self):
+
+        ## bind the LED buttons to update the display and call labjack.set_led()
+        self.Bind(wx.EVT_BUTTON, self.update_led_value, self.page1.led1)
+        self.Bind(wx.EVT_BUTTON, self.update_led_value, self.page1.led2)
+        self.Bind(wx.EVT_BUTTON, self.update_led_value, self.page1.led3)
+        self.Bind(wx.EVT_BUTTON, self.update_led_value, self.page1.led4)
+        self.Bind(wx.EVT_BUTTON, self.update_led_value, self.page1.led5)
+        self.Bind(wx.EVT_BUTTON, self.update_led_value, self.page1.led6)
+        self.Bind(wx.EVT_BUTTON, self.update_led_value, self.page1.led7)
+        self.Bind(wx.EVT_BUTTON, self.update_led_value, self.page1.led8)
+        self.Bind(wx.EVT_BUTTON, self.update_led_value, self.page1.led9)
+        self.Bind(wx.EVT_BUTTON, self.update_led_value, self.page1.led10)
+        self.Bind(wx.EVT_BUTTON, self.update_led_value, self.page1.led11)
+        self.Bind(wx.EVT_BUTTON, self.update_led_value, self.page1.led12)
+        self.Bind(wx.EVT_BUTTON, self.update_led_value, self.page1.led13)
+        self.Bind(wx.EVT_BUTTON, self.update_led_value, self.page1.led14)
+        self.Bind(wx.EVT_BUTTON, self.update_led_value, self.page1.led15)
+        self.Bind(wx.EVT_BUTTON, self.update_led_value, self.page1.led16)
+        self.Bind(wx.EVT_BUTTON, self.update_led_value, self.page1.led16)
+        self.Bind(wx.EVT_BUTTON, self.update_led_value, self.page1.lblname7s)
+
+    def __bind_pga(self):
+        self.Bind(wx.EVT_BUTTON, self.update_pga_value, self.page1.button5)
+        self.Bind(wx.EVT_BUTTON, self.update_pga_value, self.page1.button6)
+        self.Bind(wx.EVT_BUTTON, self.update_pga_value, self.page1.button7)
+        self.Bind(wx.EVT_BUTTON, self.update_pga_value, self.page1.button8)
+        self.Bind(wx.EVT_BUTTON, self.update_pga_value, self.page1.lblname6s)
+
+    def update_led_value(self, event):
+        label = event.GetEventObject().GetLabelText()
+        if label[0:3] == "LED":
+            self.page1.lblname7r.SetLabel(label[3:])
+#            self.lj.set_led(int(label[3:]))
+        if label[0:8] == "Set LED#":
+            setvalue = self.page1.lblname7w.GetValue()
+            self.page1.lblname7r.SetLabel(str(setvalue))
+
+        event.Skip()
+
+    def update_pga_value(self, event):
+        label = event.GetEventObject().GetLabelText()
+        if label[0:4] == "Gain":
+            self.page1.lblname6r.SetLabel(label[4:])
+#            self.lj.set_gain(int(label[4:]))
+        if label[0:8] == "Set Gain":
+            setvalue = self.page1.lblname6w.GetValue()
+            self.page1.lblname6r.SetLabel(str(setvalue))
+
         event.Skip()
 
 
