@@ -15,6 +15,10 @@ class BKPrecision:
         self.s.write('*IDN?\n')
         return self.s.read(64).strip()
 
+    def get_state(self):
+        self.s.write('OUTP:STAT?\n')
+        return self.s.read(64).strip()
+
     def meas_volt(self):
         self.s.write('MEAS:VOLT?\n')
         return self.s.read(64).strip()

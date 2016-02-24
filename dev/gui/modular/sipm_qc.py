@@ -93,7 +93,7 @@ class NoteBook(MainFrame):
 
         TIMER_ID = 100  # pick a number
         self.timer = wx.Timer(self, TIMER_ID)  # message will be sent to the panel
-        self.timer.Start(5000)  # milliseconds
+        self.timer.Start(10000)  # milliseconds
         wx.EVT_TIMER(self, TIMER_ID, self.on_timer)  # call the on_timer function
 
     def __init_daq(self):
@@ -102,6 +102,7 @@ class NoteBook(MainFrame):
         self.bk = BKPrecision('/dev/ttyUSB0')
         if self.bk:
             self.page4.logger.AppendText("[%s] # BK initialized\n" % self.get_time())
+        self.bk.get_state()
 
         ## initialize Labjack U3-LV
         self.lj = labjack()
@@ -221,6 +222,10 @@ class NoteBook(MainFrame):
             value = self.page3.mem7w.GetValue()
         elif labeltext == 'Set Page8':
             value = self.page3.mem8w.GetValue()
+        elif labeltext == 'OFF':
+            value = self.page1.lblname1w.GetValue()
+        elif labeltext == 'ON':
+            value = self.page1.lblname1w.GetValue()
 
         self.page4.logger.AppendText('[{0}] {1} to {2} {3}\n'.format(self.get_time(), labeltext, value, unit))
         event.Skip()
@@ -255,7 +260,9 @@ class NoteBook(MainFrame):
 
     def __bind_bk(self):
         ## bind the BK buttons to update the display and call bk.set_volt etc
+        self.Bind(wx.EVT_BUTTON, self.update_bk_state, self.page1.lblname1s)
         self.Bind(wx.EVT_BUTTON, self.update_volt, self.page1.lblname2s)
+        self.Bind(wx.EVT_BUTTON, self.update_curr, self.page1.lblname3s)
 
     def __bind_led(self):
         ## bind the LED buttons to update the display and call labjack.set_led()
@@ -304,20 +311,17 @@ class NoteBook(MainFrame):
         if label[0:8] == "Set LED#":
             setvalue = self.page1.lblname7w.GetValue()
             self.page1.lblname7r.SetLabel(str(setvalue))
-
         event.Skip()
 
     def update_pga(self, event):
         label = event.GetEventObject().GetLabelText()
         if label[0:4] == "Gain":
-           # self.page1.lblname6r.SetLabel(label[4:])
             self.lj.set_gain(int(label[4:]))
             self.read_pga()
         if label[0:8] == "Set Gain":
             setvalue = self.page1.lblname6w.GetValue()
             self.lj.set_gain(int(setvalue))
             self.read_pga()
-            #self.page1.lblname6r.SetLabel(str(setvalue))
         event.Skip()
 
     def update_eeprom(self, event):
@@ -334,14 +338,54 @@ class NoteBook(MainFrame):
         #self.page4.logger.AppendText('[{0}] Temperature readout is {1}\n'.format(self.get_time(),temp))
         self.page1.lblname5r.SetLabel(str(temp))
 
+    def bk_on(self, event):
+        self.bk.power_on()
+        self.page1.lblname2r.SetLabel('ON')
+        event.Skip()
+
+    def bk_off(self, event):
+        self.bk.power_off()
+        self.page1.lblname2r.SetLabel('OFF')
+        event.Skip()
+
+    def update_bk_state(self, event):
+        label = event.GetEventObject().GetLabelText()
+        print label
+        if label == "Turn ON":
+            self.bk.power_on()
+            self.page1.lblname1r.SetLabel('ON')
+            self.page1.lblname1s.SetLabel('Turn OFF')
+        elif label == "Turn OFF":
+            self.bk.power_off()
+            self.page1.lblname1r.SetLabel('OFF')
+            self.page1.lblname1s.SetLabel('Turn ON')
+        event.Skip()
+
+    def read_bk_state(self):
+        if self.bk.get_state():
+            self.page1.lblname1r.SetLabel('ON')
+            self.page1.lblname1s.SetLabel('Turn OFF')
+        else:
+            self.page1.lblname1r.SetLabel('OFF')
+            self.page1.lblname1s.SetLabel('Turn ON')
+
     def read_volt(self):
         volt = self.bk.meas_volt()
         self.page1.lblname2r.SetLabel(str(volt))
 
     def update_volt(self, event):
         setvalue = self.page1.lblname2w.GetValue()
-        print setvalue
         self.bk.set_volt(setvalue)
+        event.Skip()
+
+    def read_curr(self):
+        curr = self.bk.meas_curr()
+        self.page1.lblname3r.SetLabel(str(curr))
+
+    def update_curr(self, event):
+        setvalue = self.page1.lblname3w.GetValue()
+        self.bk.set_curr(setvalue)
+        event.Skip()
 
     def __do_layout(self):
         # finally, put the notebook in a sizer for the panel to manage the layout
@@ -355,7 +399,9 @@ class NoteBook(MainFrame):
     def on_timer(self, event):
 #       self.page4.logger.AppendText('[{0}]\n'.format(self.get_time()))
         self.read_temp()
+        self.read_bk_state()
         self.read_volt()
+        self.read_curr()
 
     def on_close(self, event):
         self.timer.Stop()
