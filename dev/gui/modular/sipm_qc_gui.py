@@ -9,8 +9,10 @@ from datetime import date, datetime, tzinfo, timedelta
 # print wx.__file__
 
 
-## Define logger panel here
+# Define logger panel here
+
 class logger_panel(wx.Panel):
+
     def __init__(self, parent):
         wx.Panel.__init__(self, parent)
 
@@ -19,7 +21,8 @@ class logger_panel(wx.Panel):
 
         # a multiline TextCtrl for logging purpose
         self.logger = wx.TextCtrl(
-                self, size=(400, 600), style=wx.TE_MULTILINE | wx.TE_READONLY | wx.TE_RICH2 | wx.BORDER_SUNKEN)
+            self, size=(400, 600), style=wx.TE_MULTILINE | wx.TE_READONLY
+            | wx.TE_RICH2 | wx.BORDER_SUNKEN)
 
         # set the properties of the items created
         self.logger.SetBackgroundColour("Black")
@@ -31,7 +34,9 @@ class logger_panel(wx.Panel):
     def __del__(self):
         pass
 
-## Define display panel here
+# Define display panel here
+
+
 class display_panel(wx.Panel):
 
     def __init__(self, parent):
@@ -60,7 +65,9 @@ class display_panel(wx.Panel):
     def __del__(self):
         pass
 
-## Define control panel here
+# Define control panel here
+
+
 class control_panel(wx.Panel):
 
     def __init__(self, parent):
@@ -82,7 +89,7 @@ class control_panel(wx.Panel):
         self.lblname2 = wx.StaticText(self, label='V [V]')
         self.lblname2r = wx.StaticText(self, label='0.00')
         self.lblname2w = wx.SpinCtrlDouble(
-                self, value='0.00', name="Roll V [V]")
+            self, value='0.00', name="Roll V [V]")
         self.lblname2s = wx.Button(self, label="Set V")
 
         # bk I[A]
@@ -156,7 +163,7 @@ class control_panel(wx.Panel):
         self.led15 = wx.Button(self, label="LED15")
         self.led16 = wx.Button(self, label="LED16")
 
-        ## implement the settings in 3 other functions
+        # implement the settings in 3 other functions
         self.__set_properties()
         self.__do_layout()
 
@@ -175,7 +182,7 @@ class control_panel(wx.Panel):
 
         font = wx.Font(16, wx.ROMAN, wx.NORMAL, wx.NORMAL, False, u'Consolas')
         bigfont = wx.Font(
-                20, wx.ROMAN, wx.NORMAL, wx.NORMAL, False, u'Consolas')
+            20, wx.ROMAN, wx.NORMAL, wx.NORMAL, False, u'Consolas')
 
         self.quote1.SetFont(bigfont)
         self.quote2.SetFont(bigfont)
@@ -260,47 +267,40 @@ class control_panel(wx.Panel):
         grid.Add(self.quote1, pos=(0, 1), span=(1, 2), flag=wx.TE_CENTER)
 
         grid.Add(self.lblname1, pos=(1, 0), flag=wx.TE_RIGHT | wx.ALIGN_CENTER)
-        grid.Add(
-                self.lblname1r, pos=(1, 1), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
+        grid.Add(self.lblname1r, pos=(1, 1), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
         grid.Add(self.lblname1w, pos=(1, 2), flag=wx.TE_CENTER)
         grid.Add(self.lblname1s, pos=(1, 3), flag=wx.TE_CENTER | wx.EXPAND)
 
         grid.Add(self.lblname2, pos=(2, 0), flag=wx.TE_RIGHT | wx.ALIGN_CENTER)
-        grid.Add(
-                self.lblname2r, pos=(2, 1), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
+        grid.Add(self.lblname2r, pos=(2, 1), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
         grid.Add(self.lblname2w, pos=(2, 2), flag=wx.TE_CENTER)
         grid.Add(self.lblname2s, pos=(2, 3), flag=wx.TE_CENTER)
 
         grid.Add(self.lblname3, pos=(3, 0), flag=wx.TE_RIGHT | wx.ALIGN_CENTER)
-        grid.Add(
-                self.lblname3r, pos=(3, 1), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
+        grid.Add(self.lblname3r, pos=(3, 1), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
         grid.Add(self.lblname3w, pos=(3, 2), flag=wx.TE_CENTER)
         grid.Add(self.lblname3s, pos=(3, 3), flag=wx.TE_CENTER)
 
         grid.Add(self.quote2, pos=(4, 1), span=(1, 2), flag=wx.TE_CENTER)
 
         grid.Add(self.lblname4, pos=(5, 0), flag=wx.TE_RIGHT | wx.ALIGN_CENTER)
-        grid.Add(
-                self.lblname4r, pos=(5, 1), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
+        grid.Add(self.lblname4r, pos=(5, 1), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
         grid.Add(self.lblname4w, pos=(5, 2), flag=wx.TE_CENTER)
         grid.Add(self.lblname4s, pos=(5, 3), flag=wx.TE_CENTER)
 
         grid.Add(self.lblname5, pos=(6, 0), flag=wx.TE_RIGHT | wx.ALIGN_CENTER)
-        grid.Add(
-                self.lblname5r, pos=(6, 1), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
+        grid.Add(self.lblname5r, pos=(6, 1), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
         grid.Add(self.lblname5w, pos=(6, 2), flag=wx.TE_CENTER)
 
         grid.Add(self.lblname6, pos=(7, 0), flag=wx.TE_RIGHT | wx.ALIGN_CENTER)
-        grid.Add(
-                self.lblname6r, pos=(7, 1), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
+        grid.Add(self.lblname6r, pos=(7, 1), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
         grid.Add(self.lblname6w, pos=(7, 2), flag=wx.TE_CENTER)
         grid.Add(self.lblname6s, pos=(7, 3), flag=wx.TE_CENTER)
 
         grid.Add(self.quote3, pos=(8, 1), span=(1, 2), flag=wx.TE_CENTER)
 
         grid.Add(self.lblname7, pos=(9, 0), flag=wx.TE_RIGHT | wx.ALIGN_CENTER)
-        grid.Add(
-                self.lblname7r, pos=(9, 1), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
+        grid.Add(self.lblname7r, pos=(9, 1), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
         grid.Add(self.lblname7w, pos=(9, 2), flag=wx.TE_CENTER)
         grid.Add(self.lblname7s, pos=(9, 3), flag=wx.TE_CENTER)
         # end of grid1
@@ -349,7 +349,9 @@ class control_panel(wx.Panel):
     def __del__(self):
         pass
 
-## define EEPROM Panel here
+# define EEPROM Panel here
+
+
 class eeprom_panel(wx.Panel):
 
     def __init__(self, parent):
@@ -376,7 +378,8 @@ class eeprom_panel(wx.Panel):
         self.mem7r = wx.StaticText(self, label='UWSiPM7000UWSiPM')
         self.mem8r = wx.StaticText(self, label='UWSiPM8000UWSiPM')
 
-        self.mem1w = wx.TextCtrl(self, value='UWSiPM1000UWSiPM', size=(280, 40))
+        self.mem1w = wx.TextCtrl(
+            self, value='UWSiPM1000UWSiPM', size=(280, 40))
         self.mem2w = wx.TextCtrl(self, value='UWSiPM2000UWSiPM')
         self.mem3w = wx.TextCtrl(self, value='UWSiPM3000UWSiPM')
         self.mem4w = wx.TextCtrl(self, value='UWSiPM4000UWSiPM')
@@ -394,7 +397,7 @@ class eeprom_panel(wx.Panel):
         self.mem7s = wx.Button(self, label="Set Page7")
         self.mem8s = wx.Button(self, label="Set Page8")
 
-        ## implement the settings in 3 other functions
+        # implement the settings in 3 other functions
         self.__set_properties()
         self.__do_layout()
 
@@ -403,7 +406,7 @@ class eeprom_panel(wx.Panel):
         self.SetBackgroundColour("Silver")
         font = wx.Font(16, wx.ROMAN, wx.NORMAL, wx.NORMAL, False, u'Consolas')
         bigfont = wx.Font(
-                20, wx.ROMAN, wx.NORMAL, wx.NORMAL, False, u'Consolas')
+            20, wx.ROMAN, wx.NORMAL, wx.NORMAL, False, u'Consolas')
 
         self.quote1.SetFont(bigfont)
 
@@ -446,7 +449,6 @@ class eeprom_panel(wx.Panel):
         self.mem8r.SetFont(font)
         self.mem8w.SetFont(font)
         self.mem8s.SetFont(font)
-
 
     def __do_layout(self):
 
