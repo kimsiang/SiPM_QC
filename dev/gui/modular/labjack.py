@@ -42,7 +42,8 @@ spi_conf_eeprom = {
 class labjack():
 
     def __init__(self):
-        print '>>> LabJack U3-LV initiated!'
+#        print 'LabJack U3-LV initiated!'
+        pass
 
     def read_temperature(self):
 	#make sure pga and eeprom CS are high
@@ -125,10 +126,10 @@ class labjack():
 	page <<= 4
         cmd = [0x03, page] + [0 for i in range(16)]
         res = d.spi(cmd, **spi_conf_eeprom)
-      #  print res['SPIBytes'][2]
-      #  return res['SPIBytes'][2]
-        return res['SPIBytes'][2:]
-	check_eeprom_status()
+        for idx,i in enumerate(res['SPIBytes'][2:]):
+            if i == 0xff:
+                er_safe_int[idx] = 32
+        return [chr(i) for i in er_safe_int]
 
 
     def set_led(self, led_number):

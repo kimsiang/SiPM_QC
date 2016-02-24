@@ -426,12 +426,7 @@ class MyFrame(wx.Frame):
         event.Skip()
 
     def eeprom_read(self):
-        eeprom_read_int = lj.read_eeprom(1)
-        er_safe_int = eeprom_read_int
-        for idx,i in enumerate(eeprom_read_int):
-            if i == 0xff:
-                er_safe_int[idx] = 32
-        er_array = [chr(i) for i in er_safe_int]
+        er_array = lj.read_eeprom(1)
         er_string = ''.join(er_array)
         er_array = er_string.split(' ')
         self.display8.Clear()
