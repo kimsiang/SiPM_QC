@@ -4,10 +4,11 @@
 
 ## Import all needed libraries
 import wx
-from bk_precision import BKPrecision
-from labjack import labjack
+#from bk_precision import BKPrecision
+#from labjack import labjack
 from sipm_qc_gui import control_panel, display_panel, eeprom_panel, logger_panel
 import time, sys, subprocess, os, threading, signal
+from datetime import date, datetime, tzinfo, timedelta
 
 ## Define the MainFrame
 class MainFrame (wx.Frame):
@@ -44,6 +45,7 @@ class Panel3(eeprom_panel):
     def __init__(self, parent):
         eeprom_panel.__init__(self, parent)
         self.parent = parent
+        self.SetBackgroundColour('silver')
 
 class Panel4(logger_panel):
 
@@ -56,21 +58,21 @@ class NoteBook(MainFrame):
         MainFrame.__init__(self, parent)
 
         # Here we create a panel and a notebook on the panel
-        p = wx.Panel(self)
-        nb = wx.Notebook(p)
+        self.nb = wx.Notebook(self)
 
         # create the page windows as children of the notebook
-        self.page1 = Panel1(nb)
-        self.page2 = Panel2(nb)
-        self.page3 = Panel3(nb)
-        self.page4 = Panel4(p)
+        self.page1 = Panel1(self.nb)
+        self.page2 = Panel2(self.nb)
+        self.page3 = Panel3(self.nb)
+        self.page4 = Panel4(self)
 
         # add the pages to the notebook with the label to show on the tab
-        nb.AddPage(self.page1, "Control")
-        nb.AddPage(self.page2, "Display")
-        nb.AddPage(self.page3, "EEPROM")
+        self.nb.AddPage(self.page1, "Control")
+        self.nb.AddPage(self.page2, "Display")
+        self.nb.AddPage(self.page3, "EEPROM")
 
         self.__do_binding()
+        self.__do_layout()
 
     def __do_binding(self):
 
@@ -188,21 +190,21 @@ class NoteBook(MainFrame):
         event.Skip()
 
 
+    def __do_layout(self):
         # finally, put the notebook in a sizer for the panel to manage the layout
 #        sizer = wx.BoxSizer(wx.HORIZONTAL)
 
         grid = wx.GridBagSizer(hgap=10, vgap=10)
 
         # start of grid
-        grid.Add(nb, pos=(0, 0), span=(1,2), flag=wx.TE_RIGHT | wx.ALIGN_CENTER)
-        grid.Add(logger, pos=(0, 2), flag=wx.TE_RIGHT)
+        grid.Add(self.nb, pos=(0, 0), span=(1,2), flag=wx.TE_RIGHT | wx.ALIGN_CENTER)
+        grid.Add(self.page4, pos=(0, 2), flag=wx.TE_RIGHT)
 
         #sizer.Add(nb, 1, wx.EXPAND)
 #        sizer.Add(nb, 0, wx.ALL | wx.EXPAND | wx.CENTER, 10)
 #        sizer.Add(logger, 0, wx.ALL | wx.EXPAND | wx.CENTER, 10)
 #        p.SetSizerAndFit(sizer)
-        p.SetSizerAndFit(grid)
-
+        self.SetSizerAndFit(grid)
 
 
 ## Define the MainApp
