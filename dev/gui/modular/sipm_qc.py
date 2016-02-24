@@ -2,15 +2,22 @@
 
 # sipm_qc.py
 
-## Import all needed libraries
+# Import all needed libraries
 import wx
 #from bk_precision import BKPrecision
 #from labjack import labjack
 from sipm_qc_gui import control_panel, display_panel, eeprom_panel, logger_panel
-import time, sys, subprocess, os, threading, signal
+import time
+import sys
+import subprocess
+import os
+import threading
+import signal
 from datetime import date, datetime, tzinfo, timedelta
 
-## Define the MainFrame
+# Define the MainFrame
+
+
 class MainFrame (wx.Frame):
 
     def __init__(self, parent):
@@ -26,12 +33,14 @@ class MainFrame (wx.Frame):
     def __del__(self):
         pass
 
+
 class Panel1(control_panel):
 
     def __init__(self, parent):
         control_panel.__init__(self, parent)
         self.parent = parent
         self.SetBackgroundColour('silver')
+
 
 class Panel2(display_panel):
 
@@ -40,6 +49,7 @@ class Panel2(display_panel):
         self.parent = parent
         self.SetBackgroundColour('silver')
 
+
 class Panel3(eeprom_panel):
 
     def __init__(self, parent):
@@ -47,13 +57,16 @@ class Panel3(eeprom_panel):
         self.parent = parent
         self.SetBackgroundColour('silver')
 
+
 class Panel4(logger_panel):
 
     def __init__(self, parent):
         logger_panel.__init__(self, parent)
         self.parent = parent
 
+
 class NoteBook(MainFrame):
+
     def __init__(self, parent):
         MainFrame.__init__(self, parent)
 
@@ -81,7 +94,8 @@ class NoteBook(MainFrame):
         # do all the event binding here
         self.Bind(wx.EVT_BUTTON, self.OnClick, self.page1.button)
 
-        self.Bind(wx.EVT_SPINCTRLDOUBLE, self.EvtSpinText, self.page1.lblname2w)
+        self.Bind(
+            wx.EVT_SPINCTRLDOUBLE, self.EvtSpinText, self.page1.lblname2w)
         self.Bind(wx.EVT_SPINCTRL, self.EvtSpinText, self.page1.lblname3w)
         self.Bind(wx.EVT_SPINCTRL, self.EvtSpinText, self.page1.lblname4w)
         self.Bind(wx.EVT_SPINCTRL, self.EvtSpinText, self.page1.lblname6w)
@@ -129,7 +143,6 @@ class NoteBook(MainFrame):
         self.Bind(wx.EVT_BUTTON, self.OnSet, self.page3.mem7s)
         self.Bind(wx.EVT_BUTTON, self.OnSet, self.page3.mem8s)
 
-
     def get_time(self):
         return datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S')
 
@@ -150,7 +163,8 @@ class NoteBook(MainFrame):
 
     def OnSwitch(self, event):
         labeltext = event.GetEventObject().GetLabelText()
-        self.page4.logger.AppendText("[%s] Clicked on %s\n" % (self.get_time(), labeltext))
+        self.page4.logger.AppendText(
+            "[%s] Clicked on %s\n" % (self.get_time(), labeltext))
         if labeltext == 'Turn ON':
             self.page1.lblname1r.SetLabel('ON')
             self.page1.lblname1s.SetLabel('Turn OFF')
@@ -161,7 +175,8 @@ class NoteBook(MainFrame):
 
     def OnClick(self, event):
         labeltext = event.GetEventObject().GetLabelText()
-        self.page4.logger.AppendText("[%s] Clicked on %s\n" % (self.get_time(), labeltext))
+        self.page4.logger.AppendText(
+            "[%s] Clicked on %s\n" % (self.get_time(), labeltext))
         event.Skip()
 
     def OnSet(self, event):
@@ -197,7 +212,8 @@ class NoteBook(MainFrame):
         elif labeltext == 'Set Page8':
             value = self.page3.mem8w.GetValue()
 
-        self.page4.logger.AppendText('[{0}] {1} to {2} {3}\n'.format(self.get_time(), labeltext, value, unit))
+        self.page4.logger.AppendText(
+            '[{0}] {1} to {2} {3}\n'.format(self.get_time(), labeltext, value, unit))
         event.Skip()
 
     def EvtText(self, event):
@@ -214,12 +230,12 @@ class NoteBook(MainFrame):
 
     def EvtSpinText(self, event):
         self.page4.logger.AppendText(
-                '[%s] %s to %.1f\n' % (self.get_time(), event.GetEventObject().GetName(),event.GetValue()))
+            '[%s] %s to %.1f\n' % (self.get_time(), event.GetEventObject().GetName(), event.GetValue()))
         event.Skip()
 
     def __bind_led(self):
 
-        ## bind the LED buttons to update the display and call labjack.set_led()
+        # bind the LED buttons to update the display and call labjack.set_led()
         self.Bind(wx.EVT_BUTTON, self.update_led_value, self.page1.led1)
         self.Bind(wx.EVT_BUTTON, self.update_led_value, self.page1.led2)
         self.Bind(wx.EVT_BUTTON, self.update_led_value, self.page1.led3)
@@ -268,15 +284,15 @@ class NoteBook(MainFrame):
 
         event.Skip()
 
-
     def __do_layout(self):
         # finally, put the notebook in a sizer for the panel to manage the layout
-#        sizer = wx.BoxSizer(wx.HORIZONTAL)
+        #        sizer = wx.BoxSizer(wx.HORIZONTAL)
 
         grid = wx.GridBagSizer(hgap=10, vgap=10)
 
         # start of grid
-        grid.Add(self.nb, pos=(0, 0), span=(1,2), flag=wx.TE_RIGHT | wx.ALIGN_CENTER)
+        grid.Add(self.nb, pos=(0, 0), span=(
+            1, 2), flag=wx.TE_RIGHT | wx.ALIGN_CENTER)
         grid.Add(self.page4, pos=(0, 2), flag=wx.TE_RIGHT)
 
         #sizer.Add(nb, 1, wx.EXPAND)
@@ -286,7 +302,7 @@ class NoteBook(MainFrame):
         self.SetSizerAndFit(grid)
 
 
-## Define the MainApp
+# Define the MainApp
 class MainApp(MainFrame):
 
     def __init__(self, parent):
@@ -298,32 +314,37 @@ class MainApp(MainFrame):
         self.panelTwo.Hide()
         self.panelThree.Hide()
 
-        ## initialize BK precision
-#        self.panelOne.logger.AppendText("[%s] ### Start SiPM QC Station ###\n" % self.panelOne.get_time())
+        # initialize BK precision
+# self.panelOne.logger.AppendText("[%s] ### Start SiPM QC Station ###\n" %
+# self.panelOne.get_time())
         self.bk = BKPrecision('/dev/ttyUSB0')
 #        if self.bk:
-#            self.panelOne.logger.AppendText("[%s] # BK initialized\n" % self.panelOne.get_time())
+# self.panelOne.logger.AppendText("[%s] # BK initialized\n" %
+# self.panelOne.get_time())
 
-        ## initialize Labjack U3-LV
+        # initialize Labjack U3-LV
         self.lj = labjack()
  #       if self.lj:
- #           self.panelOne.logger.AppendText("[%s] # Labjack initialized\n" % self.panelOne.get_time())
+ # self.panelOne.logger.AppendText("[%s] # Labjack initialized\n" %
+ # self.panelOne.get_time())
 
-        ## kill any running instances of drs_exam
+        # kill any running instances of drs_exam
         self.kill_drs4()
 
-        ## initialize drs4
+        # initialize drs4
         self.run_drs4()
-  #      self.panelOne.logger.AppendText('[%s] #####################\n' % self.panelOne.get_time())
+  # self.panelOne.logger.AppendText('[%s] #####################\n' %
+  # self.panelOne.get_time())
 
-        ## do the binding here
+        # do the binding here
         self.__bind_led()
         self.__bind_pga()
 
     def kill_drs4(self):
 
-        ## kill any instances of drs4_exam
-        self.p = subprocess.Popen(['ps', '-A'], stdout=subprocess.PIPE, shell=True)
+        # kill any instances of drs4_exam
+        self.p = subprocess.Popen(
+            ['ps', '-A'], stdout=subprocess.PIPE, shell=True)
         (out, err) = self.p.communicate()
 
         for line in out.splitlines():
@@ -332,20 +353,20 @@ class MainApp(MainFrame):
                 os.kill(pid, signal.SIGKILL)
         return True
 
-
     def run_drs4(self):
-        ## logging drs_exam output
+        # logging drs_exam output
         fw = open("tmpout", "wb")
         fr = open("tmpout", "r")
         self.p = subprocess.Popen("/home/midas/KimWork/drs-5.0.3/drs_exam",
-            stdin=subprocess.PIPE, stderr=fw,stdout=fw, bufsize=1)
+                                  stdin=subprocess.PIPE, stderr=fw, stdout=fw, bufsize=1)
  #       if self.p:
-#            self.panelOne.logger.AppendText('[%s] # DRS4 initialized\n' % self.panelOne.get_time())
+# self.panelOne.logger.AppendText('[%s] # DRS4 initialized\n' %
+# self.panelOne.get_time())
         return True
 
     def __bind_led(self):
 
-        ## bind the LED buttons to update the display and call labjack.set_led()
+        # bind the LED buttons to update the display and call labjack.set_led()
         self.Bind(wx.EVT_BUTTON, self.update_led_value, self.panelOne.led1)
         self.Bind(wx.EVT_BUTTON, self.update_led_value, self.panelOne.led2)
         self.Bind(wx.EVT_BUTTON, self.update_led_value, self.panelOne.led3)
@@ -363,15 +384,16 @@ class MainApp(MainFrame):
         self.Bind(wx.EVT_BUTTON, self.update_led_value, self.panelOne.led15)
         self.Bind(wx.EVT_BUTTON, self.update_led_value, self.panelOne.led16)
         self.Bind(wx.EVT_BUTTON, self.update_led_value, self.panelOne.led16)
-        self.Bind(wx.EVT_BUTTON, self.update_led_value, self.panelOne.lblname7s)
+        self.Bind(
+            wx.EVT_BUTTON, self.update_led_value, self.panelOne.lblname7s)
 
     def __bind_pga(self):
         self.Bind(wx.EVT_BUTTON, self.update_pga_value, self.panelOne.button5)
         self.Bind(wx.EVT_BUTTON, self.update_pga_value, self.panelOne.button6)
         self.Bind(wx.EVT_BUTTON, self.update_pga_value, self.panelOne.button7)
         self.Bind(wx.EVT_BUTTON, self.update_pga_value, self.panelOne.button8)
-        self.Bind(wx.EVT_BUTTON, self.update_pga_value, self.panelOne.lblname6s)
-
+        self.Bind(
+            wx.EVT_BUTTON, self.update_pga_value, self.panelOne.lblname6s)
 
     def __bind_eeprom(self):
         self.Bind(wx.EVT_BUTTON, self.update_eeprom_value, id=11)
@@ -411,11 +433,11 @@ class MainApp(MainFrame):
 #        bk.power_off()
 #        bk.set_curr(0.005)
 #        time.sleep(2)
-#	self.display1.Clear()
+#   self.display1.Clear()
 #        self.display1.AppendText(bk.meas_volt())
 #        self.display1.SetBackgroundColour("red")
 #        self.label1.SetBackgroundColour("red")
-        ## bk on
+        # bk on
 #        bk.power_on()
 #       print "Current V_setpoint ...... V_setpoint = %f" % v_setpoint
 #        bk.set_volt(v_setpoint)
