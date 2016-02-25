@@ -19,7 +19,7 @@ class logger_panel(wx.Panel):
 
         # a multiline TextCtrl for logging purpose
         self.logger = wx.TextCtrl(
-                self, size=(400, 600), style=wx.TE_MULTILINE | wx.TE_READONLY | wx.TE_RICH2 | wx.BORDER_SUNKEN)
+                self, size=(400, 700), style=wx.TE_MULTILINE | wx.TE_READONLY | wx.TE_RICH2 | wx.BORDER_SUNKEN)
 
         # set the properties of the items created
         self.logger.SetBackgroundColour("Black")
@@ -76,8 +76,13 @@ class control_panel(wx.Panel):
         # bk precision PS Label
         self.quote1 = wx.StaticText(self, label="BK Precision")
 
-        # bk Status
-        self.lblname1 = wx.StaticText(self, label='Status')
+        # bk status
+        self.lblname9 = wx.StaticText(self, label="Status")
+        self.lblname9r = wx.StaticText(self, label="NO")
+        self.lblname9w = wx.StaticText(self, label="")
+
+        # bk output
+        self.lblname1 = wx.StaticText(self, label='OUTPUT')
         self.lblname1r = wx.StaticText(self, label='OFF')
         self.lblname1w = wx.StaticText(self, label="")
         self.lblname1s = wx.Button(self, label="Turn ON")
@@ -98,7 +103,12 @@ class control_panel(wx.Panel):
         # sipm Board Label
         self.quote2 = wx.StaticText(self, label="SiPM Board")
 
-        # sipm #
+        # sipm status
+        self.lblname8 = wx.StaticText(self, label="Status")
+        self.lblname8r = wx.StaticText(self, label="NO")
+        self.lblname8w = wx.StaticText(self, label="")
+
+        # sipm number
         self.lblname4 = wx.StaticText(self, label="SiPM#")
         self.lblname4r = wx.StaticText(self, label="1")
         self.lblname4w = wx.SpinCtrl(self, value='1', name="Roll SiPM#")
@@ -161,10 +171,10 @@ class control_panel(wx.Panel):
         self.led16 = wx.Button(self, label="LED16")
 
         ## implement the settings in 3 other functions
-        self.__set_properties()
-        self.__do_layout()
+        self.set_properties()
+        self.do_layout()
 
-    def __set_properties(self):
+    def set_properties(self):
 
         # set the properties of the items created
 
@@ -177,84 +187,93 @@ class control_panel(wx.Panel):
         self.lblname6w.SetRange(6, 26)
         self.lblname7w.SetRange(1, 16)
 
-        font = wx.Font(16, wx.ROMAN, wx.NORMAL, wx.NORMAL, False, u'Consolas')
-        bigfont = wx.Font(
+        _font = wx.Font(16, wx.ROMAN, wx.NORMAL, wx.NORMAL, False, u'Consolas')
+        _bold_font = wx.Font(16, wx.ROMAN, wx.NORMAL, wx.BOLD, False, u'Consolas')
+        _big_font = wx.Font(
                 20, wx.ROMAN, wx.NORMAL, wx.NORMAL, False, u'Consolas')
 
-        self.button.SetFont(bigfont)
+        self.button.SetFont(_big_font)
 
-        self.quote1.SetFont(bigfont)
-        self.quote2.SetFont(bigfont)
-        self.quote3.SetFont(bigfont)
-        self.quote4.SetFont(bigfont)
-        self.quote5.SetFont(bigfont)
-        self.quote6.SetFont(bigfont)
+        self.quote1.SetFont(_big_font)
+        self.quote2.SetFont(_big_font)
+        self.quote3.SetFont(_big_font)
+        self.quote4.SetFont(_big_font)
+        self.quote5.SetFont(_big_font)
+        self.quote6.SetFont(_big_font)
 
-        self.lblname1.SetFont(font)
-        self.lblname1r.SetFont(font)
-        self.lblname1w.SetFont(font)
-        self.lblname1s.SetFont(font)
+        self.lblname9.SetFont(_font)
+        self.lblname9r.SetFont(_bold_font)
+        self.lblname9w.SetFont(_font)
 
-        self.lblname2.SetFont(font)
-        self.lblname2r.SetFont(font)
-        self.lblname2w.SetFont(font)
-        self.lblname2s.SetFont(font)
+        self.lblname1.SetFont(_font)
+        self.lblname1r.SetFont(_bold_font)
+        self.lblname1w.SetFont(_font)
+        self.lblname1s.SetFont(_font)
 
-        self.lblname3.SetFont(font)
-        self.lblname3r.SetFont(font)
-        self.lblname3w.SetFont(font)
-        self.lblname3s.SetFont(font)
+        self.lblname2.SetFont(_font)
+        self.lblname2r.SetFont(_bold_font)
+        self.lblname2w.SetFont(_font)
+        self.lblname2s.SetFont(_font)
 
-        self.lblname4.SetFont(font)
-        self.lblname4r.SetFont(font)
-        self.lblname4w.SetFont(font)
-        self.lblname4s.SetFont(font)
+        self.lblname3.SetFont(_font)
+        self.lblname3r.SetFont(_bold_font)
+        self.lblname3w.SetFont(_font)
+        self.lblname3s.SetFont(_font)
 
-        self.lblname5.SetFont(font)
-        self.lblname5r.SetFont(font)
-        self.lblname5w.SetFont(font)
+        self.lblname8.SetFont(_font)
+        self.lblname8r.SetFont(_bold_font)
+        self.lblname8w.SetFont(_font)
 
-        self.lblname6.SetFont(font)
-        self.lblname6r.SetFont(font)
-        self.lblname6w.SetFont(font)
-        self.lblname6s.SetFont(font)
+        self.lblname4.SetFont(_font)
+        self.lblname4r.SetFont(_bold_font)
+        self.lblname4w.SetFont(_font)
+        self.lblname4s.SetFont(_font)
 
-        self.lblname7.SetFont(font)
-        self.lblname7r.SetFont(font)
-        self.lblname7w.SetFont(font)
-        self.lblname7s.SetFont(font)
+        self.lblname5.SetFont(_font)
+        self.lblname5r.SetFont(_bold_font)
+        self.lblname5w.SetFont(_font)
 
-        self.button1.SetFont(font)
-        self.button2.SetFont(font)
-        self.button3.SetFont(font)
-        self.button4.SetFont(font)
+        self.lblname6.SetFont(_font)
+        self.lblname6r.SetFont(_bold_font)
+        self.lblname6w.SetFont(_font)
+        self.lblname6s.SetFont(_font)
 
-        self.button5.SetFont(font)
-        self.button6.SetFont(font)
-        self.button7.SetFont(font)
-        self.button8.SetFont(font)
+        self.lblname7.SetFont(_font)
+        self.lblname7r.SetFont(_bold_font)
+        self.lblname7w.SetFont(_font)
+        self.lblname7s.SetFont(_font)
 
-        self.led1.SetFont(font)
-        self.led2.SetFont(font)
-        self.led3.SetFont(font)
-        self.led4.SetFont(font)
+        self.button1.SetFont(_font)
+        self.button2.SetFont(_font)
+        self.button3.SetFont(_font)
+        self.button4.SetFont(_font)
 
-        self.led5.SetFont(font)
-        self.led6.SetFont(font)
-        self.led7.SetFont(font)
-        self.led8.SetFont(font)
+        self.button5.SetFont(_font)
+        self.button6.SetFont(_font)
+        self.button7.SetFont(_font)
+        self.button8.SetFont(_font)
 
-        self.led9.SetFont(font)
-        self.led10.SetFont(font)
-        self.led11.SetFont(font)
-        self.led12.SetFont(font)
+        self.led1.SetFont(_font)
+        self.led2.SetFont(_font)
+        self.led3.SetFont(_font)
+        self.led4.SetFont(_font)
 
-        self.led13.SetFont(font)
-        self.led14.SetFont(font)
-        self.led15.SetFont(font)
-        self.led16.SetFont(font)
+        self.led5.SetFont(_font)
+        self.led6.SetFont(_font)
+        self.led7.SetFont(_font)
+        self.led8.SetFont(_font)
 
-    def __do_layout(self):
+        self.led9.SetFont(_font)
+        self.led10.SetFont(_font)
+        self.led11.SetFont(_font)
+        self.led12.SetFont(_font)
+
+        self.led13.SetFont(_font)
+        self.led14.SetFont(_font)
+        self.led15.SetFont(_font)
+        self.led16.SetFont(_font)
+
+    def do_layout(self):
 
         # create some sizers
         mainSizer = wx.BoxSizer(wx.VERTICAL)
@@ -265,50 +284,60 @@ class control_panel(wx.Panel):
         # start of grid1
         grid.Add(self.quote1, pos=(0, 1), span=(1, 2), flag=wx.TE_CENTER)
 
-        grid.Add(self.lblname1, pos=(1, 0), flag=wx.TE_RIGHT | wx.ALIGN_CENTER)
+        grid.Add(self.lblname9, pos=(1, 0), flag=wx.TE_RIGHT | wx.ALIGN_CENTER)
         grid.Add(
-                self.lblname1r, pos=(1, 1), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
-        grid.Add(self.lblname1w, pos=(1, 2), flag=wx.TE_CENTER)
-        grid.Add(self.lblname1s, pos=(1, 3), flag=wx.TE_CENTER | wx.EXPAND)
+                self.lblname9r, pos=(1, 1), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
+        grid.Add(self.lblname9w, pos=(1, 2), flag=wx.TE_CENTER)
 
-        grid.Add(self.lblname2, pos=(2, 0), flag=wx.TE_RIGHT | wx.ALIGN_CENTER)
+        grid.Add(self.lblname1, pos=(2, 0), flag=wx.TE_RIGHT | wx.ALIGN_CENTER)
         grid.Add(
-                self.lblname2r, pos=(2, 1), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
-        grid.Add(self.lblname2w, pos=(2, 2), flag=wx.TE_CENTER)
-        grid.Add(self.lblname2s, pos=(2, 3), flag=wx.TE_CENTER)
+                self.lblname1r, pos=(2, 1), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
+        grid.Add(self.lblname1w, pos=(2, 2), flag=wx.TE_CENTER)
+        grid.Add(self.lblname1s, pos=(2, 3), flag=wx.TE_CENTER | wx.EXPAND)
 
-        grid.Add(self.lblname3, pos=(3, 0), flag=wx.TE_RIGHT | wx.ALIGN_CENTER)
+        grid.Add(self.lblname2, pos=(3, 0), flag=wx.TE_RIGHT | wx.ALIGN_CENTER)
         grid.Add(
-                self.lblname3r, pos=(3, 1), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
-        grid.Add(self.lblname3w, pos=(3, 2), flag=wx.TE_CENTER)
-        grid.Add(self.lblname3s, pos=(3, 3), flag=wx.TE_CENTER)
+                self.lblname2r, pos=(3, 1), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
+        grid.Add(self.lblname2w, pos=(3, 2), flag=wx.TE_CENTER)
+        grid.Add(self.lblname2s, pos=(3, 3), flag=wx.TE_CENTER)
 
-        grid.Add(self.quote2, pos=(4, 1), span=(1, 2), flag=wx.TE_CENTER)
-
-        grid.Add(self.lblname4, pos=(5, 0), flag=wx.TE_RIGHT | wx.ALIGN_CENTER)
+        grid.Add(self.lblname3, pos=(4, 0), flag=wx.TE_RIGHT | wx.ALIGN_CENTER)
         grid.Add(
-                self.lblname4r, pos=(5, 1), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
-        grid.Add(self.lblname4w, pos=(5, 2), flag=wx.TE_CENTER)
-        grid.Add(self.lblname4s, pos=(5, 3), flag=wx.TE_CENTER)
+                self.lblname3r, pos=(4, 1), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
+        grid.Add(self.lblname3w, pos=(4, 2), flag=wx.TE_CENTER)
+        grid.Add(self.lblname3s, pos=(4, 3), flag=wx.TE_CENTER)
 
-        grid.Add(self.lblname5, pos=(6, 0), flag=wx.TE_RIGHT | wx.ALIGN_CENTER)
+        grid.Add(self.quote2, pos=(5, 1), span=(1, 2), flag=wx.TE_CENTER)
+
+        grid.Add(self.lblname8, pos=(6, 0), flag=wx.TE_RIGHT | wx.ALIGN_CENTER)
         grid.Add(
-                self.lblname5r, pos=(6, 1), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
-        grid.Add(self.lblname5w, pos=(6, 2), flag=wx.TE_CENTER)
+                self.lblname8r, pos=(6, 1), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
+        grid.Add(self.lblname8w, pos=(6, 2), flag=wx.TE_CENTER)
 
-        grid.Add(self.lblname6, pos=(7, 0), flag=wx.TE_RIGHT | wx.ALIGN_CENTER)
+        grid.Add(self.lblname4, pos=(7, 0), flag=wx.TE_RIGHT | wx.ALIGN_CENTER)
         grid.Add(
-                self.lblname6r, pos=(7, 1), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
-        grid.Add(self.lblname6w, pos=(7, 2), flag=wx.TE_CENTER)
-        grid.Add(self.lblname6s, pos=(7, 3), flag=wx.TE_CENTER)
+                self.lblname4r, pos=(7, 1), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
+        grid.Add(self.lblname4w, pos=(7, 2), flag=wx.TE_CENTER)
+        grid.Add(self.lblname4s, pos=(7, 3), flag=wx.TE_CENTER)
 
-        grid.Add(self.quote3, pos=(8, 1), span=(1, 2), flag=wx.TE_CENTER)
-
-        grid.Add(self.lblname7, pos=(9, 0), flag=wx.TE_RIGHT | wx.ALIGN_CENTER)
+        grid.Add(self.lblname5, pos=(8, 0), flag=wx.TE_RIGHT | wx.ALIGN_CENTER)
         grid.Add(
-                self.lblname7r, pos=(9, 1), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
-        grid.Add(self.lblname7w, pos=(9, 2), flag=wx.TE_CENTER)
-        grid.Add(self.lblname7s, pos=(9, 3), flag=wx.TE_CENTER)
+                self.lblname5r, pos=(8, 1), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
+        grid.Add(self.lblname5w, pos=(8, 2), flag=wx.TE_CENTER)
+
+        grid.Add(self.lblname6, pos=(9, 0), flag=wx.TE_RIGHT | wx.ALIGN_CENTER)
+        grid.Add(
+                self.lblname6r, pos=(9, 1), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
+        grid.Add(self.lblname6w, pos=(9, 2), flag=wx.TE_CENTER)
+        grid.Add(self.lblname6s, pos=(9, 3), flag=wx.TE_CENTER)
+
+        grid.Add(self.quote3, pos=(10, 1), span=(1, 2), flag=wx.TE_CENTER)
+
+        grid.Add(self.lblname7, pos=(11, 0), flag=wx.TE_RIGHT | wx.ALIGN_CENTER)
+        grid.Add(
+                self.lblname7r, pos=(11, 1), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
+        grid.Add(self.lblname7w, pos=(11, 2), flag=wx.TE_CENTER)
+        grid.Add(self.lblname7s, pos=(11, 3), flag=wx.TE_CENTER)
         # end of grid1
 
         # start of grid2
@@ -401,60 +430,61 @@ class eeprom_panel(wx.Panel):
         self.mem8s = wx.Button(self, label="Set Page8")
 
         ## implement the settings in 3 other functions
-        self.__set_properties()
-        self.__do_layout()
+        self.set_properties()
+        self.do_layout()
 
-    def __set_properties(self):
+    def set_properties(self):
 
         self.SetBackgroundColour("Silver")
-        font = wx.Font(16, wx.ROMAN, wx.NORMAL, wx.NORMAL, False, u'Consolas')
-        bigfont = wx.Font(
+        _font = wx.Font(16, wx.ROMAN, wx.NORMAL, wx.NORMAL, False, u'Consolas')
+        _bold_font = wx.Font(16, wx.ROMAN, wx.NORMAL, wx.NORMAL, False, u'Consolas')
+        _big_font = wx.Font(
                 20, wx.ROMAN, wx.NORMAL, wx.NORMAL, False, u'Consolas')
 
-        self.quote1.SetFont(bigfont)
+        self.quote1.SetFont(_big_font)
 
-        self.mem1.SetFont(font)
-        self.mem1r.SetFont(font)
-        self.mem1w.SetFont(font)
-        self.mem1s.SetFont(font)
+        self.mem1.SetFont(_font)
+        self.mem1r.SetFont(_bold_font)
+        self.mem1w.SetFont(_font)
+        self.mem1s.SetFont(_font)
 
-        self.mem2.SetFont(font)
-        self.mem2r.SetFont(font)
-        self.mem2w.SetFont(font)
-        self.mem2s.SetFont(font)
+        self.mem2.SetFont(_font)
+        self.mem2r.SetFont(_bold_font)
+        self.mem2w.SetFont(_font)
+        self.mem2s.SetFont(_font)
 
-        self.mem3.SetFont(font)
-        self.mem3r.SetFont(font)
-        self.mem3w.SetFont(font)
-        self.mem3s.SetFont(font)
+        self.mem3.SetFont(_font)
+        self.mem3r.SetFont(_bold_font)
+        self.mem3w.SetFont(_font)
+        self.mem3s.SetFont(_font)
 
-        self.mem4.SetFont(font)
-        self.mem4r.SetFont(font)
-        self.mem4w.SetFont(font)
-        self.mem4s.SetFont(font)
+        self.mem4.SetFont(_font)
+        self.mem4r.SetFont(_bold_font)
+        self.mem4w.SetFont(_font)
+        self.mem4s.SetFont(_font)
 
-        self.mem5.SetFont(font)
-        self.mem5r.SetFont(font)
-        self.mem5w.SetFont(font)
-        self.mem5s.SetFont(font)
+        self.mem5.SetFont(_font)
+        self.mem5r.SetFont(_bold_font)
+        self.mem5w.SetFont(_font)
+        self.mem5s.SetFont(_font)
 
-        self.mem6.SetFont(font)
-        self.mem6r.SetFont(font)
-        self.mem6w.SetFont(font)
-        self.mem6s.SetFont(font)
+        self.mem6.SetFont(_font)
+        self.mem6r.SetFont(_bold_font)
+        self.mem6w.SetFont(_font)
+        self.mem6s.SetFont(_font)
 
-        self.mem7.SetFont(font)
-        self.mem7r.SetFont(font)
-        self.mem7w.SetFont(font)
-        self.mem7s.SetFont(font)
+        self.mem7.SetFont(_font)
+        self.mem7r.SetFont(_bold_font)
+        self.mem7w.SetFont(_font)
+        self.mem7s.SetFont(_font)
 
-        self.mem8.SetFont(font)
-        self.mem8r.SetFont(font)
-        self.mem8w.SetFont(font)
-        self.mem8s.SetFont(font)
+        self.mem8.SetFont(_font)
+        self.mem8r.SetFont(_bold_font)
+        self.mem8w.SetFont(_font)
+        self.mem8s.SetFont(_font)
 
 
-    def __do_layout(self):
+    def do_layout(self):
 
         mainSizer = wx.BoxSizer(wx.VERTICAL)
         grid = wx.GridBagSizer(hgap=20, vgap=20)
@@ -504,6 +534,7 @@ class eeprom_panel(wx.Panel):
         mainSizer.Add(grid, 0, wx.ALL | wx.EXPAND | wx.CENTER, 10)
 
         self.SetSizerAndFit(mainSizer)
+        self.Layout()
 
     def __del__(self):
         pass

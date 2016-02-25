@@ -134,102 +134,33 @@ class labjack():
         return res['SPIBytes'][2:]
 
     def set_led(self, led_number):
-        if led_number == 1:
-            d.getFeedback(u3.BitStateWrite(16,0))
-	    d.getFeedback(u3.BitStateWrite(17,0))
-	    d.getFeedback(u3.BitStateWrite(18,0))
-	    d.getFeedback(u3.BitStateWrite(19,0))
 
-        elif led_number == 2:
-	    d.getFeedback(u3.BitStateWrite(16,0))
-            d.getFeedback(u3.BitStateWrite(17,0))
-	    d.getFeedback(u3.BitStateWrite(18,1))
-	    d.getFeedback(u3.BitStateWrite(19,0))
+        print led_number
 
-        elif led_number == 3:
-	    d.getFeedback(u3.BitStateWrite(16,0))
-	    d.getFeedback(u3.BitStateWrite(17,0))
-	    d.getFeedback(u3.BitStateWrite(18,0))
-	    d.getFeedback(u3.BitStateWrite(19,1))
+        binary = format(led_number-1, "#06b")
+        array = list(binary)
 
-        elif led_number == 4:
-	    d.getFeedback(u3.BitStateWrite(16,0))
-	    d.getFeedback(u3.BitStateWrite(17,0))
-	    d.getFeedback(u3.BitStateWrite(18,1))
-	    d.getFeedback(u3.BitStateWrite(19,1))
+        d.getFeedback(u3.BitStateWrite(16, int(array[2])))
+        d.getFeedback(u3.BitStateWrite(17, int(array[3])))
+        d.getFeedback(u3.BitStateWrite(18, int(array[4])))
+        d.getFeedback(u3.BitStateWrite(19, int(array[5])))
 
-        elif led_number == 5:
-	    d.getFeedback(u3.BitStateWrite(16,1))
-	    d.getFeedback(u3.BitStateWrite(17,0))
-	    d.getFeedback(u3.BitStateWrite(18,0))
-	    d.getFeedback(u3.BitStateWrite(19,0))
+    def read_led(self):
 
-        elif led_number == 6:
-	    d.getFeedback(u3.BitStateWrite(16,1))
-	    d.getFeedback(u3.BitStateWrite(17,0))
-	    d.getFeedback(u3.BitStateWrite(18,1))
-	    d.getFeedback(u3.BitStateWrite(19,0))
+        read = []
+        read.append( d.getFeedback(u3.BitStateRead(16))[0])
+        read.append( d.getFeedback(u3.BitStateRead(17))[0])
+        read.append( d.getFeedback(u3.BitStateRead(18))[0])
+        read.append( d.getFeedback(u3.BitStateRead(19))[0])
 
-        elif led_number == 7:
-	    d.getFeedback(u3.BitStateWrite(16,1))
-	    d.getFeedback(u3.BitStateWrite(17,0))
-	    d.getFeedback(u3.BitStateWrite(18,0))
-	    d.getFeedback(u3.BitStateWrite(19,1))
+        array = [str(i) for i in read]
+        binary = ''.join(array)
 
-        elif led_number == 8:
-	    d.getFeedback(u3.BitStateWrite(16,1))
-	    d.getFeedback(u3.BitStateWrite(17,0))
-	    d.getFeedback(u3.BitStateWrite(18,1))
-	    d.getFeedback(u3.BitStateWrite(19,1))
-
-        elif led_number == 9:
-	    d.getFeedback(u3.BitStateWrite(16,0))
-	    d.getFeedback(u3.BitStateWrite(17,1))
-	    d.getFeedback(u3.BitStateWrite(18,0))
-	    d.getFeedback(u3.BitStateWrite(19,0))
-
-        elif led_number == 10:
-	    d.getFeedback(u3.BitStateWrite(16,0))
-	    d.getFeedback(u3.BitStateWrite(17,1))
-	    d.getFeedback(u3.BitStateWrite(18,1))
-	    d.getFeedback(u3.BitStateWrite(19,0))
-
-        elif led_number == 11:
-	    d.getFeedback(u3.BitStateWrite(16,0))
-	    d.getFeedback(u3.BitStateWrite(17,1))
-	    d.getFeedback(u3.BitStateWrite(18,0))
-	    d.getFeedback(u3.BitStateWrite(19,1))
-
-        elif led_number == 12:
-	    d.getFeedback(u3.BitStateWrite(16,0))
-	    d.getFeedback(u3.BitStateWrite(17,1))
-	    d.getFeedback(u3.BitStateWrite(18,1))
-	    d.getFeedback(u3.BitStateWrite(19,1))
-
-        elif led_number == 13:
-	    d.getFeedback(u3.BitStateWrite(16,0))
-	    d.getFeedback(u3.BitStateWrite(17,0))
-	    d.getFeedback(u3.BitStateWrite(18,1))
-	    d.getFeedback(u3.BitStateWrite(19,1))
-
-        elif led_number == 14:
-	    d.getFeedback(u3.BitStateWrite(16,1))
-	    d.getFeedback(u3.BitStateWrite(17,1))
-	    d.getFeedback(u3.BitStateWrite(18,1))
-	    d.getFeedback(u3.BitStateWrite(19,0))
-
-        elif led_number == 15:
-	    d.getFeedback(u3.BitStateWrite(16,1))
-	    d.getFeedback(u3.BitStateWrite(17,1))
-	    d.getFeedback(u3.BitStateWrite(18,0))
-	    d.getFeedback(u3.BitStateWrite(19,1))
-
-        elif led_number == 16:
-	    d.getFeedback(u3.BitStateWrite(16,1))
-	    d.getFeedback(u3.BitStateWrite(17,1))
-	    d.getFeedback(u3.BitStateWrite(18,1))
-	    d.getFeedback(u3.BitStateWrite(19,1))
+        return  int(binary,2) + 1
 
 
-#led = LEDBoard()
-#led.On(1)
+#lj = labjack()
+#
+#for i in range(1, 20):
+#    lj.set_led(i)
+#    print lj.read_led()

@@ -21,7 +21,7 @@ class MainFrame (wx.Frame):
         wx.Frame.__init__(self, parent, id=wx.ID_ANY,
                           title=wx.EmptyString,
                           pos=wx.DefaultPosition,
-                          size=wx.Size(1450, 620),
+                          size=wx.Size(1300, 700),
                           style=wx.DEFAULT_FRAME_STYLE |
                           wx.TAB_TRAVERSAL)
 
@@ -103,18 +103,34 @@ class NoteBook(MainFrame):
         self.bind_pga()
         self.bind_eeprom()
         self.do_logger_binding()
+
+        # define private variabls for status checking
+        self.__volt=0.0
+        self.__curr=0.0
+        self.__temp=0.0
+        self.__gain=0.0
+        self.__serial=0
+        self.__sipm_status=False
+        self.__bk_status=False
+
+        # redo layout realign all the variables
+        self.page1.Layout()
         ### end of __init__
 
 
     def init_daq(self):
         ## initialize BK precision
         self.page4.logger.AppendText('[{0}] ### Start SiPM QC Station ###\n'.format(self.get_time()))
+
         self.bk = BKPrecision('/dev/ttyUSB0')
+
         if self.bk:
             self.page4.logger.AppendText('[{0}] # BK initialized\n'.format(self.get_time()))
 
         ## initialize Labjack U3-LV
+
         self.lj = labjack()
+
         if self.lj:
             self.page4.logger.AppendText('[{0}] # Labjack initialized\n'.format(self.get_time()))
 
@@ -131,6 +147,7 @@ class NoteBook(MainFrame):
         self.read_temp()
         self.read_pga()
         self.read_eeprom()
+        self.read_serial()
 
     def init_thread(self):
         ## initialize threads for labjack and bk to refresh variables
@@ -183,6 +200,7 @@ class NoteBook(MainFrame):
         self.Bind(wx.EVT_BUTTON, self.update_eeprom, self.page3.mem6s)
         self.Bind(wx.EVT_BUTTON, self.update_eeprom, self.page3.mem7s)
         self.Bind(wx.EVT_BUTTON, self.update_eeprom, self.page3.mem8s)
+        self.Bind(wx.EVT_BUTTON, self.update_serial, self.page1.lblname4s)
 
     def do_logger_binding(self):
         # do all the logger bindings
@@ -297,7 +315,8 @@ class NoteBook(MainFrame):
             if 'drs_exam' in line:
                 pid = int(line.split(None, 1)[0])
                 os.kill(pid, signal.SIGKILL)
-        return True
+
+        self.page4.logger.AppendText('[{0}] # Killed running DRS4 \n'.format(self.get_time()))
 
     def run_drs4(self):
         ## logging drs_exam output
@@ -308,51 +327,6 @@ class NoteBook(MainFrame):
         if self.p:
             self.page4.logger.AppendText('[{0}] # DRS4 initialized\n'.format(self.get_time()))
         return True
-
-    def bind_bk(self):
-        ## bind the BK buttons to update the display and call bk.set_volt etc
-        self.Bind(wx.EVT_BUTTON, self.update_bk_state, self.page1.lblname1s)
-        self.Bind(wx.EVT_BUTTON, self.update_volt, self.page1.lblname2s)
-        self.Bind(wx.EVT_BUTTON, self.update_curr, self.page1.lblname3s)
-
-    def bind_led(self):
-        ## bind the LED buttons to update the display and call labjack.set_led()
-        self.Bind(wx.EVT_BUTTON, self.update_led, self.page1.led1)
-        self.Bind(wx.EVT_BUTTON, self.update_led, self.page1.led2)
-        self.Bind(wx.EVT_BUTTON, self.update_led, self.page1.led3)
-        self.Bind(wx.EVT_BUTTON, self.update_led, self.page1.led4)
-        self.Bind(wx.EVT_BUTTON, self.update_led, self.page1.led5)
-        self.Bind(wx.EVT_BUTTON, self.update_led, self.page1.led6)
-        self.Bind(wx.EVT_BUTTON, self.update_led, self.page1.led7)
-        self.Bind(wx.EVT_BUTTON, self.update_led, self.page1.led8)
-        self.Bind(wx.EVT_BUTTON, self.update_led, self.page1.led9)
-        self.Bind(wx.EVT_BUTTON, self.update_led, self.page1.led10)
-        self.Bind(wx.EVT_BUTTON, self.update_led, self.page1.led11)
-        self.Bind(wx.EVT_BUTTON, self.update_led, self.page1.led12)
-        self.Bind(wx.EVT_BUTTON, self.update_led, self.page1.led13)
-        self.Bind(wx.EVT_BUTTON, self.update_led, self.page1.led14)
-        self.Bind(wx.EVT_BUTTON, self.update_led, self.page1.led15)
-        self.Bind(wx.EVT_BUTTON, self.update_led, self.page1.led16)
-        self.Bind(wx.EVT_BUTTON, self.update_led, self.page1.led16)
-        self.Bind(wx.EVT_BUTTON, self.update_led, self.page1.lblname7s)
-
-    def bind_pga(self):
-        ## bind the PGA buttons to update the display and call labjack.read_pga()
-        self.Bind(wx.EVT_BUTTON, self.update_pga, self.page1.button5)
-        self.Bind(wx.EVT_BUTTON, self.update_pga, self.page1.button6)
-        self.Bind(wx.EVT_BUTTON, self.update_pga, self.page1.button7)
-        self.Bind(wx.EVT_BUTTON, self.update_pga, self.page1.button8)
-        self.Bind(wx.EVT_BUTTON, self.update_pga, self.page1.lblname6s)
-
-    def bind_eeprom(self):
-        self.Bind(wx.EVT_BUTTON, self.update_eeprom, self.page3.mem1s)
-        self.Bind(wx.EVT_BUTTON, self.update_eeprom, self.page3.mem2s)
-        self.Bind(wx.EVT_BUTTON, self.update_eeprom, self.page3.mem3s)
-        self.Bind(wx.EVT_BUTTON, self.update_eeprom, self.page3.mem4s)
-        self.Bind(wx.EVT_BUTTON, self.update_eeprom, self.page3.mem5s)
-        self.Bind(wx.EVT_BUTTON, self.update_eeprom, self.page3.mem6s)
-        self.Bind(wx.EVT_BUTTON, self.update_eeprom, self.page3.mem7s)
-        self.Bind(wx.EVT_BUTTON, self.update_eeprom, self.page3.mem8s)
 
     #### define functions for BK Precision
     def bk_on(self, event):
@@ -378,18 +352,25 @@ class NoteBook(MainFrame):
         event.Skip()
 
     def read_bk_state(self):
-        state = self.bk.get_state()
-        if state == '1':
-            self.page1.lblname1r.SetLabel('ON')
-            self.page1.lblname1s.SetLabel('Turn OFF')
-        elif state == '0':
-            self.page1.lblname1r.SetLabel('OFF')
-            self.page1.lblname1s.SetLabel('Turn ON')
+        if(self.bk.get_state()):
+            state = self.bk.get_state()
+            if state == '1':
+                self.page1.lblname1r.SetLabel('ON')
+                self.page1.lblname1s.SetLabel('Turn OFF')
+            elif state == '0':
+                self.page1.lblname1r.SetLabel('OFF')
+                self.page1.lblname1s.SetLabel('Turn ON')
+        else:
+            pass
 
     def read_volt(self):
-        volt = float(self.bk.meas_volt())
-        self.page1.lblname2r.SetLabel('{:.2f}'.format(volt))
-        #print 'V={0} V'.format(volt)
+        if(self.bk.meas_volt()):
+            self.__volt = float(self.bk.meas_volt())
+            self.page1.lblname2r.SetLabel('{:.2f}'.format(self.__volt))
+            #print 'V={0} V'.format(volt)
+        else:
+            self.__volt = -1
+            self.page1.lblname2r.SetLabel('')
 
     def update_volt(self, event):
         setvalue = self.page1.lblname2w.GetValue()
@@ -398,9 +379,13 @@ class NoteBook(MainFrame):
         event.Skip()
 
     def read_curr(self):
-        curr = float(self.bk.meas_curr())*1000
-        self.page1.lblname3r.SetLabel(str(curr))
-        #print 'I={0} mA'.format(curr)
+        if(self.bk.meas_curr()):
+            self.__curr = float(self.bk.meas_curr())*1000
+            self.page1.lblname3r.SetLabel(str(self.__curr))
+            #print 'I={0} mA'.format(curr)
+        else:
+            self.__curr = -1
+            self.page1.lblname3r.SetLabel('')
 
     def update_curr(self, event):
         setvalue = self.page1.lblname3w.GetValue()
@@ -408,121 +393,175 @@ class NoteBook(MainFrame):
         wx.CallAfter(self.read_curr)
         event.Skip()
 
+    def check_bk_status(self):
+        _bk_status = self.__bk_status
+        if self.__volt < 0 and self.__curr < 0:
+            self.page1.lblname9r.SetLabel('NO')
+            self.__bk_status = False
+            if _bk_status == True:
+                    self.page4.logger.AppendText('[{0}] BK Precision is powered off!\n'.format(self.get_time()))
+
+
+        elif self.__volt > -1 and self.__curr > -1:
+            self.page1.lblname9r.SetLabel('YES')
+            self.__bk_status = True
+            if _bk_status == False:
+                    self.page4.logger.AppendText('[{0}] BK Precision is powered on!\n'.format(self.get_time()))
+                    self.read_bk_state()
+
     def refresh_bk(self):
         while True:
-            time.sleep(10)
             wx.CallAfter(self.read_volt)
             wx.CallAfter(self.read_curr)
+            wx.CallAfter(self.check_bk_status)
+            time.sleep(10)
 
 
     #### define functions for Labjack
 
     ## T-sensor
     def read_temp(self):
-        temp = self.lj.read_temperature()
+        self.__temp = float(self.lj.read_temperature())
+        self.page1.lblname5r.SetLabel(str(self.__temp))
         #print 'T={0} C'.format(temp)
-        #self.page4.logger.AppendText('[{0}] Temperature readout is {1}\n'.format(self.get_time(),temp))
-        self.page1.lblname5r.SetLabel(str(temp))
 
     ## PGA
     def update_pga(self, event):
-        label = event.GetEventObject().GetLabelText()
-        if label[0:4] == 'Gain':
-            self.lj.set_gain(int(label[4:]))
+        _label = event.GetEventObject().GetLabelText()
+        ## fast buttons (Gain10, Gain16, Gain20, Gain26)
+        if _label[0:4] == 'Gain':
+            self.lj.set_gain(int(_label[4:]))
             self.read_pga()
-        if label[0:8] == 'Set Gain':
-            setvalue = self.page1.lblname6w.GetValue()
-            self.lj.set_gain(int(setvalue))
+        ## Spin Control Text (G = 6 - 26)
+        if _label[0:8] == 'Set Gain':
+            _setvalue = self.page1.lblname6w.GetValue()
+            self.lj.set_gain(int(_setvalue))
             self.read_pga()
         event.Skip()
 
     def read_pga(self):
-        gain = self.lj.read_gain()
+        self.__gain = float(self.lj.read_gain())
+        self.page1.lblname6r.SetLabel(str(self.__gain))
         #print 'gain={0} dB'.format(gain)
-        self.page1.lblname6r.SetLabel(str(gain))
-        #self.page4.logger.AppendText('[{0}] Gain readout is {1}\n'.format(self.get_time(), gain))
 
     ## EEPROM
     def read_eeprom(self):
-        for page in range(8):
-            page = page + 1
-            readout = self.lj.read_eeprom(page)
-            for idx,i in enumerate(readout):
-                if i == 0xff:
-                    readout[idx] = 32
-            array = [chr(i) for i in readout]
-            string = ''.join(array)
-            if page == 1:
-                self.page3.mem1r.SetLabel(string)
-                self.page3.mem1w.SetValue(string)
-                self.page1.lblname4r.SetLabel(self.check_serial(string))
-            elif page == 2:
-                self.page3.mem2r.SetLabel(string)
-            elif page == 3:
-                self.page3.mem3r.SetLabel(string)
-            elif page == 4:
-                self.page3.mem4r.SetLabel(string)
-            elif page == 5:
-                self.page3.mem5r.SetLabel(string)
-            elif page == 6:
-                self.page3.mem6r.SetLabel(string)
-            elif page == 7:
-                self.page3.mem7r.SetLabel(string)
-            elif page == 8:
-                self.page3.mem8r.SetLabel(string)
+        for _page in range(8):
+            _page = _page + 1
+            _readout = self.lj.read_eeprom(_page)
+            for _idx,_i in enumerate(_readout):
+                if _i == 0xff:
+                    _readout[_idx] = 32
+            _array = [chr(_i) for _i in _readout]
+            _string = ''.join(_array)
+            if _page == 1:
+                self.page3.mem1r.SetLabel(_string)
+                self.page3.mem1w.SetValue(_string)
+            elif _page == 2:
+                self.page3.mem2r.SetLabel(_string)
+            elif _page == 3:
+                self.page3.mem3r.SetLabel(_string)
+            elif _page == 4:
+                self.page3.mem4r.SetLabel(_string)
+            elif _page == 5:
+                self.page3.mem5r.SetLabel(_string)
+            elif _page == 6:
+                self.page3.mem6r.SetLabel(_string)
+            elif _page == 7:
+                self.page3.mem7r.SetLabel(_string)
+            elif _page == 8:
+                self.page3.mem8r.SetLabel(_string)
 
     def update_eeprom(self, event):
-        label = event.GetEventObject().GetLabelText()
-        if label[0:8] == 'Set Page':
-            page = int(label[8:])
-            if page == 1:
-                string = self.page3.mem1w.GetValue()
-            elif page == 2:
-                string = self.page3.mem2w.GetValue()
-            elif page == 3:
-                string = self.page3.mem3w.GetValue()
-            elif page == 4:
-                string = self.page3.mem4w.GetValue()
-            elif page == 5:
-                string = self.page3.mem5w.GetValue()
-            elif page == 6:
-                string = self.page3.mem6w.GetValue()
-            elif page == 7:
-                string = self.page3.mem7w.GetValue()
-            elif page == 8:
-                string = self.page3.mem8w.GetValue()
+        _label = event.GetEventObject().GetLabelText()
+        if _label[0:8] == 'Set Page':
+            _page = int(_label[8:])
+            if _page == 1:
+                _string = self.page3.mem1w.GetValue()
+            elif _page == 2:
+                _string = self.page3.mem2w.GetValue()
+            elif _page == 3:
+                _string = self.page3.mem3w.GetValue()
+            elif _page == 4:
+                _string = self.page3.mem4w.GetValue()
+            elif _page == 5:
+                _string = self.page3.mem5w.GetValue()
+            elif _page == 6:
+                _string = self.page3.mem6w.GetValue()
+            elif _page == 7:
+                _string = self.page3.mem7w.GetValue()
+            elif _page == 8:
+                _string = self.page3.mem8w.GetValue()
 
             ## Get the first 16 characters
-            string_list = list(string[:16])
-            #print string_list
-            int_array = [ord(s) for s in string_list]
-            #print int_array
+            _string_list = list(_string[:16])
+            _int_array = [ord(s) for s in _string_list]
+
             ## Add spaces if the length is smaller than 16
-            while len(int_array) < 16:
-                int_array.append(32)
-            self.lj.write_eeprom(page, int_array)
+            while len(_int_array) < 16:
+                _int_array.append(32)
+            self.lj.write_eeprom(_page, _int_array)
             self.read_eeprom()
             self.page3.Layout()
             event.Skip()
         else:
             pass
 
-    def check_serial(self, _string):
-        array = _string.split(' ')
-        print array
-        if len(array) == 3 and array[0] == array[2] and array[1] == 'UWSiPM':
-            self.page4.logger.AppendText('[{0}] SiPM# {1} found\n'.format(self.get_time(), int(array[0])))
-            return str(int(array[0]))
+    def read_serial(self):
+        _readout = self.lj.read_eeprom(1)
+        for _idx,_i in enumerate(_readout):
+            if _i == 0xff:
+                _readout[_idx] = 32
+        _array = [chr(_i) for _i in _readout]
+        _string = ''.join(_array)
+        _array = _string.split(' ')
+        # print _array
+        if len(_array) == 3 and _array[0] == _array[2] and _array[1] == 'UWSiPM':
+            self.page1.lblname4r.SetLabel(str(int(_array[0])))
+            self.__serial = int(_array[0])
         else:
-            self.page4.logger.AppendText('[{0}] SiPM# not found. Please enter.\n'.format(self.get_time()))
-            return '0'
+            self.page1.lblname4r.SetLabel('')
+            self.__serial = 0
+
+    def update_serial(self, event):
+        _sn_string = self.page1.lblname4r.GetLabel()
+        if _sn_string == '':
+            _sn = self.page1.lblname4w.GetValue()
+            _string = ('%04d UWSiPM %04d') % (_sn, _sn)
+            _str_list = list(string)
+            _int_array = [ord(_s) for _s in _str_list]
+            #lj.write_eeprom(1, int_array)
+            read_serial()
+        elif int(_sn_string):
+            self.page4.logger.AppendText('[{0}] SiPM# {1} found! Please don\'t alter it.\n'.format(self.get_time(), int(_sn_string)))
+
+    def check_sipm_status(self):
+        _sipm_status = self.__sipm_status
+        if self.__temp > 50.0 or self.__gain > 25.0:
+            # self.page4.logger.AppendText('[{0}] No SiPM found!\n'.format(self.get_time()))
+            self.page1.lblname8r.SetLabel('NO')
+            self.__sipm_status = False
+            if _sipm_status == True:
+                    self.page4.logger.AppendText('[{0}] A SiPM is being taken off!\n'.format(self.get_time()))
+
+
+        elif self.__temp < 50.0 and self.__gain < 25.0:
+            # self.page4.logger.AppendText('[{0}] SiPM found!\n'.format(self.get_time()))
+            self.page1.lblname8r.SetLabel('YES')
+            self.__sipm_status = True
+            if _sipm_status == False:
+                    self.page4.logger.AppendText('[{0}] A new SiPM is inserted!\n'.format(self.get_time()))
+
 
     def refresh_lj(self):
         while True:
-            time.sleep(2)
             wx.CallAfter(self.read_temp)
             wx.CallAfter(self.read_pga)
-
+            wx.CallAfter(self.read_serial)
+            wx.CallAfter(self.check_sipm_status)
+            #self.page1.Layout()
+            time.sleep(2)
+            #print 'V={0}, I={1}, T={2}, G={3}, SN={4}, STAT={5}'.format(self.__volt, self.__curr, self.__temp, self.__gain, self.__serial, self.__sipm_status)
 
     ## LED Board
     def update_led(self, event):
@@ -559,7 +598,7 @@ class NoteBook(MainFrame):
             socks = dict(poller.poll())
             if socket_pull in socks and socks[socket_pull] == zmq.POLLIN:
                 message = socket_pull.recv()
-                #print "Received control command: %s" % message
+                print "Received control command: %s" % message
                 #wx.CallAfter(self.page4.logger.AppendText, '[{0}] {1}\n'.format(self.get_time(), message))
                 if message == "Exit":
                     #print "Received exit command, client will stop receiving messages"

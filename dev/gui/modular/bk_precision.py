@@ -6,7 +6,7 @@ from urllib import quote
 
 class BKPrecision:
 
-    def __init__(self, dev_path, baud=4800, timeout=1):
+    def __init__(self, dev_path, baud=4800, timeout=0.5):
         self.s = serial.Serial(dev_path, baud, timeout=timeout)
 #        print '%s' % self.get_version()
    	#self.id = int(self.get_version().split(',')[-2][-4:])
