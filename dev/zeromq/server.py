@@ -13,7 +13,7 @@ def server_push(port="5556"):
     # serves only 5 request and dies
     for reqnum in range(100):
         if reqnum < 96:
-            socket.send("Continue")
+            socket.send("Hello I am Kim")
         else:
             socket.send("Exit")
             break

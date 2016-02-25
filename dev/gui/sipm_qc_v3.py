@@ -426,7 +426,8 @@ class MyFrame(wx.Frame):
         event.Skip()
 
     def eeprom_read(self):
-        er_array = lj.read_eeprom(1)
+        eeprom_read_int = lj.read_eeprom(1)
+        er_array = [chr(i) for i in eeprom_read_int]
         er_string = ''.join(er_array)
         er_array = er_string.split(' ')
         self.display8.Clear()
@@ -517,7 +518,7 @@ class MyFrame(wx.Frame):
     def callanalyzer(self, led_no):
         sipm_no = int(self.display4.GetValue())
         total = 0.0
-        length = 0.0
+        length = 0
         average = 0.0
         test_no = -1
 
@@ -527,9 +528,9 @@ class MyFrame(wx.Frame):
         print 'Plotting traces from SiPM #%d, test #%d, LED #%d' % (sipm_no,
                 test_no, led_no)
 
-        time.sleep(1)
 
-        while True:
+        while os.path.isfile("./data/sipm_%d_%02d/sipm_%d_%d.txt" % (sipm_no,
+            test_no, sipm_no, led_no)):
             infile = open("./data/sipm_%d_%02d/sipm_%d_%d.txt" % (sipm_no,
                 test_no, sipm_no,
                 led_no), 'r+')
@@ -538,7 +539,7 @@ class MyFrame(wx.Frame):
                 total += amount
                 length = length + 1
             infile.close()
-            if length == 500:
+            if length == 300:
                 with open("./data/sipm_%d_%02d/sipm_%d_%d.txt" % (sipm_no,
                     test_no, sipm_no,
                     led_no), 'r+') as fileread:
@@ -639,7 +640,7 @@ class MyFrame(wx.Frame):
 
         ## Set gain 10 dB on the SiPM board PGA
     def SetGain1(self, event):
-        lj.set_gain(64)
+        lj.set_gain(10)
         self.display2.Clear()
         self.display2.AppendText(str(lj.read_gain()))
         if int(lj.read_gain()) == 10:
@@ -651,7 +652,7 @@ class MyFrame(wx.Frame):
 
         ## Set gain 16 dB on the SiPM board PGA
     def SetGain2(self, event):
-        lj.set_gain(40)
+        lj.set_gain(16)
         self.display2.Clear()
         self.display2.AppendText(str(lj.read_gain()))
         if int(lj.read_gain()) == 16:
@@ -663,7 +664,7 @@ class MyFrame(wx.Frame):
 
         ## Set gain 20 dB on the SiPM board PGA
     def SetGain3(self, event):
-        lj.set_gain(24)
+        lj.set_gain(20)
         self.display2.Clear()
         self.display2.AppendText(str(lj.read_gain()))
         if int(lj.read_gain()) == 20:

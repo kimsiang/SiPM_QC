@@ -57,6 +57,10 @@ class display_panel(wx.Panel):
         mainSizer.Add(hSizer, 0, wx.ALL, 5)
         self.SetSizerAndFit(mainSizer)
 
+    def gauss(x, *p):
+        A, mu, sigma = p
+        return A*np.exp(-(x-mu)**2/(2.*sigma**2))
+
     def __del__(self):
         pass
 
