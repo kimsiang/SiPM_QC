@@ -126,11 +126,12 @@ class labjack():
 	page <<= 4
         cmd = [0x03, page] + [0 for i in range(16)]
         res = d.spi(cmd, **spi_conf_eeprom)
-        for idx,i in enumerate(res['SPIBytes'][2:]):
-            if i == 0xff:
-                er_safe_int[idx] = 32
-        return [chr(i) for i in er_safe_int]
-
+#        er_safe_int = res['SPIBytes'][2:]
+#        for idx,i in enumerate(res['SPIBytes'][2:]):
+#            if i == 0xff:
+#                er_safe_int[idx] = 32
+#        return [chr(i) for i in er_safe_int]
+        return res['SPIBytes'][2:]
 
     def set_led(self, led_number):
         if led_number == 1:

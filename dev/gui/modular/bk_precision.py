@@ -25,6 +25,7 @@ class BKPrecision:
 
     def get_volt(self):
 	self.s.write('LIST:VOLT?\n')
+        return self.s.read(64).strip()
 
     def set_volt(self, new_volt):
 	self.s.write('SOUR:VOLT ' + str(new_volt) + '\n')
