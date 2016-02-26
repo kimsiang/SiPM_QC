@@ -61,6 +61,60 @@ class display_panel(wx.Panel):
         A, mu, sigma = p
         return A*np.exp(-(x-mu)**2/(2.*sigma**2))
 
+    def plot_waveform(self, _infile):
+	plt.figure(1)
+        #_infile = np.loadtxt("./data/sipm_%d_%02d/sipm_%d_%d_full.txt" % (sipm_no,
+        #    test_no, sipm_no, led_no) )
+        plt.plot(_infile[:,0],_infile[:,1],'ro')
+        plt.title("SiPM traces")
+        plt.ylabel("Amplitude [mV]")
+        plt.xlabel("time [ns]")
+        self.canvas1.draw()
+
+    def plot_amp_hist(self, _infile):
+        while True:
+            #_infile = open("./data/sipm_%d_%02d/sipm_%d_%d.txt" % (sipm_no,
+            #    test_no, sipm_no,
+            #    led_no), 'r+')
+            for line in _infile:
+                amount = float(line)
+                total += amount
+                length = length + 1
+            infile.close()
+            if length == 500:
+              #  with open("./data/sipm_%d_%02d/sipm_%d_%d.txt" % (sipm_no,
+               #     test_no, sipm_no,
+               #     led_no), 'r+') as fileread:
+                  with open(_infile) as fileread:
+                    floats = map(float, fileread)
+            break
+        average = total / length
+#        print "LED #%d V_amp %.2f" % (led_no, average)
+        plt.figure(2)
+        plt.hist(floats,25)
+        plt.title("Amplitude Histogram")
+        plt.xlabel("Amplitude [mV]")
+        plt.ylabel("Frequency")
+        self.canvas2.draw()
+
+    def plot_led_scan(self):
+	pass
+
+    def plot_volt_scan(self):
+	pass
+
+    def fit_gaussian(self, floats):
+	n, bins, patches = plt.hist(floats,25)
+        bin_centres = (bins[:-1] + bins[1:])/2
+        # p0 is the initial guess for the fitting coefficients (A, mu and sigma# above)
+        coeff, var_matrix = curve_fit(gauss, bin_centres, n, p0=[100.,average,5.])
+        hist_fit = gauss(bin_centres, *coeff)
+        plt.plot(bin_centres, hist_fit, label='Fitted data', linewidth=2)
+        print 'Fitted mean = ', coeff[1]
+        print 'Fitted standard deviation = ', coeff[2]
+        fdata = open("vbd.txt", "a+")
+        print >> fdata, float(bk.meas_volt()), ' ', coeff[1], ' ', coeff[2]
+
     def __del__(self):
         pass
 
@@ -72,6 +126,8 @@ class control_panel(wx.Panel):
 
         # a save button
         self.drs4_button = wx.Button(self, label="Run DRS4")
+        self.led_scan_button = wx.Button(self, label="Run LED Scan")
+        self.volt_scan_button = wx.Button(self, label="Run Voltage Scan")
 
         # bk precision PS Label
         self.quote1 = wx.StaticText(self, label="BK Precision")
@@ -170,6 +226,8 @@ class control_panel(wx.Panel):
         self.led15 = wx.Button(self, label="LED15")
         self.led16 = wx.Button(self, label="LED16")
 
+	self.gauge = wx.Gauge(self, range=1000, size=(250, 25))
+
         ## implement the settings in 3 other functions
         self.set_properties()
         self.do_layout()
@@ -193,6 +251,8 @@ class control_panel(wx.Panel):
                 20, wx.ROMAN, wx.NORMAL, wx.NORMAL, False, u'Consolas')
 
         self.drs4_button.SetFont(_big_font)
+        self.led_scan_button.SetFont(_big_font)
+        self.volt_scan_button.SetFont(_big_font)
 
         self.quote1.SetFont(_big_font)
         self.quote2.SetFont(_big_font)
@@ -280,6 +340,7 @@ class control_panel(wx.Panel):
         grid = wx.GridBagSizer(hgap=10, vgap=10)
         grid2 = wx.GridBagSizer(hgap=10, vgap=10)
         hSizer = wx.BoxSizer(wx.HORIZONTAL)
+        hSizer2 = wx.BoxSizer(wx.HORIZONTAL)
 
         # start of grid1
         grid.Add(self.quote1, pos=(0, 1), span=(1, 2), flag=wx.TE_CENTER)
@@ -373,12 +434,17 @@ class control_panel(wx.Panel):
         grid2.Add(self.led14, pos=(8, 1), flag=wx.TE_CENTER)
         grid2.Add(self.led15, pos=(8, 2), flag=wx.TE_CENTER)
         grid2.Add(self.led16, pos=(8, 3), flag=wx.TE_CENTER)
+        
+	grid2.Add(self.gauge, pos=(9, 0), span=(1, 4), flag=wx.EXPAND)
         # end of grid2
 
         hSizer.Add(grid, 0, wx.ALL | wx.EXPAND | wx.CENTER, 10)
         hSizer.Add(grid2, 0, wx.ALL | wx.EXPAND | wx.CENTER, 10)
         mainSizer.Add(hSizer, 0, wx.ALL, 10)
-        mainSizer.Add(self.drs4_button, 0, wx.CENTER)
+        hSizer2.Add(self.drs4_button, 0, wx.CENTER)
+        hSizer2.Add(self.led_scan_button, 0, wx.CENTER)
+        hSizer2.Add(self.volt_scan_button, 0, wx.CENTER)
+        mainSizer.Add(hSizer2, 0, wx.ALL, 10)
         self.SetSizerAndFit(mainSizer)
 
     def __del__(self):

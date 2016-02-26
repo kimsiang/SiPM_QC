@@ -6,8 +6,8 @@
 import wx
 import wx.lib.agw.flatnotebook as fnb
 from threading import Thread
-from bk_precision import BKPrecision
-from labjack import labjack
+#from bk_precision import BKPrecision
+#from labjack import labjack
 from sipm_qc_gui import control_panel, display_panel, eeprom_panel, logger_panel
 import time, sys, subprocess, os, threading, signal
 from datetime import date, datetime, tzinfo, timedelta
@@ -25,8 +25,6 @@ class MainFrame (wx.Frame):
                           size=wx.Size(1400, 700),
                           style=wx.DEFAULT_FRAME_STYLE |
                           wx.TAB_TRAVERSAL)
-
-#        self.Centre(wx.BOTH)
 
     def __del__(self):
         pass
@@ -74,10 +72,10 @@ class NoteBook(MainFrame):
         self.nb = fnb.FlatNotebook(self)
 
         # create the page windows as children of the notebook
-        self.page1 = Panel1(self.nb)
-        self.page2 = Panel2(self.nb)
-        self.page3 = Panel3(self.nb)
-        self.page4 = Panel4(self)
+        self.page1 = control_panel(self.nb)
+        self.page2 = display_panel(self.nb)
+        self.page3 = eeprom_panel(self.nb)
+        self.page4 = logger_panel(self)
 
         # add the pages to the notebook with the label to show on the tab
         self.nb.AddPage(self.page1, 'Control')
@@ -104,11 +102,12 @@ class NoteBook(MainFrame):
         self.__serial=0
         self.__led_no=0
         self.__seq_no=0
+        self.__count=0
         self.__sipm_status=False
         self.__bk_status=False
 
         # initialize all the environment and do the layout
-        self.init_daq()
+        #self.init_daq()
         self.init_thread()
         self.bind_bk()
         self.bind_led()
@@ -211,6 +210,7 @@ class NoteBook(MainFrame):
     def do_logger_binding(self):
         # do all the logger bindings
         self.Bind(wx.EVT_BUTTON, self.on_click, self.page1.drs4_button)
+        self.Bind(wx.EVT_BUTTON, self.led_scan_thread, self.page1.led_scan_button)
 
         self.Bind(wx.EVT_SPINCTRLDOUBLE, self.on_spin, self.page1.lblname2w)
         self.Bind(wx.EVT_SPINCTRL, self.on_spin, self.page1.lblname3w)
@@ -568,7 +568,7 @@ class NoteBook(MainFrame):
             wx.CallAfter(self.check_sipm_status)
             wx.CallAfter(self.page1.Layout)
             time.sleep(2)
-            #print 'V={0}, I={1}, T={2}, G={3}, SN={4}, STAT={5}'.format(self.__volt, self.__curr, self.__temp, self.__gain, self.__serial, self.__sipm_status)
+	    #print 'V={0}, I={1}, T={2}, G={3}, SN={4}, STAT={5}'.format(self.__volt, self.__curr, self.__temp, self.__gain, self.__serial, self.__sipm_status)
 
     ## LED Board
     def update_led(self, event):
@@ -590,6 +590,21 @@ class NoteBook(MainFrame):
         self.__seq_no  += 1
         self.dump_log()
 
+    def led_scan(self):
+	for _led_no in range (1, 1000):
+		#self.lj.set_led(_led_no)
+		#self.read_led()
+		#run_drs4(self)
+		time.sleep(0.2)
+                self.page4.logger.AppendText('[{0}] Flasing LED# {1} \n'.format(self.get_time(), self.__led_no))
+	        self.__count += 1
+                self.page1.gauge.SetValue(self.__count)
+
+    def led_scan_thread(self, event):
+        ## initialize threads for labjack and bk to refresh variables
+        self.t3=Thread(target=self.led_scan)
+        self.t3.start()
+    
     ## functions for Notebook
     def get_time(self):
         return datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S')
