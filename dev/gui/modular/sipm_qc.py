@@ -13,6 +13,7 @@ import time, sys, subprocess, os, threading, signal
 from datetime import date, datetime, tzinfo, timedelta
 import zmq
 from multiprocessing import Process
+import json
 
 ## Define the MainFrame
 class MainFrame (wx.Frame):
@@ -21,7 +22,7 @@ class MainFrame (wx.Frame):
         wx.Frame.__init__(self, parent, id=wx.ID_ANY,
                           title=wx.EmptyString,
                           pos=wx.DefaultPosition,
-                          size=wx.Size(1300, 700),
+                          size=wx.Size(1400, 700),
                           style=wx.DEFAULT_FRAME_STYLE |
                           wx.TAB_TRAVERSAL)
 
@@ -95,6 +96,17 @@ class NoteBook(MainFrame):
         server_push_port = "5556"
         Process(target=self.zmq_client, args=(server_push_port,)).start()
 
+        # define private variabls for status checking
+        self.__volt=0.0
+        self.__curr=0.0
+        self.__temp=0.0
+        self.__gain=0.0
+        self.__serial=0
+        self.__led_no=0
+        self.__seq_no=0
+        self.__sipm_status=False
+        self.__bk_status=False
+
         # initialize all the environment and do the layout
         self.init_daq()
         self.init_thread()
@@ -102,16 +114,8 @@ class NoteBook(MainFrame):
         self.bind_led()
         self.bind_pga()
         self.bind_eeprom()
+        self.bind_drs4()
         self.do_logger_binding()
-
-        # define private variabls for status checking
-        self.__volt=0.0
-        self.__curr=0.0
-        self.__temp=0.0
-        self.__gain=0.0
-        self.__serial=0
-        self.__sipm_status=False
-        self.__bk_status=False
 
         # redo layout realign all the variables
         self.page1.Layout()
@@ -134,11 +138,9 @@ class NoteBook(MainFrame):
         if self.lj:
             self.page4.logger.AppendText('[{0}] # Labjack initialized\n'.format(self.get_time()))
 
-        ## kill any running instances of drs_exam
-        self.kill_drs4()
-
         ## initialize drs4
-        self.run_drs4()
+        self.init_drs4()
+
         self.page4.logger.AppendText('[{}] #####################\n'.format(self.get_time()))
 
         self.read_bk_state()
@@ -148,6 +150,7 @@ class NoteBook(MainFrame):
         self.read_pga()
         self.read_eeprom()
         self.read_serial()
+        self.read_led()
 
     def init_thread(self):
         ## initialize threads for labjack and bk to refresh variables
@@ -202,9 +205,12 @@ class NoteBook(MainFrame):
         self.Bind(wx.EVT_BUTTON, self.update_eeprom, self.page3.mem8s)
         self.Bind(wx.EVT_BUTTON, self.update_serial, self.page1.lblname4s)
 
+    def bind_drs4(self):
+        self.Bind(wx.EVT_BUTTON, self.run_drs4, self.page1.drs4_button)
+
     def do_logger_binding(self):
         # do all the logger bindings
-        self.Bind(wx.EVT_BUTTON, self.on_click, self.page1.button)
+        self.Bind(wx.EVT_BUTTON, self.on_click, self.page1.drs4_button)
 
         self.Bind(wx.EVT_SPINCTRLDOUBLE, self.on_spin, self.page1.lblname2w)
         self.Bind(wx.EVT_SPINCTRL, self.on_spin, self.page1.lblname3w)
@@ -305,28 +311,25 @@ class NoteBook(MainFrame):
         self.page4.logger.AppendText('[{0}] {1} to {2} {3}\n'.format(self.get_time(), labeltext, value, unit))
         event.Skip()
 
-    def kill_drs4(self):
+    def init_drs4(self):
 
         ## kill any instances of drs4_exam
-        self.p = subprocess.Popen(['ps', '-A'], stdout=subprocess.PIPE, shell=True)
-        (out, err) = self.p.communicate()
+        _proc = subprocess.Popen(['ps', '-A'], stdout=subprocess.PIPE, shell=True)
+        (out, err) = _proc.communicate()
 
         for line in out.splitlines():
             if 'drs_exam' in line:
                 pid = int(line.split(None, 1)[0])
                 os.kill(pid, signal.SIGKILL)
+                self.page4.logger.AppendText('[{0}] # Killed running DRS4 \n'.format(self.get_time()))
 
-        self.page4.logger.AppendText('[{0}] # Killed running DRS4 \n'.format(self.get_time()))
-
-    def run_drs4(self):
         ## logging drs_exam output
         fw = open("tmpout", "wb")
         fr = open("tmpout", "r")
-        self.p = subprocess.Popen("/home/midas/KimWork/drs-5.0.3/drs_exam",
+        self.drs4_proc = subprocess.Popen("/home/midas/KimWork/drs-5.0.3/drs_exam",
             stdin=subprocess.PIPE, stderr=fw,stdout=fw, bufsize=1)
-        if self.p:
+        if self.drs4_proc:
             self.page4.logger.AppendText('[{0}] # DRS4 initialized\n'.format(self.get_time()))
-        return True
 
     #### define functions for BK Precision
     def bk_on(self, event):
@@ -550,7 +553,10 @@ class NoteBook(MainFrame):
             self.page1.lblname8r.SetLabel('YES')
             self.__sipm_status = True
             if _sipm_status == False:
+                if self.__serial == 0:
                     self.page4.logger.AppendText('[{0}] A new SiPM is inserted!\n'.format(self.get_time()))
+                else:
+                    self.page4.logger.AppendText('[{0}] SiPM #{1} is inserted!\n'.format(self.get_time(), self.__serial))
 
 
     def refresh_lj(self):
@@ -558,8 +564,9 @@ class NoteBook(MainFrame):
             wx.CallAfter(self.read_temp)
             wx.CallAfter(self.read_pga)
             wx.CallAfter(self.read_serial)
+            wx.CallAfter(self.read_led)
             wx.CallAfter(self.check_sipm_status)
-            #self.page1.Layout()
+            wx.CallAfter(self.page1.Layout)
             time.sleep(2)
             #print 'V={0}, I={1}, T={2}, G={3}, SN={4}, STAT={5}'.format(self.__volt, self.__curr, self.__temp, self.__gain, self.__serial, self.__sipm_status)
 
@@ -567,17 +574,42 @@ class NoteBook(MainFrame):
     def update_led(self, event):
         label = event.GetEventObject().GetLabelText()
         if label[0:3] == 'LED':
-            self.page1.lblname7r.SetLabel(label[3:])
             self.lj.set_led(int(label[3:]))
-        if label[0:8] == 'Set LED#':
+        elif label[0:8] == 'Set LED#':
             setvalue = self.page1.lblname7w.GetValue()
-            self.page1.lblname7r.SetLabel(str(setvalue))
+            self.lj.set_led(setvalue)
+        self.read_led()
         event.Skip()
 
-    ## functions for Notebook
+    def read_led(self):
+        self.__led_no = self.lj.read_led()
+        self.page1.lblname7r.SetLabel(str(self.__led_no))
 
+    def run_drs4(self, event):
+        self.drs4_proc.stdin.write('{0:04d} {1} {2:02d} {3:05d}\n'.format(self.__serial,'led',self.__led_no,self.__seq_no))
+        self.__seq_no  += 1
+        self.dump_log()
+
+    ## functions for Notebook
     def get_time(self):
         return datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S')
+
+    def dump_log(self):
+
+        _log_dict = {
+           'Datetime': self.get_time(),
+           'Temperature': self.__temp,
+           'Voltage': self.__volt,
+           'Current': self.__curr,
+           'Gain': self.__gain,
+           'Serial_No': self.__serial,
+           'Led_No': self.__led_no,
+           'Sequence_No': self.__seq_no
+        }
+
+        json_outfile = open('./data/log/{0:04d}.txt'.format(self.__seq_no), 'w')
+        json.dump(_log_dict, json_outfile, indent=4, sort_keys=True)
+
 
     def on_close(self, event):
         self.Close()

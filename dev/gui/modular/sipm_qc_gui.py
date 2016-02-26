@@ -71,7 +71,7 @@ class control_panel(wx.Panel):
         wx.Panel.__init__(self, parent)
 
         # a save button
-        self.button = wx.Button(self, label="Save")
+        self.drs4_button = wx.Button(self, label="Run DRS4")
 
         # bk precision PS Label
         self.quote1 = wx.StaticText(self, label="BK Precision")
@@ -192,7 +192,7 @@ class control_panel(wx.Panel):
         _big_font = wx.Font(
                 20, wx.ROMAN, wx.NORMAL, wx.NORMAL, False, u'Consolas')
 
-        self.button.SetFont(_big_font)
+        self.drs4_button.SetFont(_big_font)
 
         self.quote1.SetFont(_big_font)
         self.quote2.SetFont(_big_font)
@@ -378,7 +378,7 @@ class control_panel(wx.Panel):
         hSizer.Add(grid, 0, wx.ALL | wx.EXPAND | wx.CENTER, 10)
         hSizer.Add(grid2, 0, wx.ALL | wx.EXPAND | wx.CENTER, 10)
         mainSizer.Add(hSizer, 0, wx.ALL, 10)
-        mainSizer.Add(self.button, 0, wx.CENTER)
+        mainSizer.Add(self.drs4_button, 0, wx.CENTER)
         self.SetSizerAndFit(mainSizer)
 
     def __del__(self):

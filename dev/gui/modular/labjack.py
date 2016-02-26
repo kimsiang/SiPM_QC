@@ -135,8 +135,6 @@ class labjack():
 
     def set_led(self, led_number):
 
-        print led_number
-
         binary = format(led_number-1, "#06b")
         array = list(binary)
 
