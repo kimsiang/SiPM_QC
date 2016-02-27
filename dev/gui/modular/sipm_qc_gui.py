@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
 import numpy as np
 from datetime import date, datetime, tzinfo, timedelta
+import time, sys, subprocess, os, threading, signal
 # print wx.__file__
 
 
@@ -61,35 +62,34 @@ class display_panel(wx.Panel):
         A, mu, sigma = p
         return A*np.exp(-(x-mu)**2/(2.*sigma**2))
 
-    def plot_waveform(self, _infile):
+    def plot_waveform(self, _filename):
+        self.axes1.clear()
+        infile = np.loadtxt(_filename )
 	plt.figure(1)
-        #_infile = np.loadtxt("./data/sipm_%d_%02d/sipm_%d_%d_full.txt" % (sipm_no,
-        #    test_no, sipm_no, led_no) )
-        plt.plot(_infile[:,0],_infile[:,1],'ro')
+        #plt.plot(data[:,0], data[:,1],'ro')
+        plt.plot(infile[:,0], infile[:,1])
         plt.title("SiPM traces")
         plt.ylabel("Amplitude [mV]")
         plt.xlabel("time [ns]")
         self.canvas1.draw()
 
-    def plot_amp_hist(self, _infile):
-        while True:
-            #_infile = open("./data/sipm_%d_%02d/sipm_%d_%d.txt" % (sipm_no,
-            #    test_no, sipm_no,
-            #    led_no), 'r+')
-            for line in _infile:
-                amount = float(line)
-                total += amount
+    def plot_amp_hist(self, _filename):
+        total = 0.0
+        length = 0
+        average = 0.0
+        while os.path.isfile(_filename):
+            infile = open(_filename, 'r+')
+            for line in infile:
+                total += float(line)
                 length = length + 1
             infile.close()
             if length == 500:
-              #  with open("./data/sipm_%d_%02d/sipm_%d_%d.txt" % (sipm_no,
-               #     test_no, sipm_no,
-               #     led_no), 'r+') as fileread:
-                  with open(_infile) as fileread:
-                    floats = map(float, fileread)
-            break
+                with open(_filename, 'r+') as data:
+                    floats = map(float, data)
+                break
         average = total / length
 #        print "LED #%d V_amp %.2f" % (led_no, average)
+        self.axes2.clear()
         plt.figure(2)
         plt.hist(floats,25)
         plt.title("Amplitude Histogram")
@@ -123,6 +123,9 @@ class control_panel(wx.Panel):
 
     def __init__(self, parent):
         wx.Panel.__init__(self, parent)
+
+        self._led_gauge_max = 18
+        self._volt_gauge_max = 18
 
         # a save button
         self.drs4_button = wx.Button(self, label="Run DRS4")
@@ -226,7 +229,8 @@ class control_panel(wx.Panel):
         self.led15 = wx.Button(self, label="LED15")
         self.led16 = wx.Button(self, label="LED16")
 
-	self.gauge = wx.Gauge(self, range=1000, size=(250, 25))
+	self.led_gauge = wx.Gauge(self, range=self._led_gauge_max, size=(250, 25), name='LED Scan Progress')
+	self.volt_gauge = wx.Gauge(self, range=self._led_gauge_max, size=(250, 25), name='Bias Scan Progress')
 
         ## implement the settings in 3 other functions
         self.set_properties()
@@ -434,8 +438,9 @@ class control_panel(wx.Panel):
         grid2.Add(self.led14, pos=(8, 1), flag=wx.TE_CENTER)
         grid2.Add(self.led15, pos=(8, 2), flag=wx.TE_CENTER)
         grid2.Add(self.led16, pos=(8, 3), flag=wx.TE_CENTER)
-        
-	grid2.Add(self.gauge, pos=(9, 0), span=(1, 4), flag=wx.EXPAND)
+
+	grid2.Add(self.led_gauge, pos=(9, 0), span=(1, 4), flag=wx.EXPAND)
+	grid2.Add(self.volt_gauge, pos=(10, 0), span=(1, 4), flag=wx.EXPAND)
         # end of grid2
 
         hSizer.Add(grid, 0, wx.ALL | wx.EXPAND | wx.CENTER, 10)

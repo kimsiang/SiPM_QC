@@ -5,15 +5,21 @@
 ## Import all needed libraries
 import wx
 import wx.lib.agw.flatnotebook as fnb
-from threading import Thread
-#from bk_precision import BKPrecision
-#from labjack import labjack
+from threading import Thread, Event
+from bk_precision import BKPrecision
+from labjack import labjack
 from sipm_qc_gui import control_panel, display_panel, eeprom_panel, logger_panel
 import time, sys, subprocess, os, threading, signal
 from datetime import date, datetime, tzinfo, timedelta
 import zmq
 from multiprocessing import Process
 import json
+
+def frange(start, stop, step):
+    i = start
+    while i < stop:
+        yield i
+        i += step
 
 ## Define the MainFrame
 class MainFrame (wx.Frame):
@@ -95,6 +101,7 @@ class NoteBook(MainFrame):
         Process(target=self.zmq_client, args=(server_push_port,)).start()
 
         # define private variabls for status checking
+        self.__is_taking_data=False
         self.__volt=0.0
         self.__curr=0.0
         self.__temp=0.0
@@ -103,11 +110,12 @@ class NoteBook(MainFrame):
         self.__led_no=0
         self.__seq_no=0
         self.__count=0
+        self.__type=''
         self.__sipm_status=False
         self.__bk_status=False
 
         # initialize all the environment and do the layout
-        #self.init_daq()
+        self.init_daq()
         self.init_thread()
         self.bind_bk()
         self.bind_led()
@@ -119,7 +127,6 @@ class NoteBook(MainFrame):
         # redo layout realign all the variables
         self.page1.Layout()
         ### end of __init__
-
 
     def init_daq(self):
         ## initialize BK precision
@@ -152,10 +159,14 @@ class NoteBook(MainFrame):
         self.read_led()
 
     def init_thread(self):
-        ## initialize threads for labjack and bk to refresh variables
+        ## initialize threads for labjack to refresh variables
         self.t1=Thread(target=self.refresh_lj)
-        self.t2=Thread(target=self.refresh_bk)
+        self.t1.daemon = True
         self.t1.start()
+
+        ## initialize threads for bk to refresh variables
+        self.t2=Thread(target=self.refresh_bk)
+        self.t2.daemon = True
         self.t2.start()
 
     def bind_bk(self):
@@ -205,12 +216,13 @@ class NoteBook(MainFrame):
         self.Bind(wx.EVT_BUTTON, self.update_serial, self.page1.lblname4s)
 
     def bind_drs4(self):
-        self.Bind(wx.EVT_BUTTON, self.run_drs4, self.page1.drs4_button)
+        self.Bind(wx.EVT_BUTTON, self.run_drs4_thread, self.page1.drs4_button)
+        self.Bind(wx.EVT_BUTTON, self.led_scan_thread, self.page1.led_scan_button)
+        self.Bind(wx.EVT_BUTTON, self.volt_scan_thread, self.page1.volt_scan_button)
 
     def do_logger_binding(self):
         # do all the logger bindings
         self.Bind(wx.EVT_BUTTON, self.on_click, self.page1.drs4_button)
-        self.Bind(wx.EVT_BUTTON, self.led_scan_thread, self.page1.led_scan_button)
 
         self.Bind(wx.EVT_SPINCTRLDOUBLE, self.on_spin, self.page1.lblname2w)
         self.Bind(wx.EVT_SPINCTRL, self.on_spin, self.page1.lblname3w)
@@ -313,7 +325,7 @@ class NoteBook(MainFrame):
 
     def init_drs4(self):
 
-        ## kill any instances of drs4_exam
+        ## kill any instances of drs4_exam and sipm_qc.py
         _proc = subprocess.Popen(['ps', '-A'], stdout=subprocess.PIPE, shell=True)
         (out, err) = _proc.communicate()
 
@@ -322,6 +334,10 @@ class NoteBook(MainFrame):
                 pid = int(line.split(None, 1)[0])
                 os.kill(pid, signal.SIGKILL)
                 self.page4.logger.AppendText('[{0}] # Killed running DRS4 \n'.format(self.get_time()))
+#            elif 'sipm_qc.py' in line:
+#                pid = int(line.split(None, 1)[0])
+#                os.kill(pid, signal.SIGKILL)
+#                self.page4.logger.AppendText('[{0}] # Killed running SiPM_QC \n'.format(self.get_time()))
 
         ## logging drs_exam output
         fw = open("tmpout", "wb")
@@ -346,12 +362,9 @@ class NoteBook(MainFrame):
         label = event.GetEventObject().GetLabelText()
         if label == 'Turn ON':
             self.bk.power_on()
-            self.page1.lblname1r.SetLabel('ON')
-            self.page1.lblname1s.SetLabel('Turn OFF')
         elif label == 'Turn OFF':
             self.bk.power_off()
-            self.page1.lblname1r.SetLabel('OFF')
-            self.page1.lblname1s.SetLabel('Turn ON')
+        self.read_bk_state()
         event.Skip()
 
     def read_bk_state(self):
@@ -414,11 +427,12 @@ class NoteBook(MainFrame):
 
     def refresh_bk(self):
         while True:
+            if not self.__is_taking_data:
+                print 'refresh_bk'
             wx.CallAfter(self.read_volt)
             wx.CallAfter(self.read_curr)
             wx.CallAfter(self.check_bk_status)
             time.sleep(10)
-
 
     #### define functions for Labjack
 
@@ -561,14 +575,16 @@ class NoteBook(MainFrame):
 
     def refresh_lj(self):
         while True:
-            wx.CallAfter(self.read_temp)
-            wx.CallAfter(self.read_pga)
-            wx.CallAfter(self.read_serial)
-            wx.CallAfter(self.read_led)
-            wx.CallAfter(self.check_sipm_status)
-            wx.CallAfter(self.page1.Layout)
-            time.sleep(2)
-	    #print 'V={0}, I={1}, T={2}, G={3}, SN={4}, STAT={5}'.format(self.__volt, self.__curr, self.__temp, self.__gain, self.__serial, self.__sipm_status)
+            if not self.__is_taking_data:
+                print 'refresh_lj'
+                wx.CallAfter(self.read_temp)
+                wx.CallAfter(self.read_pga)
+                wx.CallAfter(self.read_serial)
+                wx.CallAfter(self.read_led)
+                wx.CallAfter(self.check_sipm_status)
+                wx.CallAfter(self.page1.Layout)
+                time.sleep(2)
+	#print 'V={0}, I={1}, T={2}, G={3}, SN={4}, STAT={5}'.format(self.__volt, self.__curr, self.__temp, self.__gain, self.__serial, self.__sipm_status)
 
     ## LED Board
     def update_led(self, event):
@@ -583,31 +599,92 @@ class NoteBook(MainFrame):
 
     def read_led(self):
         self.__led_no = self.lj.read_led()
-        self.page1.lblname7r.SetLabel(str(self.__led_no))
+        wx.CallAfter(self.page1.lblname7r.SetLabel,str(self.__led_no))
 
-    def run_drs4(self, event):
-        self.drs4_proc.stdin.write('{0:04d} {1} {2:02d} {3:05d}\n'.format(self.__serial,'led',self.__led_no,self.__seq_no))
-        self.__seq_no  += 1
-        self.dump_log()
+    def run_drs4(self):
+#        self.__is_taking_data=True
+        self.incre_seq_no()
+	self.__type = 'test'
+        wx.CallAfter(self.read_led)
+        wx.CallAfter(self.drs4_proc.stdin.write,'{0:04d} {1} {2:02d} {3:05d}\n'.format(self.__serial,'test',self.__led_no,self.__seq_no))
+        wx.CallAfter(self.dump_log)
+        wx.CallAfter(self.page4.logger.AppendText,'[{0}][Seq:{1}] Flasing LED# {2} \n'.format(self.get_time(),self.__seq_no, self.__led_no))
+        time.sleep(2.5)
+        wx.CallAfter(self.page1.led_gauge.SetValue,18)
+        self.update_plot()
+#        self.__is_taking_data=False
 
     def led_scan(self):
-	for _led_no in range (1, 1000):
-		#self.lj.set_led(_led_no)
-		#self.read_led()
-		#run_drs4(self)
-		time.sleep(0.2)
-                self.page4.logger.AppendText('[{0}] Flasing LED# {1} \n'.format(self.get_time(), self.__led_no))
-	        self.__count += 1
-                self.page1.gauge.SetValue(self.__count)
+	self.__type = 'led'
+ #       self.__is_taking_data=True
+	for _led_no in range (1, 17):
+            self.incre_seq_no()
+            wx.CallAfter(self.lj.set_led,_led_no)
+	    wx.CallAfter(self.read_led)
+            wx.CallAfter(self.drs4_proc.stdin.write,'{0:04d} {1} {2:02d} {3:05d}\n'.format(self.__serial,'led',self.__led_no,self.__seq_no))
+            wx.CallAfter(self.dump_log)
+            wx.CallAfter(self.page4.logger.AppendText,'[{0}][Seq:{1}] Flasing LED# {2} \n'.format(self.get_time(),self.__seq_no, _led_no))
+            time.sleep(2.5)
+            wx.CallAfter(self.page1.led_gauge.SetValue,_led_no)
+  #          self.update_plot_thread()
+  #      self.__is_taking_data=False
+
+    def volt_scan(self):
+        self.__count = 0
+	self.__type = 'volt'
+  #      self.__is_taking_data=True
+	for _volt in frange (65.0, 69.5, 0.25):
+            self.incre_seq_no()
+            wx.CallAfter(self.bk.set_volt,_volt)
+            wx.CallAfter(self.drs4_proc.stdin.write,'{0:04d} {1} {2:02d} {3:05d}\n'.format(self.__serial,'volt', self.__count, self.__seq_no))
+            wx.CallAfter(self.dump_log)
+            wx.CallAfter(self.page4.logger.AppendText,'[{0}][Seq:{1}] Running Volt {2}\n'.format(self.get_time(), self.__seq_no, _volt))
+            time.sleep(2.5)
+	    self.__count += 1
+            wx.CallAfter(self.page1.led_gauge.SetValue,self.__count)
+    #        self.update_plot_thread()
+   #     self.__is_taking_data=False
+
+    def incre_seq_no(self):
+        self.__seq_no += 1
+
+    def run_drs4_thread(self, event):
+        _t=Thread(target=self.run_drs4)
+        _t.daemon = True
+        _t.start()
+        event.Skip()
 
     def led_scan_thread(self, event):
-        ## initialize threads for labjack and bk to refresh variables
-        self.t3=Thread(target=self.led_scan)
-        self.t3.start()
-    
+        _t=Thread(target=self.led_scan)
+        _t.daemon = True
+        _t.start()
+        event.Skip()
+
+    def volt_scan_thread(self, event):
+        _t=Thread(target=self.volt_scan)
+        _t.daemon = True
+        _t.start()
+        event.Skip()
+
+    def update_plot_thread(self):
+        _t=Thread(target=self.update_plot)
+        _t.daemon = True
+        _t.start()
+
     ## functions for Notebook
     def get_time(self):
         return datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S')
+
+    def update_plot(self):
+        print 'call plot'
+        with open('./data/log/{0:05d}.txt'.format(self.__seq_no),'r') as f:
+            data = json.load(f)
+        #time.sleep(1)
+        print data
+        self.page4.logger.AppendText('[{0}] Plotting SiPM#: {1} LED#: {2} Seq#: {3}!\n'.format(self.get_time(), data["Serial_No"], data["Led_No"], data["Sequence_No"]))
+        self.page2.plot_waveform,'./data/sipm_{0:04d}/sipm_{0:04d}_{1}_{2:02d}_{3:05d}_full.txt'.format(data["Serial_No"], data["Type"], data["Led_No"], data["Sequence_No"])
+        self.page2.plot_amp_hist,'./data/sipm_{0:04d}/sipm_{0:04d}_{1}_{2:02d}_{3:05d}.txt'.format(data["Serial_No"],data["Type"],data["Led_No"],data["Sequence_No"])
+
 
     def dump_log(self):
 
@@ -619,15 +696,17 @@ class NoteBook(MainFrame):
            'Gain': self.__gain,
            'Serial_No': self.__serial,
            'Led_No': self.__led_no,
+           'Type': self.__type,
            'Sequence_No': self.__seq_no
         }
 
-        json_outfile = open('./data/log/{0:04d}.txt'.format(self.__seq_no), 'w')
+        json_outfile = open('./data/log/{0:05d}.txt'.format(self.__seq_no), 'w')
         json.dump(_log_dict, json_outfile, indent=4, sort_keys=True)
 
 
     def on_close(self, event):
         self.Close()
+        self.Destroy()
 
     def zmq_client(self, port_push):
         context = zmq.Context()
