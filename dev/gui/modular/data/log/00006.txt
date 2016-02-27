@@ -1,0 +1,11 @@
+{
+    "Current": 0.0, 
+    "Datetime": "2016-02-26 19:17:05", 
+    "Gain": 10.0, 
+    "Sequence_No": 6, 
+    "Serial_No": 7, 
+    "Subrun_No": 4, 
+    "Temperature": 32.06, 
+    "Type": "led", 
+    "Voltage": 69.003
+}

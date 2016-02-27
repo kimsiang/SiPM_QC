@@ -108,6 +108,7 @@ class NoteBook(MainFrame):
         self.__gain=0.0
         self.__serial=0
         self.__led_no=0
+        self.__subrun_no=0
         self.__seq_no=0
         self.__count=0
         self.__type=''
@@ -216,9 +217,12 @@ class NoteBook(MainFrame):
         self.Bind(wx.EVT_BUTTON, self.update_serial, self.page1.lblname4s)
 
     def bind_drs4(self):
-        self.Bind(wx.EVT_BUTTON, self.run_drs4_thread, self.page1.drs4_button)
-        self.Bind(wx.EVT_BUTTON, self.led_scan_thread, self.page1.led_scan_button)
-        self.Bind(wx.EVT_BUTTON, self.volt_scan_thread, self.page1.volt_scan_button)
+        #self.Bind(wx.EVT_BUTTON, self.run_drs4_thread, self.page1.drs4_button)
+        #self.Bind(wx.EVT_BUTTON, self.led_scan_thread, self.page1.led_scan_button)
+        #self.Bind(wx.EVT_BUTTON, self.volt_scan_thread, self.page1.volt_scan_button)
+        self.Bind(wx.EVT_BUTTON, self.run_drs4, self.page1.drs4_button)
+        self.Bind(wx.EVT_BUTTON, self.led_scan, self.page1.led_scan_button)
+        self.Bind(wx.EVT_BUTTON, self.volt_scan, self.page1.volt_scan_button)
 
     def do_logger_binding(self):
         # do all the logger bindings
@@ -334,18 +338,33 @@ class NoteBook(MainFrame):
                 pid = int(line.split(None, 1)[0])
                 os.kill(pid, signal.SIGKILL)
                 self.page4.logger.AppendText('[{0}] # Killed running DRS4 \n'.format(self.get_time()))
-#            elif 'sipm_qc.py' in line:
-#                pid = int(line.split(None, 1)[0])
-#                os.kill(pid, signal.SIGKILL)
-#                self.page4.logger.AppendText('[{0}] # Killed running SiPM_QC \n'.format(self.get_time()))
 
         ## logging drs_exam output
         fw = open("tmpout", "wb")
-        fr = open("tmpout", "r")
+#        fr = open("tmpout", "r")
         self.drs4_proc = subprocess.Popen("/home/midas/KimWork/drs-5.0.3/drs_exam",
-            stdin=subprocess.PIPE, stderr=fw,stdout=fw, bufsize=1)
+            stdin=subprocess.PIPE, stderr=fw, stdout=subprocess.PIPE)
+        for line in iter(self.drs4_proc.stdout.readline, b''):
+#            print(">>> " + line.rstrip())
+            if 'Invalid magic number' in line:
+                print 'Invalid Magic number! Please replug DRS4 USB Cable!'
+            elif 'Could not set frequency' in line:
+                print 'Could not set frequency for DRS4! Please replug DRS4 USB Cable!'
+            elif 'Please begin the measurement' in line:
+                self.drs4_proc.stdin.write('begin\n')
+                return True
+
+        print self.drs4_read()
+
         if self.drs4_proc:
             self.page4.logger.AppendText('[{0}] # DRS4 initialized\n'.format(self.get_time()))
+
+
+    def drs4_ready(self):
+        for line in iter(self.drs4_proc.stdout.readline, b''):
+            if 'Please enter the SiPM#' in line:
+                print 'Please enter the SiPM#'
+                return 'True'
 
     #### define functions for BK Precision
     def bk_on(self, event):
@@ -599,54 +618,63 @@ class NoteBook(MainFrame):
 
     def read_led(self):
         self.__led_no = self.lj.read_led()
-        wx.CallAfter(self.page1.lblname7r.SetLabel,str(self.__led_no))
+        self.__subrun_no = self.__led_no
+        self.page1.lblname7r.SetLabel(str(self.__led_no))
 
-    def run_drs4(self):
-#        self.__is_taking_data=True
-        self.incre_seq_no()
-	self.__type = 'test'
-        wx.CallAfter(self.read_led)
-        wx.CallAfter(self.drs4_proc.stdin.write,'{0:04d} {1} {2:02d} {3:05d}\n'.format(self.__serial,'test',self.__led_no,self.__seq_no))
-        wx.CallAfter(self.dump_log)
-        wx.CallAfter(self.page4.logger.AppendText,'[{0}][Seq:{1}] Flasing LED# {2} \n'.format(self.get_time(),self.__seq_no, self.__led_no))
-        time.sleep(2.5)
-        wx.CallAfter(self.page1.led_gauge.SetValue,18)
-        self.update_plot()
-#        self.__is_taking_data=False
-
-    def led_scan(self):
-	self.__type = 'led'
- #       self.__is_taking_data=True
-	for _led_no in range (1, 17):
-            self.incre_seq_no()
-            wx.CallAfter(self.lj.set_led,_led_no)
-	    wx.CallAfter(self.read_led)
-            wx.CallAfter(self.drs4_proc.stdin.write,'{0:04d} {1} {2:02d} {3:05d}\n'.format(self.__serial,'led',self.__led_no,self.__seq_no))
-            wx.CallAfter(self.dump_log)
-            wx.CallAfter(self.page4.logger.AppendText,'[{0}][Seq:{1}] Flasing LED# {2} \n'.format(self.get_time(),self.__seq_no, _led_no))
-            time.sleep(2.5)
-            wx.CallAfter(self.page1.led_gauge.SetValue,_led_no)
-  #          self.update_plot_thread()
-  #      self.__is_taking_data=False
-
-    def volt_scan(self):
-        self.__count = 0
-	self.__type = 'volt'
-  #      self.__is_taking_data=True
-	for _volt in frange (65.0, 69.5, 0.25):
-            self.incre_seq_no()
-            wx.CallAfter(self.bk.set_volt,_volt)
-            wx.CallAfter(self.drs4_proc.stdin.write,'{0:04d} {1} {2:02d} {3:05d}\n'.format(self.__serial,'volt', self.__count, self.__seq_no))
-            wx.CallAfter(self.dump_log)
-            wx.CallAfter(self.page4.logger.AppendText,'[{0}][Seq:{1}] Running Volt {2}\n'.format(self.get_time(), self.__seq_no, _volt))
-            time.sleep(2.5)
-	    self.__count += 1
-            wx.CallAfter(self.page1.led_gauge.SetValue,self.__count)
-    #        self.update_plot_thread()
-   #     self.__is_taking_data=False
-
-    def incre_seq_no(self):
+    def run_drs4(self, event):
+        self.__is_taking_data=True
         self.__seq_no += 1
+        self.__type = 'test'
+        self.read_led()
+        self.drs4_proc.stdin.write('{0:04d} {1} {2:02d} {3:05d}\n'.format(self.__serial,'test',self.__led_no,self.__seq_no))
+        self.dump_log()
+        self.page4.logger.AppendText('[{0}][Seq:{1}] Flasing LED# {2} \n'.format(self.get_time(),self.__seq_no, self.__led_no))
+        time.sleep(2.5)
+        self.page1.led_gauge.SetValue(18)
+        self.update_plot(self.__seq_no)
+        self.__is_taking_data=False
+
+    def led_scan(self, event):
+	self.__type = 'led'
+        self.__is_taking_data=True
+        for _led_no in range (1, 17):
+            self.__seq_no += 1
+            self.lj.set_led(_led_no)
+	    self.read_led()
+            while True:
+                if self.drs4_ready():
+                    break
+            print 'Start Scanning'
+            self.drs4_proc.stdin.write('{0:04d} {1} {2:02d} {3:05d}\n'.format(self.__serial,'led',_led_no, self.__seq_no))
+            self.dump_log()
+            self.page4.logger.AppendText('[{0}][Seq:{1}] Flasing LED# {2}\n'.format(self.get_time(), self.__seq_no , _led_no))
+            print 'Wait 2.5s'
+            time.sleep(2.5)
+            print 'Finish wait 2.5s'
+            self.page1.led_gauge.SetValue(_led_no)
+            self.update_plot(self.__seq_no)
+        self.__is_taking_data=False
+
+    def volt_scan(self, event):
+        self.__count = 1
+	self.__type = 'volt'
+        self.__is_taking_data=True
+	for _volt in frange (65.0, 69.5, 0.25):
+            self.__seq_no += 1
+            self.bk.set_volt(_volt)
+            while True:
+                if self.drs4_ready():
+                    break
+            print 'Start Scanning'
+            self.drs4_proc.stdin.write('{0:04d} {1} {2:02d} {3:05d}\n'.format(self.__serial,'volt', self.__count, self.__seq_no))
+            self.__subrun_no = self.__count
+            self.dump_log()
+            self.page4.logger.AppendText('[{0}][Seq:{1}] Running Volt {2}\n'.format(self.get_time(), self.__seq_no, _volt))
+            time.sleep(2.5)
+            self.page1.led_gauge.SetValue(self.__count)
+            self.update_plot(self.__seq_no)
+	    self.__count += 1
+        self.__is_taking_data=False
 
     def run_drs4_thread(self, event):
         _t=Thread(target=self.run_drs4)
@@ -666,8 +694,8 @@ class NoteBook(MainFrame):
         _t.start()
         event.Skip()
 
-    def update_plot_thread(self):
-        _t=Thread(target=self.update_plot)
+    def update_plot_thread(self, seq_no):
+        _t=Thread(target=self.update_plot, args=(seq_no,))
         _t.daemon = True
         _t.start()
 
@@ -675,15 +703,13 @@ class NoteBook(MainFrame):
     def get_time(self):
         return datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S')
 
-    def update_plot(self):
-        print 'call plot'
-        with open('./data/log/{0:05d}.txt'.format(self.__seq_no),'r') as f:
+    def update_plot(self, seq_no):
+        with open('./data/log/{0:05d}.txt'.format(seq_no),'r') as f:
             data = json.load(f)
-        #time.sleep(1)
-        print data
-        self.page4.logger.AppendText('[{0}] Plotting SiPM#: {1} LED#: {2} Seq#: {3}!\n'.format(self.get_time(), data["Serial_No"], data["Led_No"], data["Sequence_No"]))
-        self.page2.plot_waveform,'./data/sipm_{0:04d}/sipm_{0:04d}_{1}_{2:02d}_{3:05d}_full.txt'.format(data["Serial_No"], data["Type"], data["Led_No"], data["Sequence_No"])
-        self.page2.plot_amp_hist,'./data/sipm_{0:04d}/sipm_{0:04d}_{1}_{2:02d}_{3:05d}.txt'.format(data["Serial_No"],data["Type"],data["Led_No"],data["Sequence_No"])
+        self.page4.logger.AppendText('[{0}] Plotting SiPM#: {1} LED#: {2} Seq#: {3}!\n'.format(self.get_time(), data["Serial_No"], data["Subrun_No"], data["Sequence_No"]))
+        self.page2.plot_waveform('./data/sipm_{0:04d}/sipm_{0:04d}_{1}_{2:02d}_{3:05d}_full.txt'.format(data["Serial_No"],
+            data["Type"], data["Subrun_No"], data["Sequence_No"]))
+        self.page2.plot_amp_hist('./data/sipm_{0:04d}/sipm_{0:04d}_{1}_{2:02d}_{3:05d}.txt'.format(data["Serial_No"],data["Type"],data["Subrun_No"],data["Sequence_No"]))
 
 
     def dump_log(self):
@@ -695,7 +721,7 @@ class NoteBook(MainFrame):
            'Current': self.__curr,
            'Gain': self.__gain,
            'Serial_No': self.__serial,
-           'Led_No': self.__led_no,
+           'Subrun_No': self.__subrun_no,
            'Type': self.__type,
            'Sequence_No': self.__seq_no
         }

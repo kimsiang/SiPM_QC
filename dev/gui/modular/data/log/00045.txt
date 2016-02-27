@@ -1,0 +1,11 @@
+{
+    "Current": 0.0, 
+    "Datetime": "2016-02-26 19:28:37", 
+    "Gain": 10.0, 
+    "Sequence_No": 45, 
+    "Serial_No": 7, 
+    "Subrun_No": 9, 
+    "Temperature": 30.88, 
+    "Type": "volt", 
+    "Voltage": 67.5015
+}

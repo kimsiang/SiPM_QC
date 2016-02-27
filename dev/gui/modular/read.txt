@@ -1,0 +1,3 @@
+http://eli.thegreenplace.net/2011/12/27/python-threads-communication-and-stopping
+https://pymotw.com/2/threading/
+http://stackoverflow.com/questions/8103847/pausing-two-python-threads-while-a-third-one-does-stuff-with-locks

@@ -5,10 +5,14 @@ from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg as FigureCanvas
 import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
 import numpy as np
+from scipy.optimize import curve_fit
 from datetime import date, datetime, tzinfo, timedelta
 import time, sys, subprocess, os, threading, signal
 # print wx.__file__
 
+def gauss(x, *p):
+    A, mu, sigma = p
+    return A*np.exp(-(x-mu)**2/(2.*sigma**2))
 
 ## Define logger panel here
 class logger_panel(wx.Panel):
@@ -58,10 +62,6 @@ class display_panel(wx.Panel):
         mainSizer.Add(hSizer, 0, wx.ALL, 5)
         self.SetSizerAndFit(mainSizer)
 
-    def gauss(x, *p):
-        A, mu, sigma = p
-        return A*np.exp(-(x-mu)**2/(2.*sigma**2))
-
     def plot_waveform(self, _filename):
         self.axes1.clear()
         infile = np.loadtxt(_filename )
@@ -76,7 +76,7 @@ class display_panel(wx.Panel):
     def plot_amp_hist(self, _filename):
         total = 0.0
         length = 0
-        average = 0.0
+        self.average = 0.0
         while os.path.isfile(_filename):
             infile = open(_filename, 'r+')
             for line in infile:
@@ -87,15 +87,16 @@ class display_panel(wx.Panel):
                 with open(_filename, 'r+') as data:
                     floats = map(float, data)
                 break
-        average = total / length
+        self.average = total / length
 #        print "LED #%d V_amp %.2f" % (led_no, average)
         self.axes2.clear()
         plt.figure(2)
-        plt.hist(floats,25)
+        plt.hist(floats,50)
         plt.title("Amplitude Histogram")
         plt.xlabel("Amplitude [mV]")
         plt.ylabel("Frequency")
         self.canvas2.draw()
+        self.fit_gaussian(floats)
 
     def plot_led_scan(self):
 	pass
@@ -103,17 +104,18 @@ class display_panel(wx.Panel):
     def plot_volt_scan(self):
 	pass
 
-    def fit_gaussian(self, floats):
-	n, bins, patches = plt.hist(floats,25)
+    def fit_gaussian(self, _floats):
+	n, bins, patches = plt.hist(_floats, 50)
         bin_centres = (bins[:-1] + bins[1:])/2
         # p0 is the initial guess for the fitting coefficients (A, mu and sigma# above)
-        coeff, var_matrix = curve_fit(gauss, bin_centres, n, p0=[100.,average,5.])
+        coeff, var_matrix = curve_fit(gauss, bin_centres, n,
+                p0=[100.,self.average,0.05*self.average])
         hist_fit = gauss(bin_centres, *coeff)
         plt.plot(bin_centres, hist_fit, label='Fitted data', linewidth=2)
         print 'Fitted mean = ', coeff[1]
         print 'Fitted standard deviation = ', coeff[2]
-        fdata = open("vbd.txt", "a+")
-        print >> fdata, float(bk.meas_volt()), ' ', coeff[1], ' ', coeff[2]
+#        fdata = open("vbd.txt", "a+")
+#        print >> fdata, float(bk.meas_volt()), ' ', coeff[1], ' ', coeff[2]
 
     def __del__(self):
         pass
