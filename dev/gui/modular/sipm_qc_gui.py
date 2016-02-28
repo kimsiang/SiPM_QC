@@ -127,7 +127,7 @@ class control_panel(wx.Panel):
         wx.Panel.__init__(self, parent)
 
         self._led_gauge_max = 18
-        self._volt_gauge_max = 18
+        self._volt_gauge_max = 1000
 
         # a save button
         self.drs4_button = wx.Button(self, label="Run DRS4")
@@ -197,23 +197,15 @@ class control_panel(wx.Panel):
 
         # end of grid1
 
-        # bk precision PS Label
-        self.quote4 = wx.StaticText(self, label="BK Precision")
-
-        self.button1 = wx.Button(self, label="OFF")
-        self.button2 = wx.Button(self, label="ON")
-        self.button3 = wx.Button(self, label="Update")
-        self.button4 = wx.Button(self, label="OFF")
-
         # sipm Board Label
-        self.quote5 = wx.StaticText(self, label="SiPM Board")
-        self.button5 = wx.Button(self, label="Gain10")
-        self.button6 = wx.Button(self, label="Gain16")
-        self.button7 = wx.Button(self, label="Gain20")
-        self.button8 = wx.Button(self, label="Gain26")
+        self.quote4 = wx.StaticText(self, label="SiPM Board")
+        self.button1 = wx.Button(self, label="Gain10")
+        self.button2 = wx.Button(self, label="Gain16")
+        self.button3 = wx.Button(self, label="Gain20")
+        self.button4 = wx.Button(self, label="Gain26")
 
         # led Board Label
-        self.quote6 = wx.StaticText(self, label="LED Board")
+        self.quote5 = wx.StaticText(self, label="LED Board")
         self.led1 = wx.Button(self, label="LED1")
         self.led2 = wx.Button(self, label="LED2")
         self.led3 = wx.Button(self, label="LED3")
@@ -231,6 +223,14 @@ class control_panel(wx.Panel):
         self.led15 = wx.Button(self, label="LED15")
         self.led16 = wx.Button(self, label="LED16")
 
+        # drs4 board label
+        self.quote6 = wx.StaticText(self, label="DRS 4 Board")
+
+        self.button5 = wx.Button(self, label="Single")
+        self.button6 = wx.Button(self, label="LED Scan")
+        self.button7 = wx.Button(self, label="Bias Scan")
+        self.button8 = wx.Button(self, label="LED Scan")
+        self.button9 = wx.Button(self, label="Bias Scan")
 	self.led_gauge = wx.Gauge(self, range=self._led_gauge_max, size=(250, 25), name='LED Scan Progress')
 	self.volt_gauge = wx.Gauge(self, range=self._led_gauge_max, size=(250, 25), name='Bias Scan Progress')
 
@@ -314,11 +314,6 @@ class control_panel(wx.Panel):
         self.button3.SetFont(_font)
         self.button4.SetFont(_font)
 
-        self.button5.SetFont(_font)
-        self.button6.SetFont(_font)
-        self.button7.SetFont(_font)
-        self.button8.SetFont(_font)
-
         self.led1.SetFont(_font)
         self.led2.SetFont(_font)
         self.led3.SetFont(_font)
@@ -338,6 +333,11 @@ class control_panel(wx.Panel):
         self.led14.SetFont(_font)
         self.led15.SetFont(_font)
         self.led16.SetFont(_font)
+
+        self.button5.SetFont(_font)
+        self.button6.SetFont(_font)
+        self.button7.SetFont(_font)
+        self.button8.SetFont(_font)
 
     def do_layout(self):
 
@@ -415,13 +415,6 @@ class control_panel(wx.Panel):
         grid2.Add(self.button3, pos=(1, 2), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
         grid2.Add(self.button4, pos=(1, 3), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
 
-        grid2.Add(self.quote5, pos=(2, 1), span=(1, 2), flag=wx.TE_CENTER)
-
-        grid2.Add(self.button5, pos=(3, 0), flag=wx.TE_CENTER)
-        grid2.Add(self.button6, pos=(3, 1), flag=wx.TE_CENTER)
-        grid2.Add(self.button7, pos=(3, 2), flag=wx.TE_CENTER)
-        grid2.Add(self.button8, pos=(3, 3), flag=wx.TE_CENTER)
-
         grid2.Add(self.quote6, pos=(4, 1), span=(1, 2), flag=wx.TE_CENTER)
 
         grid2.Add(self.led1, pos=(5, 0), flag=wx.TE_CENTER)
@@ -440,6 +433,13 @@ class control_panel(wx.Panel):
         grid2.Add(self.led14, pos=(8, 1), flag=wx.TE_CENTER)
         grid2.Add(self.led15, pos=(8, 2), flag=wx.TE_CENTER)
         grid2.Add(self.led16, pos=(8, 3), flag=wx.TE_CENTER)
+
+        grid2.Add(self.quote5, pos=(2, 1), span=(1, 2), flag=wx.TE_CENTER)
+
+        grid2.Add(self.button5, pos=(3, 0), flag=wx.TE_CENTER)
+        grid2.Add(self.button6, pos=(3, 1), flag=wx.TE_CENTER)
+        grid2.Add(self.button7, pos=(3, 2), flag=wx.TE_CENTER)
+        grid2.Add(self.button8, pos=(3, 3), flag=wx.TE_CENTER)
 
 	grid2.Add(self.led_gauge, pos=(9, 0), span=(1, 4), flag=wx.EXPAND)
 	grid2.Add(self.volt_gauge, pos=(10, 0), span=(1, 4), flag=wx.EXPAND)

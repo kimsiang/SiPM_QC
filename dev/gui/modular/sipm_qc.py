@@ -659,7 +659,7 @@ class NoteBook(MainFrame):
         self.__count = 1
 	self.__type = 'volt'
         self.__is_taking_data=True
-	for _volt in frange (65.0, 69.5, 0.25):
+	for _volt in frange (65.0, 69.5, 0.05):
             self.__seq_no += 1
             self.bk.set_volt(_volt)
             while True:
@@ -671,10 +671,11 @@ class NoteBook(MainFrame):
             self.dump_log()
             self.page4.logger.AppendText('[{0}][Seq:{1}] Running Volt {2}\n'.format(self.get_time(), self.__seq_no, _volt))
             time.sleep(2.5)
-            self.page1.led_gauge.SetValue(self.__count)
+            self.page1.volt_gauge.SetValue(self.__count)
             self.update_plot(self.__seq_no)
 	    self.__count += 1
         self.__is_taking_data=False
+        self.bk.power_off()
 
     def run_drs4_thread(self, event):
         _t=Thread(target=self.run_drs4)
