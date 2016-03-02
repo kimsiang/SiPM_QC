@@ -4,10 +4,14 @@ matplotlib.use('WxAgg')
 from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg as FigureCanvas
 import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
+from matplotlib.dates import strpdate2num
+import matplotlib.dates as mdates
 import numpy as np
 from scipy.optimize import curve_fit
+from Gnuplot import Gnuplot
 from datetime import date, datetime, tzinfo, timedelta
 import time, sys, subprocess, os, threading, signal
+from threading import Thread, Event
 # print wx.__file__
 
 def gauss(x, *p):
@@ -20,11 +24,11 @@ class logger_panel(wx.Panel):
         wx.Panel.__init__(self, parent)
 
         sizer = wx.BoxSizer()
-        self.SetBackgroundColour("Silver")
+        self.SetBackgroundColour("Light Grey")
 
         # a multiline TextCtrl for logging purpose
         self.logger = wx.TextCtrl(
-                self, size=(400, 700), style=wx.TE_MULTILINE | wx.TE_READONLY | wx.TE_RICH2 | wx.BORDER_SUNKEN)
+                self, size=(500, 1000), style=wx.TE_MULTILINE | wx.TE_READONLY | wx.TE_RICH2 | wx.BORDER_SUNKEN)
 
         # set the properties of the items created
         self.logger.SetBackgroundColour("Black")
@@ -41,81 +45,89 @@ class display_panel(wx.Panel):
 
     def __init__(self, parent):
         wx.Panel.__init__(self, parent)
-        self.SetBackgroundColour("Silver")
+        self.SetBackgroundColour("Light Grey")
 
         # create some sizers
         mainSizer = wx.BoxSizer(wx.VERTICAL)
-        hSizer = wx.BoxSizer(wx.HORIZONTAL)
+        hSizer1 = wx.BoxSizer(wx.HORIZONTAL)
+        hSizer2 = wx.BoxSizer(wx.HORIZONTAL)
 
         # add figure
-        self.figure1 = plt.figure(1, dpi=60)
-        self.axes1 = self.figure1.add_subplot(111)
-        self.canvas1 = FigureCanvas(self, -1, self.figure1)
-        self.figure2 = plt.figure(2, dpi=60)
-        self.axes2 = self.figure2.add_subplot(111)
-        self.canvas2 = FigureCanvas(self, -1, self.figure2)
+        self.figure3 = plt.figure(3, dpi=60)
+        self.figure4 = plt.figure(4, dpi=60)
+        self.figure5 = plt.figure(5, dpi=60)
+        self.figure6 = plt.figure(6, dpi=60)
 
-        hSizer.Add(self.canvas1, 0, wx.EXPAND, 5)
-        hSizer.AddSpacer(10)
-        hSizer.Add(self.canvas2, 0, wx.EXPAND, 5)
+        self.axes3 = self.figure3.add_subplot(111)
+        self.axes4 = self.figure4.add_subplot(111)
+        self.axes5 = self.figure5.add_subplot(111)
+        self.axes6 = self.figure6.add_subplot(111)
 
-        mainSizer.Add(hSizer, 0, wx.ALL, 5)
+        self.canvas3 = FigureCanvas(self, -1, self.figure3)
+        self.canvas4 = FigureCanvas(self, -1, self.figure4)
+        self.canvas5 = FigureCanvas(self, -1, self.figure5)
+        self.canvas6 = FigureCanvas(self, -1, self.figure6)
+
+        hSizer1.Add(self.canvas3, 0, wx.EXPAND, 5)
+        hSizer1.AddSpacer(10)
+        hSizer1.Add(self.canvas4, 0, wx.EXPAND, 5)
+
+        hSizer2.Add(self.canvas5, 0, wx.EXPAND, 5)
+        hSizer2.AddSpacer(10)
+        hSizer2.Add(self.canvas6, 0, wx.EXPAND, 5)
+
+        mainSizer.Add(hSizer1, 0, wx.ALL, 5)
+        mainSizer.Add(hSizer2, 0, wx.ALL, 5)
         self.SetSizerAndFit(mainSizer)
 
-    def plot_waveform(self, _filename):
-        self.axes1.clear()
-        infile = np.loadtxt(_filename )
-	plt.figure(1)
-        #plt.plot(data[:,0], data[:,1],'ro')
-        plt.plot(infile[:,0], infile[:,1])
-        plt.title("SiPM traces")
-        plt.ylabel("Amplitude [mV]")
-        plt.xlabel("time [ns]")
-        self.canvas1.draw()
+    def plot_temp(self, _filename):
 
-    def plot_amp_hist(self, _filename):
-        total = 0.0
-        length = 0
-        self.average = 0.0
-        while os.path.isfile(_filename):
-            infile = open(_filename, 'r+')
-            for line in infile:
-                total += float(line)
-                length = length + 1
-            infile.close()
-            if length == 500:
-                with open(_filename, 'r+') as data:
-                    floats = map(float, data)
-                break
-        self.average = total / length
-#        print "LED #%d V_amp %.2f" % (led_no, average)
-        self.axes2.clear()
-        plt.figure(2)
-        plt.hist(floats,50)
-        plt.title("Amplitude Histogram")
-        plt.xlabel("Amplitude [mV]")
-        plt.ylabel("Frequency")
-        self.canvas2.draw()
-        self.fit_gaussian(floats)
+        time, temp, volt, curr, gain = np.loadtxt(_filename, usecols= (1,2,3,4,5), converters={1:
+        strpdate2num('%H:%M:%S')}, unpack=True)
 
-    def plot_led_scan(self):
-	pass
+        self.axes3.clear()
+        plt.figure(3)
+        plt.plot(time[-1000:], temp[-1000:], lw=2)
+        plt.title("Temperature")
+        plt.ylabel("T [C]")
+        plt.xlabel("time [hh:mm]")
+        xfmt = mdates.DateFormatter('%H:%M')
+        self.axes3.xaxis.set_major_formatter(xfmt)
+        self.axes3.grid(True, linewidth=1)
+        self.canvas3.draw()
 
-    def plot_volt_scan(self):
-	pass
+        self.axes4.clear()
+        plt.figure(4)
+        plt.plot(time[-1000:], gain[-1000:], lw=2)
+        plt.title("Gain")
+        plt.ylabel("G [dB]")
+        plt.xlabel("time [hh:mm]")
+        plt.grid(True)
+        self.axes4.xaxis.set_major_formatter(xfmt)
+        self.axes4.grid(True, linewidth=1)
+        self.canvas4.draw()
 
-    def fit_gaussian(self, _floats):
-	n, bins, patches = plt.hist(_floats, 50)
-        bin_centres = (bins[:-1] + bins[1:])/2
-        # p0 is the initial guess for the fitting coefficients (A, mu and sigma# above)
-        coeff, var_matrix = curve_fit(gauss, bin_centres, n,
-                p0=[100.,self.average,0.05*self.average])
-        hist_fit = gauss(bin_centres, *coeff)
-        plt.plot(bin_centres, hist_fit, label='Fitted data', linewidth=2)
-        print 'Fitted mean = ', coeff[1]
-        print 'Fitted standard deviation = ', coeff[2]
-#        fdata = open("vbd.txt", "a+")
-#        print >> fdata, float(bk.meas_volt()), ' ', coeff[1], ' ', coeff[2]
+        self.axes5.clear()
+        plt.figure(5)
+        plt.plot(time[-1000:], volt[-1000:], lw=2)
+        plt.title("Volt")
+        plt.ylabel("V [V]")
+        plt.xlabel("time [hh:mm]")
+        plt.grid(True)
+        self.axes5.xaxis.set_major_formatter(xfmt)
+        self.axes5.grid(True, linewidth=1)
+        self.canvas5.draw()
+
+        self.axes6.clear()
+        plt.figure(6)
+        plt.plot(time[-1000:], curr[-1000:], lw=2)
+        plt.title("Current")
+        plt.ylabel("I [mA]")
+        plt.xlabel("time [hh:mm]")
+        plt.grid(True)
+        self.axes6.xaxis.set_major_formatter(xfmt)
+        self.axes6.grid(True, linewidth=1)
+        self.canvas6.draw()
 
     def __del__(self):
         pass
@@ -126,13 +138,17 @@ class control_panel(wx.Panel):
     def __init__(self, parent):
         wx.Panel.__init__(self, parent)
 
-        self._led_gauge_max = 18
-        self._volt_gauge_max = 1000
+        self._singlescan_gauge_max = 1
+        self._led_gauge_max = 16
+        self._volt_gauge_max = 16
 
-        # a save button
-        self.drs4_button = wx.Button(self, label="Run DRS4")
-        self.led_scan_button = wx.Button(self, label="Run LED Scan")
-        self.volt_scan_button = wx.Button(self, label="Run Voltage Scan")
+        # add figure
+        self.figure1 = plt.figure(1, dpi=55)
+        self.axes1 = self.figure1.add_subplot(111)
+        self.canvas1 = FigureCanvas(self, -1, self.figure1)
+        self.figure2 = plt.figure(2, dpi=55)
+        self.axes2 = self.figure2.add_subplot(111)
+        self.canvas2 = FigureCanvas(self, -1, self.figure2)
 
         # bk precision PS Label
         self.quote1 = wx.StaticText(self, label="BK Precision")
@@ -146,7 +162,7 @@ class control_panel(wx.Panel):
         self.lblname1 = wx.StaticText(self, label='OUTPUT')
         self.lblname1r = wx.StaticText(self, label='OFF')
         self.lblname1w = wx.StaticText(self, label="")
-        self.lblname1s = wx.Button(self, label="Turn ON")
+        self.lblname1s = wx.Button(self, label="Set ON")
 
         # bk V[V]
         self.lblname2 = wx.StaticText(self, label='V [V]')
@@ -226,13 +242,19 @@ class control_panel(wx.Panel):
         # drs4 board label
         self.quote6 = wx.StaticText(self, label="DRS 4 Board")
 
-        self.button5 = wx.Button(self, label="Single")
-        self.button6 = wx.Button(self, label="LED Scan")
-        self.button7 = wx.Button(self, label="Bias Scan")
-        self.button8 = wx.Button(self, label="LED Scan")
-        self.button9 = wx.Button(self, label="Bias Scan")
-	self.led_gauge = wx.Gauge(self, range=self._led_gauge_max, size=(250, 25), name='LED Scan Progress')
-	self.volt_gauge = wx.Gauge(self, range=self._led_gauge_max, size=(250, 25), name='Bias Scan Progress')
+        #  daq buttons
+        self.drs4_button = wx.Button(self, label="Run DRS4")
+        self.led_scan_button = wx.Button(self, label="Run LED Scan")
+        self.volt_scan_button = wx.Button(self, label="Run Voltage Scan")
+
+        self.gaugelbl1 = wx.StaticText(self, label="Single")
+        self.gaugelbl2 = wx.StaticText(self, label="LED")
+        self.gaugelbl3 = wx.StaticText(self, label="Bias")
+
+	self.singlescan_gauge = wx.Gauge(self, range=self._singlescan_gauge_max,
+                size=(250, 25))
+        self.led_gauge = wx.Gauge(self, range=self._led_gauge_max, size=(250, 25))
+	self.volt_gauge = wx.Gauge(self, range=self._volt_gauge_max, size=(250, 25))
 
         ## implement the settings in 3 other functions
         self.set_properties()
@@ -254,7 +276,7 @@ class control_panel(wx.Panel):
         _font = wx.Font(16, wx.ROMAN, wx.NORMAL, wx.NORMAL, False, u'Consolas')
         _bold_font = wx.Font(16, wx.ROMAN, wx.NORMAL, wx.BOLD, False, u'Consolas')
         _big_font = wx.Font(
-                20, wx.ROMAN, wx.NORMAL, wx.NORMAL, False, u'Consolas')
+                20, wx.ROMAN, wx.NORMAL, wx.BOLD, False, u'Consolas')
 
         self.drs4_button.SetFont(_big_font)
         self.led_scan_button.SetFont(_big_font)
@@ -334,10 +356,9 @@ class control_panel(wx.Panel):
         self.led15.SetFont(_font)
         self.led16.SetFont(_font)
 
-        self.button5.SetFont(_font)
-        self.button6.SetFont(_font)
-        self.button7.SetFont(_font)
-        self.button8.SetFont(_font)
+        self.gaugelbl1.SetFont(_font)
+        self.gaugelbl2.SetFont(_font)
+        self.gaugelbl3.SetFont(_font)
 
     def do_layout(self):
 
@@ -345,8 +366,10 @@ class control_panel(wx.Panel):
         mainSizer = wx.BoxSizer(wx.VERTICAL)
         grid = wx.GridBagSizer(hgap=10, vgap=10)
         grid2 = wx.GridBagSizer(hgap=10, vgap=10)
-        hSizer = wx.BoxSizer(wx.HORIZONTAL)
+        hSizer1 = wx.BoxSizer(wx.HORIZONTAL)
         hSizer2 = wx.BoxSizer(wx.HORIZONTAL)
+        hSizer3 = wx.BoxSizer(wx.HORIZONTAL)
+
 
         # start of grid1
         grid.Add(self.quote1, pos=(0, 1), span=(1, 2), flag=wx.TE_CENTER)
@@ -415,44 +438,110 @@ class control_panel(wx.Panel):
         grid2.Add(self.button3, pos=(1, 2), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
         grid2.Add(self.button4, pos=(1, 3), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
 
-        grid2.Add(self.quote6, pos=(4, 1), span=(1, 2), flag=wx.TE_CENTER)
-
-        grid2.Add(self.led1, pos=(5, 0), flag=wx.TE_CENTER)
-        grid2.Add(self.led2, pos=(5, 1), flag=wx.TE_CENTER)
-        grid2.Add(self.led3, pos=(5, 2), flag=wx.TE_CENTER)
-        grid2.Add(self.led4, pos=(5, 3), flag=wx.TE_CENTER)
-        grid2.Add(self.led5, pos=(6, 0), flag=wx.TE_CENTER)
-        grid2.Add(self.led6, pos=(6, 1), flag=wx.TE_CENTER)
-        grid2.Add(self.led7, pos=(6, 2), flag=wx.TE_CENTER)
-        grid2.Add(self.led8, pos=(6, 3), flag=wx.TE_CENTER)
-        grid2.Add(self.led9, pos=(7, 0), flag=wx.TE_CENTER)
-        grid2.Add(self.led10, pos=(7, 1), flag=wx.TE_CENTER)
-        grid2.Add(self.led11, pos=(7, 2), flag=wx.TE_CENTER)
-        grid2.Add(self.led12, pos=(7, 3), flag=wx.TE_CENTER)
-        grid2.Add(self.led13, pos=(8, 0), flag=wx.TE_CENTER)
-        grid2.Add(self.led14, pos=(8, 1), flag=wx.TE_CENTER)
-        grid2.Add(self.led15, pos=(8, 2), flag=wx.TE_CENTER)
-        grid2.Add(self.led16, pos=(8, 3), flag=wx.TE_CENTER)
-
         grid2.Add(self.quote5, pos=(2, 1), span=(1, 2), flag=wx.TE_CENTER)
 
-        grid2.Add(self.button5, pos=(3, 0), flag=wx.TE_CENTER)
-        grid2.Add(self.button6, pos=(3, 1), flag=wx.TE_CENTER)
-        grid2.Add(self.button7, pos=(3, 2), flag=wx.TE_CENTER)
-        grid2.Add(self.button8, pos=(3, 3), flag=wx.TE_CENTER)
+        grid2.Add(self.led1, pos=(3, 0), flag=wx.TE_CENTER)
+        grid2.Add(self.led2, pos=(3, 1), flag=wx.TE_CENTER)
+        grid2.Add(self.led3, pos=(3, 2), flag=wx.TE_CENTER)
+        grid2.Add(self.led4, pos=(3, 3), flag=wx.TE_CENTER)
+        grid2.Add(self.led5, pos=(4, 0), flag=wx.TE_CENTER)
+        grid2.Add(self.led6, pos=(4, 1), flag=wx.TE_CENTER)
+        grid2.Add(self.led7, pos=(4, 2), flag=wx.TE_CENTER)
+        grid2.Add(self.led8, pos=(4, 3), flag=wx.TE_CENTER)
+        grid2.Add(self.led9, pos=(5, 0), flag=wx.TE_CENTER)
+        grid2.Add(self.led10, pos=(5, 1), flag=wx.TE_CENTER)
+        grid2.Add(self.led11, pos=(5, 2), flag=wx.TE_CENTER)
+        grid2.Add(self.led12, pos=(5, 3), flag=wx.TE_CENTER)
+        grid2.Add(self.led13, pos=(6, 0), flag=wx.TE_CENTER)
+        grid2.Add(self.led14, pos=(6, 1), flag=wx.TE_CENTER)
+        grid2.Add(self.led15, pos=(6, 2), flag=wx.TE_CENTER)
+        grid2.Add(self.led16, pos=(6, 3), flag=wx.TE_CENTER)
 
-	grid2.Add(self.led_gauge, pos=(9, 0), span=(1, 4), flag=wx.EXPAND)
-	grid2.Add(self.volt_gauge, pos=(10, 0), span=(1, 4), flag=wx.EXPAND)
+        grid2.Add(self.quote6, pos=(7, 1), span=(1, 2), flag=wx.TE_CENTER)
+
+	grid2.Add(self.gaugelbl1, pos=(8, 0), flag=wx.EXPAND)
+	grid2.Add(self.gaugelbl2, pos=(9, 0), flag=wx.EXPAND)
+	grid2.Add(self.gaugelbl3, pos=(10, 0), flag=wx.EXPAND)
+
+	grid2.Add(self.singlescan_gauge, pos=(8, 1), span=(1, 3), flag=wx.EXPAND)
+	grid2.Add(self.led_gauge, pos=(9, 1), span=(1, 3), flag=wx.EXPAND)
+	grid2.Add(self.volt_gauge, pos=(10, 1), span=(1, 3), flag=wx.EXPAND)
         # end of grid2
 
-        hSizer.Add(grid, 0, wx.ALL | wx.EXPAND | wx.CENTER, 10)
-        hSizer.Add(grid2, 0, wx.ALL | wx.EXPAND | wx.CENTER, 10)
-        mainSizer.Add(hSizer, 0, wx.ALL, 10)
-        hSizer2.Add(self.drs4_button, 0, wx.CENTER)
-        hSizer2.Add(self.led_scan_button, 0, wx.CENTER)
-        hSizer2.Add(self.volt_scan_button, 0, wx.CENTER)
-        mainSizer.Add(hSizer2, 0, wx.ALL, 10)
+        hSizer1.Add(self.canvas1, 0, wx.EXPAND, 5)
+        hSizer1.AddSpacer(5)
+        hSizer1.Add(self.canvas2, 0, wx.EXPAND, 5)
+
+        hSizer2.Add(grid, 0, wx.ALL | wx.EXPAND | wx.CENTER, 5)
+        hSizer2.Add(grid2, 0, wx.ALL | wx.EXPAND | wx.CENTER, 5)
+
+        hSizer3.Add(self.drs4_button, 0, wx.CENTER)
+        hSizer3.Add(self.led_scan_button, 0, wx.CENTER)
+        hSizer3.Add(self.volt_scan_button, 0, wx.CENTER)
+
+        mainSizer.Add(hSizer1, 0, wx.ALL | wx.ALIGN_CENTER, 5)
+        mainSizer.Add(hSizer2, 0, wx.ALL, 5)
+        mainSizer.Add(hSizer3, 0, wx.ALIGN_CENTER, 5)
+
         self.SetSizerAndFit(mainSizer)
+        mainSizer.Layout()
+
+    def plot_waveform(self, _filename):
+        self.axes1.clear()
+        infile = np.loadtxt(_filename )
+	plt.figure(1)
+        #plt.plot(data[:,0], data[:,1],'ro')
+        plt.plot(infile[:500,0], infile[:500,1])
+        plt.title("SiPM traces")
+        plt.ylabel("Amplitude [mV]")
+        plt.xlabel("time [ns]")
+        self.canvas1.draw()
+
+    def plot_amp_hist(self, _filename):
+        total = 0.0
+        length = 0
+        self.average = 0.0
+        while os.path.isfile(_filename):
+            infile = open(_filename, 'r+')
+            for line in infile:
+                total += float(line)
+                length = length + 1
+            infile.close()
+            if length == 500:
+                with open(_filename, 'r+') as data:
+                    floats = map(float, data)
+                break
+        self.average = total / length
+#        print "LED #%d V_amp %.2f" % (led_no, average)
+        self.axes2.clear()
+        plt.figure(2)
+        plt.hist(floats,25)
+        plt.title("Amplitude Histogram")
+        plt.xlabel("Amplitude [mV]")
+        plt.ylabel("Frequency")
+        self.canvas2.draw()
+        self.fit_gaussian(floats)
+
+    def plot_led_scan(self):
+	pass
+
+    def plot_volt_scan(self):
+	pass
+
+    def fit_gaussian(self, _floats):
+	n, bins, patches = plt.hist(_floats, 25)
+        bin_centres = (bins[:-1] + bins[1:])/2
+        # p0 is the initial guess for the fitting coefficients (A, mu and sigma# above)
+        self.coeff, var_matrix = curve_fit(gauss, bin_centres, n,
+                p0=[100.,self.average,0.05*self.average])
+        hist_fit = gauss(bin_centres, *self.coeff)
+        plt.plot(bin_centres, hist_fit, label='Fitted data', linewidth=2)
+        print 'Fitted mean = ', self.coeff[1]
+        print 'Fitted standard deviation = ', self.coeff[2]
+
+    def get_fit_result(self):
+        return self.coeff
+
 
     def __del__(self):
         pass
@@ -508,7 +597,7 @@ class eeprom_panel(wx.Panel):
 
     def set_properties(self):
 
-        self.SetBackgroundColour("Silver")
+        self.SetBackgroundColour("Light Grey")
         _font = wx.Font(16, wx.ROMAN, wx.NORMAL, wx.NORMAL, False, u'Consolas')
         _bold_font = wx.Font(16, wx.ROMAN, wx.NORMAL, wx.NORMAL, False, u'Consolas')
         _big_font = wx.Font(
