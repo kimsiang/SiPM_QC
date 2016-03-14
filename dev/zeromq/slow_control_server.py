@@ -60,9 +60,11 @@ class SlowControl():
                 elif msg == "read led":
                     print self.lj.read_led()
                 elif msg[0:10] == "set eeprom":
-                    print self.lj.write_eeprom(int(msg[11:12]),msg[13:])
+                    print self.lj.write_eeprom(int(msg[11:12]),msg[13:29])
                 elif msg[0:7] == "set led":
                     print self.lj.set_led(int(msg[8:]))
+                elif msg[0:8] == "set gain":
+                    print self.lj.set_gain(int(msg[9:]))
                 else:
                     print "Unknown command, try again."
 

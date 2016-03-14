@@ -334,7 +334,6 @@ int main (){
 
             /* reset the event number to -1 */
             evtno_= -1;
-            cout << trace_amp<< endl;
 
             for (int smpno_ = 0; smpno_ < MAX_SAMPLE; smpno_++){
                 avg_wave_array[smpno_] /= float(MAX_EVENT);

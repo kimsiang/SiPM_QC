@@ -100,8 +100,15 @@ class Labjack():
 	res = d.spi([0x06], **spi_conf_eeprom)
 	self.check_eeprom_status()
 
-	# print "write page"
-	cmd = [0x02, page] + msg
+        # convert string to int array
+        string_list = list(msg)
+        int_array = [ord(s) for s in string_list]
+
+        # Add spaces if the length is smaller than 16
+        while len(int_array) < 16:
+            int_array.append(32)
+
+        cmd = [0x02, page] + int_array
         res = d.spi(cmd, **spi_conf_eeprom)
 	self.check_eeprom_status()
 
