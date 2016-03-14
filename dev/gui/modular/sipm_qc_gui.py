@@ -81,53 +81,54 @@ class display_panel(wx.Panel):
         self.SetSizerAndFit(mainSizer)
 
     def plot_temp(self, _filename):
+        if os.path.isfile(_filename):
 
-        time, temp, volt, curr, gain = np.loadtxt(_filename, usecols= (1,2,3,4,5), converters={1:
-        strpdate2num('%H:%M:%S')}, unpack=True)
+            time, temp, volt, curr, gain = np.loadtxt(_filename, usecols= (1,2,3,4,5), converters={1:
+            strpdate2num('%H:%M:%S')}, unpack=True)
 
-        self.axes3.clear()
-        plt.figure(3)
-        plt.plot(time[-1000:], temp[-1000:], lw=2)
-        plt.title("Temperature")
-        plt.ylabel("T [C]")
-        plt.xlabel("time [hh:mm]")
-        xfmt = mdates.DateFormatter('%H:%M')
-        self.axes3.xaxis.set_major_formatter(xfmt)
-        self.axes3.grid(True, linewidth=1)
-        self.canvas3.draw()
+            self.axes3.clear()
+            plt.figure(3)
+            plt.plot(time[-20000:], temp[-20000:], lw=2)
+            plt.title("Temperature")
+            plt.ylabel("T [C]")
+            plt.xlabel("time [hh:mm]")
+            xfmt = mdates.DateFormatter('%H:%M')
+            self.axes3.xaxis.set_major_formatter(xfmt)
+            self.axes3.grid(True, linewidth=1)
+            self.canvas3.draw()
 
-        self.axes4.clear()
-        plt.figure(4)
-        plt.plot(time[-1000:], gain[-1000:], lw=2)
-        plt.title("Gain")
-        plt.ylabel("G [dB]")
-        plt.xlabel("time [hh:mm]")
-        plt.grid(True)
-        self.axes4.xaxis.set_major_formatter(xfmt)
-        self.axes4.grid(True, linewidth=1)
-        self.canvas4.draw()
+            self.axes4.clear()
+            plt.figure(4)
+            plt.plot(time[-20000:], gain[-20000:], lw=2)
+            plt.title("Gain")
+            plt.ylabel("G [dB]")
+            plt.xlabel("time [hh:mm]")
+            plt.grid(True)
+            self.axes4.xaxis.set_major_formatter(xfmt)
+            self.axes4.grid(True, linewidth=1)
+            self.canvas4.draw()
 
-        self.axes5.clear()
-        plt.figure(5)
-        plt.plot(time[-1000:], volt[-1000:], lw=2)
-        plt.title("Volt")
-        plt.ylabel("V [V]")
-        plt.xlabel("time [hh:mm]")
-        plt.grid(True)
-        self.axes5.xaxis.set_major_formatter(xfmt)
-        self.axes5.grid(True, linewidth=1)
-        self.canvas5.draw()
+            self.axes5.clear()
+            plt.figure(5)
+            plt.plot(time[-20000:], volt[-20000:], lw=2)
+            plt.title("Volt")
+            plt.ylabel("V [V]")
+            plt.xlabel("time [hh:mm]")
+            plt.grid(True)
+            self.axes5.xaxis.set_major_formatter(xfmt)
+            self.axes5.grid(True, linewidth=1)
+            self.canvas5.draw()
 
-        self.axes6.clear()
-        plt.figure(6)
-        plt.plot(time[-1000:], curr[-1000:], lw=2)
-        plt.title("Current")
-        plt.ylabel("I [mA]")
-        plt.xlabel("time [hh:mm]")
-        plt.grid(True)
-        self.axes6.xaxis.set_major_formatter(xfmt)
-        self.axes6.grid(True, linewidth=1)
-        self.canvas6.draw()
+            self.axes6.clear()
+            plt.figure(6)
+            plt.plot(time[-20000:], curr[-20000:], lw=2)
+            plt.title("Current")
+            plt.ylabel("I [mA]")
+            plt.xlabel("time [hh:mm]")
+            plt.grid(True)
+            self.axes6.xaxis.set_major_formatter(xfmt)
+            self.axes6.grid(True, linewidth=1)
+            self.canvas6.draw()
 
     def __del__(self):
         pass
@@ -472,8 +473,9 @@ class control_panel(wx.Panel):
         hSizer1.AddSpacer(5)
         hSizer1.Add(self.canvas2, 0, wx.EXPAND, 5)
 
-        hSizer2.Add(grid, 0, wx.ALL | wx.EXPAND | wx.CENTER, 5)
-        hSizer2.Add(grid2, 0, wx.ALL | wx.EXPAND | wx.CENTER, 5)
+        hSizer2.Add(grid, 0, wx.ALL | wx.EXPAND | wx.CENTER, 10)
+        hSizer2.AddSpacer(10)
+        hSizer2.Add(grid2, 0, wx.ALL | wx.EXPAND | wx.CENTER, 10)
 
         hSizer3.Add(self.drs4_button, 0, wx.CENTER)
         hSizer3.Add(self.led_scan_button, 0, wx.CENTER)
@@ -520,7 +522,7 @@ class control_panel(wx.Panel):
         plt.xlabel("Amplitude [mV]")
         plt.ylabel("Frequency")
         self.canvas2.draw()
-        self.fit_gaussian(floats)
+        #self.fit_gaussian(floats)
 
     def plot_led_scan(self):
 	pass
@@ -542,6 +544,8 @@ class control_panel(wx.Panel):
     def get_fit_result(self):
         return self.coeff
 
+    def get_amp_avg(self):
+        return self.average
 
     def __del__(self):
         pass
