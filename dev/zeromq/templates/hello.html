@@ -1,0 +1,9 @@
+<!doctype html>
+<title>Hello from Flask</title>
+
+<p>Json:</p>
+<p>{{json}}</p>
+{% for key in json %}
+  {{ json[key].item }}
+{% endfor %}
+

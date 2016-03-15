@@ -88,7 +88,7 @@ class display_panel(wx.Panel):
 
             self.axes3.clear()
             plt.figure(3)
-            plt.plot(time[-20000:], temp[-20000:], lw=2)
+            plt.plot(time[-5000:], temp[-5000:], lw=2)
             plt.title("Temperature")
             plt.ylabel("T [C]")
             plt.xlabel("time [hh:mm]")
@@ -99,7 +99,7 @@ class display_panel(wx.Panel):
 
             self.axes4.clear()
             plt.figure(4)
-            plt.plot(time[-20000:], gain[-20000:], lw=2)
+            plt.plot(time[-5000:], gain[-5000:], lw=2)
             plt.title("Gain")
             plt.ylabel("G [dB]")
             plt.xlabel("time [hh:mm]")
@@ -110,7 +110,7 @@ class display_panel(wx.Panel):
 
             self.axes5.clear()
             plt.figure(5)
-            plt.plot(time[-20000:], volt[-20000:], lw=2)
+            plt.plot(time[-5000:], volt[-5000:], lw=2)
             plt.title("Volt")
             plt.ylabel("V [V]")
             plt.xlabel("time [hh:mm]")
@@ -121,7 +121,7 @@ class display_panel(wx.Panel):
 
             self.axes6.clear()
             plt.figure(6)
-            plt.plot(time[-20000:], curr[-20000:], lw=2)
+            plt.plot(time[-5000:], curr[-5000:], lw=2)
             plt.title("Current")
             plt.ylabel("I [mA]")
             plt.xlabel("time [hh:mm]")
@@ -140,7 +140,7 @@ class control_panel(wx.Panel):
         wx.Panel.__init__(self, parent)
 
         self._singlescan_gauge_max = 1
-        self._led_gauge_max = 16
+        self._led_gauge_max = 18
         self._volt_gauge_max = 16
 
         # add figure
@@ -499,7 +499,7 @@ class control_panel(wx.Panel):
         plt.xlabel("time [ns]")
         self.canvas1.draw()
 
-    def plot_amp_hist(self, _filename):
+    def get_amp_avg(self, _filename):
         total = 0.0
         length = 0
         self.average = 0.0
@@ -512,9 +512,9 @@ class control_panel(wx.Panel):
             if length == 500:
                 with open(_filename, 'r+') as data:
                     floats = map(float, data)
-                break
+            break
         self.average = total / length
-#        print "LED #%d V_amp %.2f" % (led_no, average)
+        print "V_amp %.2f" % self.average
         self.axes2.clear()
         plt.figure(2)
         plt.hist(floats,25)
@@ -523,6 +523,7 @@ class control_panel(wx.Panel):
         plt.ylabel("Frequency")
         self.canvas2.draw()
         #self.fit_gaussian(floats)
+        return self.average
 
     def plot_led_scan(self):
 	pass
@@ -543,9 +544,6 @@ class control_panel(wx.Panel):
 
     def get_fit_result(self):
         return self.coeff
-
-    def get_amp_avg(self):
-        return self.average
 
     def __del__(self):
         pass

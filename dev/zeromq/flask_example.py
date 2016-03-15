@@ -30,7 +30,7 @@ def hello(name=None):
 #    print('{0}'.format(json_data1))
 #    print('{0}'.format(json_data2))
 
-        return render_template('hello.html', json=json_data1)
+        return render_template('hello.html', json=json_data2)
 #        return '{0}\n {1}\n'.format(json_data1, json_data2)
 
 if __name__ == "__main__":
