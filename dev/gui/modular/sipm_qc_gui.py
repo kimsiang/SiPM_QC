@@ -10,16 +10,21 @@ import numpy as np
 from scipy.optimize import curve_fit
 from Gnuplot import Gnuplot
 from datetime import date, datetime, tzinfo, timedelta
-import time, sys, subprocess, os, threading, signal
-from threading import Thread, Event
+import time
+import os
+import signal
 # print wx.__file__
+
 
 def gauss(x, *p):
     A, mu, sigma = p
     return A*np.exp(-(x-mu)**2/(2.*sigma**2))
 
-## Define logger panel here
+# Define logger panel here
+
+
 class logger_panel(wx.Panel):
+
     def __init__(self, parent):
         wx.Panel.__init__(self, parent)
 
@@ -27,8 +32,8 @@ class logger_panel(wx.Panel):
         self.SetBackgroundColour("Light Grey")
 
         # a multiline TextCtrl for logging purpose
-        self.logger = wx.TextCtrl(
-                self, size=(500, 1000), style=wx.TE_MULTILINE | wx.TE_READONLY | wx.TE_RICH2 | wx.BORDER_SUNKEN)
+        self.logger = wx.TextCtrl(self, size=(500, 1000), style=wx.TE_MULTILINE |
+                                  wx.TE_READONLY | wx.TE_RICH2 | wx.BORDER_SUNKEN)
 
         # set the properties of the items created
         self.logger.SetBackgroundColour("Black")
@@ -40,7 +45,9 @@ class logger_panel(wx.Panel):
     def __del__(self):
         pass
 
-## Define display panel here
+# Define display panel here
+
+
 class display_panel(wx.Panel):
 
     def __init__(self, parent):
@@ -83,8 +90,11 @@ class display_panel(wx.Panel):
     def plot_temp(self, _filename):
         if os.path.isfile(_filename):
 
-            time, temp, volt, curr, gain = np.loadtxt(_filename, usecols= (1,2,3,4,5), converters={1:
-            strpdate2num('%H:%M:%S')}, unpack=True)
+            time, temp, volt, curr, gain = np.loadtxt(_filename,
+                                                      usecols=(1, 2, 3, 4, 5),
+                                                      converters={
+                                                          1: strpdate2num('%H:%M:%S')},
+                                                      unpack=True)
 
             self.axes3.clear()
             plt.figure(3)
@@ -133,7 +143,9 @@ class display_panel(wx.Panel):
     def __del__(self):
         pass
 
-## Define control panel here
+# Define control panel here
+
+
 class control_panel(wx.Panel):
 
     def __init__(self, parent):
@@ -169,7 +181,7 @@ class control_panel(wx.Panel):
         self.lblname2 = wx.StaticText(self, label='V [V]')
         self.lblname2r = wx.StaticText(self, label='0.00')
         self.lblname2w = wx.SpinCtrlDouble(
-                self, value='0.00', name="Roll V [V]")
+            self, value='0.00', name="Roll V [V]")
         self.lblname2s = wx.Button(self, label="Set V")
 
         # bk I[A]
@@ -252,12 +264,15 @@ class control_panel(wx.Panel):
         self.gaugelbl2 = wx.StaticText(self, label="LED")
         self.gaugelbl3 = wx.StaticText(self, label="Bias")
 
-	self.singlescan_gauge = wx.Gauge(self, range=self._singlescan_gauge_max,
-                size=(250, 25))
-        self.led_gauge = wx.Gauge(self, range=self._led_gauge_max, size=(250, 25))
-	self.volt_gauge = wx.Gauge(self, range=self._volt_gauge_max, size=(250, 25))
+        self.singlescan_gauge = wx.Gauge(self,
+                                         range=self._singlescan_gauge_max,
+                                         size=(250, 25))
+        self.led_gauge = wx.Gauge(self, range=self._led_gauge_max,
+                                  size=(250, 25))
+        self.volt_gauge = wx.Gauge(self, range=self._volt_gauge_max,
+                                   size=(250, 25))
 
-        ## implement the settings in 3 other functions
+        # implement the settings in 3 other functions
         self.set_properties()
         self.do_layout()
 
@@ -274,10 +289,12 @@ class control_panel(wx.Panel):
         self.lblname6w.SetRange(6, 26)
         self.lblname7w.SetRange(1, 16)
 
-        _font = wx.Font(16, wx.ROMAN, wx.NORMAL, wx.NORMAL, False, u'Consolas')
-        _bold_font = wx.Font(16, wx.ROMAN, wx.NORMAL, wx.BOLD, False, u'Consolas')
-        _big_font = wx.Font(
-                20, wx.ROMAN, wx.NORMAL, wx.BOLD, False, u'Consolas')
+        _font = wx.Font(16, wx.ROMAN, wx.NORMAL, wx.NORMAL,
+                        False, u'Consolas')
+        _bold_font = wx.Font(16, wx.ROMAN, wx.NORMAL, wx.BOLD,
+                             False, u'Consolas')
+        _big_font = wx.Font(20, wx.ROMAN, wx.NORMAL, wx.BOLD,
+                            False, u'Consolas')
 
         self.drs4_button.SetFont(_big_font)
         self.led_scan_button.SetFont(_big_font)
@@ -371,30 +388,29 @@ class control_panel(wx.Panel):
         hSizer2 = wx.BoxSizer(wx.HORIZONTAL)
         hSizer3 = wx.BoxSizer(wx.HORIZONTAL)
 
-
         # start of grid1
         grid.Add(self.quote1, pos=(0, 1), span=(1, 2), flag=wx.TE_CENTER)
 
         grid.Add(self.lblname9, pos=(1, 0), flag=wx.TE_RIGHT | wx.ALIGN_CENTER)
         grid.Add(
-                self.lblname9r, pos=(1, 1), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
+            self.lblname9r, pos=(1, 1), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
         grid.Add(self.lblname9w, pos=(1, 2), flag=wx.TE_CENTER)
 
         grid.Add(self.lblname1, pos=(2, 0), flag=wx.TE_RIGHT | wx.ALIGN_CENTER)
         grid.Add(
-                self.lblname1r, pos=(2, 1), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
+            self.lblname1r, pos=(2, 1), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
         grid.Add(self.lblname1w, pos=(2, 2), flag=wx.TE_CENTER)
         grid.Add(self.lblname1s, pos=(2, 3), flag=wx.TE_CENTER | wx.EXPAND)
 
         grid.Add(self.lblname2, pos=(3, 0), flag=wx.TE_RIGHT | wx.ALIGN_CENTER)
         grid.Add(
-                self.lblname2r, pos=(3, 1), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
+            self.lblname2r, pos=(3, 1), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
         grid.Add(self.lblname2w, pos=(3, 2), flag=wx.TE_CENTER)
         grid.Add(self.lblname2s, pos=(3, 3), flag=wx.TE_CENTER)
 
         grid.Add(self.lblname3, pos=(4, 0), flag=wx.TE_RIGHT | wx.ALIGN_CENTER)
         grid.Add(
-                self.lblname3r, pos=(4, 1), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
+            self.lblname3r, pos=(4, 1), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
         grid.Add(self.lblname3w, pos=(4, 2), flag=wx.TE_CENTER)
         grid.Add(self.lblname3s, pos=(4, 3), flag=wx.TE_CENTER)
 
@@ -402,31 +418,32 @@ class control_panel(wx.Panel):
 
         grid.Add(self.lblname8, pos=(6, 0), flag=wx.TE_RIGHT | wx.ALIGN_CENTER)
         grid.Add(
-                self.lblname8r, pos=(6, 1), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
+            self.lblname8r, pos=(6, 1), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
         grid.Add(self.lblname8w, pos=(6, 2), flag=wx.TE_CENTER)
 
         grid.Add(self.lblname4, pos=(7, 0), flag=wx.TE_RIGHT | wx.ALIGN_CENTER)
         grid.Add(
-                self.lblname4r, pos=(7, 1), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
+            self.lblname4r, pos=(7, 1), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
         grid.Add(self.lblname4w, pos=(7, 2), flag=wx.TE_CENTER)
         grid.Add(self.lblname4s, pos=(7, 3), flag=wx.TE_CENTER)
 
         grid.Add(self.lblname5, pos=(8, 0), flag=wx.TE_RIGHT | wx.ALIGN_CENTER)
         grid.Add(
-                self.lblname5r, pos=(8, 1), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
+            self.lblname5r, pos=(8, 1), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
         grid.Add(self.lblname5w, pos=(8, 2), flag=wx.TE_CENTER)
 
         grid.Add(self.lblname6, pos=(9, 0), flag=wx.TE_RIGHT | wx.ALIGN_CENTER)
         grid.Add(
-                self.lblname6r, pos=(9, 1), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
+            self.lblname6r, pos=(9, 1), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
         grid.Add(self.lblname6w, pos=(9, 2), flag=wx.TE_CENTER)
         grid.Add(self.lblname6s, pos=(9, 3), flag=wx.TE_CENTER)
 
         grid.Add(self.quote3, pos=(10, 1), span=(1, 2), flag=wx.TE_CENTER)
 
-        grid.Add(self.lblname7, pos=(11, 0), flag=wx.TE_RIGHT | wx.ALIGN_CENTER)
         grid.Add(
-                self.lblname7r, pos=(11, 1), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
+            self.lblname7, pos=(11, 0), flag=wx.TE_RIGHT | wx.ALIGN_CENTER)
+        grid.Add(
+            self.lblname7r, pos=(11, 1), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
         grid.Add(self.lblname7w, pos=(11, 2), flag=wx.TE_CENTER)
         grid.Add(self.lblname7s, pos=(11, 3), flag=wx.TE_CENTER)
         # end of grid1
@@ -434,10 +451,14 @@ class control_panel(wx.Panel):
         # start of grid2
         grid2.Add(self.quote4, pos=(0, 1), span=(1, 2), flag=wx.TE_CENTER)
 
-        grid2.Add(self.button1, pos=(1, 0), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
-        grid2.Add(self.button2, pos=(1, 1), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
-        grid2.Add(self.button3, pos=(1, 2), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
-        grid2.Add(self.button4, pos=(1, 3), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
+        grid2.Add(
+            self.button1, pos=(1, 0), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
+        grid2.Add(
+            self.button2, pos=(1, 1), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
+        grid2.Add(
+            self.button3, pos=(1, 2), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
+        grid2.Add(
+            self.button4, pos=(1, 3), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
 
         grid2.Add(self.quote5, pos=(2, 1), span=(1, 2), flag=wx.TE_CENTER)
 
@@ -460,13 +481,14 @@ class control_panel(wx.Panel):
 
         grid2.Add(self.quote6, pos=(7, 1), span=(1, 2), flag=wx.TE_CENTER)
 
-	grid2.Add(self.gaugelbl1, pos=(8, 0), flag=wx.EXPAND)
-	grid2.Add(self.gaugelbl2, pos=(9, 0), flag=wx.EXPAND)
-	grid2.Add(self.gaugelbl3, pos=(10, 0), flag=wx.EXPAND)
+        grid2.Add(self.gaugelbl1, pos=(8, 0), flag=wx.EXPAND)
+        grid2.Add(self.gaugelbl2, pos=(9, 0), flag=wx.EXPAND)
+        grid2.Add(self.gaugelbl3, pos=(10, 0), flag=wx.EXPAND)
 
-	grid2.Add(self.singlescan_gauge, pos=(8, 1), span=(1, 3), flag=wx.EXPAND)
-	grid2.Add(self.led_gauge, pos=(9, 1), span=(1, 3), flag=wx.EXPAND)
-	grid2.Add(self.volt_gauge, pos=(10, 1), span=(1, 3), flag=wx.EXPAND)
+        grid2.Add(self.singlescan_gauge, pos=(
+            8, 1), span=(1, 3), flag=wx.EXPAND)
+        grid2.Add(self.led_gauge, pos=(9, 1), span=(1, 3), flag=wx.EXPAND)
+        grid2.Add(self.volt_gauge, pos=(10, 1), span=(1, 3), flag=wx.EXPAND)
         # end of grid2
 
         hSizer1.Add(self.canvas1, 0, wx.EXPAND, 5)
@@ -490,10 +512,10 @@ class control_panel(wx.Panel):
 
     def plot_waveform(self, _filename):
         self.axes1.clear()
-        infile = np.loadtxt(_filename )
-	plt.figure(1)
+        infile = np.loadtxt(_filename)
+        plt.figure(1)
         #plt.plot(data[:,0], data[:,1],'ro')
-        plt.plot(infile[:500,0], infile[:500,1])
+        plt.plot(infile[:500, 0], infile[:500, 1])
         plt.title("SiPM traces")
         plt.ylabel("Amplitude [mV]")
         plt.xlabel("time [ns]")
@@ -517,26 +539,27 @@ class control_panel(wx.Panel):
         print "V_amp %.2f" % self.average
         self.axes2.clear()
         plt.figure(2)
-        plt.hist(floats,25)
+        plt.hist(floats, 25)
         plt.title("Amplitude Histogram")
         plt.xlabel("Amplitude [mV]")
         plt.ylabel("Frequency")
         self.canvas2.draw()
-        #self.fit_gaussian(floats)
+        # self.fit_gaussian(floats)
         return self.average
 
     def plot_led_scan(self):
-	pass
+        pass
 
     def plot_volt_scan(self):
-	pass
+        pass
 
     def fit_gaussian(self, _floats):
-	n, bins, patches = plt.hist(_floats, 25)
+        n, bins, patches = plt.hist(_floats, 25)
         bin_centres = (bins[:-1] + bins[1:])/2
-        # p0 is the initial guess for the fitting coefficients (A, mu and sigma# above)
+        # p0 is the initial guess for the fitting coefficients (A, mu and
+        # sigma# above)
         self.coeff, var_matrix = curve_fit(gauss, bin_centres, n,
-                p0=[100.,self.average,0.05*self.average])
+                                           p0=[100., self.average, 0.05*self.average])
         hist_fit = gauss(bin_centres, *self.coeff)
         plt.plot(bin_centres, hist_fit, label='Fitted data', linewidth=2)
         print 'Fitted mean = ', self.coeff[1]
@@ -548,7 +571,9 @@ class control_panel(wx.Panel):
     def __del__(self):
         pass
 
-## define EEPROM Panel here
+# define EEPROM Panel here
+
+
 class eeprom_panel(wx.Panel):
 
     def __init__(self, parent):
@@ -575,7 +600,8 @@ class eeprom_panel(wx.Panel):
         self.mem7r = wx.StaticText(self, label='0001 UWSiPM 0001')
         self.mem8r = wx.StaticText(self, label='0001 UWSiPM 0001')
 
-        self.mem1w = wx.TextCtrl(self, value='0001 UWSiPM 0001', size=(280, 40))
+        self.mem1w = wx.TextCtrl(
+            self, value='0001 UWSiPM 0001', size=(280, 40))
         self.mem2w = wx.TextCtrl(self, value='0001 UWSiPM 0001')
         self.mem3w = wx.TextCtrl(self, value='0001 UWSiPM 0001')
         self.mem4w = wx.TextCtrl(self, value='0001 UWSiPM 0001')
@@ -593,17 +619,19 @@ class eeprom_panel(wx.Panel):
         self.mem7s = wx.Button(self, label="Set Page7")
         self.mem8s = wx.Button(self, label="Set Page8")
 
-        ## implement the settings in 3 other functions
+        # implement the settings in 3 other functions
         self.set_properties()
         self.do_layout()
 
     def set_properties(self):
 
         self.SetBackgroundColour("Light Grey")
-        _font = wx.Font(16, wx.ROMAN, wx.NORMAL, wx.NORMAL, False, u'Consolas')
-        _bold_font = wx.Font(16, wx.ROMAN, wx.NORMAL, wx.NORMAL, False, u'Consolas')
-        _big_font = wx.Font(
-                20, wx.ROMAN, wx.NORMAL, wx.NORMAL, False, u'Consolas')
+        _font = wx.Font(16, wx.ROMAN, wx.NORMAL, wx.NORMAL,
+                        False, u'Consolas')
+        _bold_font = wx.Font(16, wx.ROMAN, wx.NORMAL, wx.NORMAL,
+                             False, u'Consolas')
+        _big_font = wx.Font(20, wx.ROMAN, wx.NORMAL, wx.NORMAL,
+                            False, u'Consolas')
 
         self.quote1.SetFont(_big_font)
 
@@ -646,7 +674,6 @@ class eeprom_panel(wx.Panel):
         self.mem8r.SetFont(_bold_font)
         self.mem8w.SetFont(_font)
         self.mem8s.SetFont(_font)
-
 
     def do_layout(self):
 

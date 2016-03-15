@@ -24,8 +24,8 @@ class SlowControl():
 
     def lj_server(self):
 
-        lj_port_push="5556"
-        lj_port_pub="5566"
+        lj_port_push = "5556"
+        lj_port_pub = "5566"
 
         context = zmq.Context()
         socket_pull = context.socket(zmq.PULL)
@@ -47,7 +47,8 @@ class SlowControl():
 
             if socket_pull in socks and socks[socket_pull] == zmq.POLLIN:
                 msg = socket_pull.recv()
-                print '{0} Received control command: {1}'.format(self.get_time(),msg)
+                print '{0} Received control command: {1}'.format(
+                    self.get_time(), msg)
 
                 if msg == "read temp":
                     print self.lj.read_temp()
@@ -60,7 +61,7 @@ class SlowControl():
                 elif msg == "read led":
                     print self.lj.read_led()
                 elif msg[0:10] == "set eeprom":
-                    print self.lj.write_eeprom(int(msg[11:12]),msg[13:29])
+                    print self.lj.write_eeprom(int(msg[11:12]), msg[13:29])
                 elif msg[0:7] == "set led":
                     print self.lj.set_led(int(msg[8:]))
                 elif msg[0:8] == "set gain":
@@ -83,28 +84,27 @@ class SlowControl():
                 led_no = self.lj.read_led()
 
                 lj_data = {
-                        'time' : self.get_time(),
-                        'temp' : temp,
-                        'gain' : gain,
-                        'eeprom1'  : eeprom1,
-                        'eeprom2'  : eeprom2,
-                        'eeprom3'  : eeprom3,
-                        'eeprom4'  : eeprom4,
-                        'eeprom5'  : eeprom5,
-                        'eeprom6'  : eeprom6,
-                        'eeprom7'  : eeprom7,
-                        'eeprom8'  : eeprom8,
-                        'serial'   : serial,
-                        'ledno'   : led_no
-                        }
+                    'time': self.get_time(),
+                    'temp': temp,
+                    'gain': gain,
+                    'eeprom1': eeprom1,
+                    'eeprom2': eeprom2,
+                    'eeprom3': eeprom3,
+                    'eeprom4': eeprom4,
+                    'eeprom5': eeprom5,
+                    'eeprom6': eeprom6,
+                    'eeprom7': eeprom7,
+                    'eeprom8': eeprom8,
+                    'serial': serial,
+                    'ledno': led_no
+                }
 
                 socket_pub.send_json(lj_data)
 
-
     def bk_server(self):
 
-        bk_port_push="5557"
-        bk_port_pub="5567"
+        bk_port_push = "5557"
+        bk_port_pub = "5567"
 
         context = zmq.Context()
         socket_pull = context.socket(zmq.PULL)
@@ -126,7 +126,8 @@ class SlowControl():
 
             if socket_pull in socks and socks[socket_pull] == zmq.POLLIN:
                 msg = socket_pull.recv()
-                print '{0} Received control command: {1}'.format(self.get_time(),msg)
+                print '{0} Received control command: {1}'.format(
+                    self.get_time(), msg)
 
                 if msg == "power on":
                     print self.bk.power_on()
@@ -151,11 +152,11 @@ class SlowControl():
                 state = self.bk.get_state()
 
                 bk_data = {
-                        'time' : self.get_time(),
-                        'volt' : volt,
-                        'curr' : curr,
-                        'state' : state
-                        }
+                    'time': self.get_time(),
+                    'volt': volt,
+                    'curr': curr,
+                    'state': state
+                }
 
                 socket_pub.send_json(bk_data)
 
@@ -168,4 +169,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
