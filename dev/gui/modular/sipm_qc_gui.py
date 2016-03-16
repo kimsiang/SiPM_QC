@@ -151,9 +151,8 @@ class logger_panel(wx.Panel):
         self.SetBackgroundColour("Light Grey")
 
         # a multiline TextCtrl for logging purpose
-        self.logger = wx.TextCtrl(self, size=(500, 1000))
-        self.logger.SetDefaultStyle(wx.TE_MULTILINE | wx.TE_READONLY
-                                    | wx.TE_RICH2 | wx.BORDER_SUNKEN)
+        self.logger = wx.TextCtrl(self, size=(500, 1000),
+                style=wx.TE_MULTILINE | wx.TE_READONLY |wx.TE_RICH2 | wx.BORDER_SUNKEN)
 
         # set black background and white fonts
         self.logger.SetBackgroundColour("Black")

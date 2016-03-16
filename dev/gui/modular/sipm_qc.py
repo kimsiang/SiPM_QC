@@ -431,15 +431,23 @@ class NoteBook(MainFrame):
     def refresh_bk(self):
         while True:
             json_data = self.read_from_bk()
-            self.__volt = float(json_data["volt"])
-            self.__curr = float(json_data["curr"])
-            self.__state = int(json_data["state"])
-            wx.CallAfter(self.read_volt)
-            wx.CallAfter(self.read_curr)
-            wx.CallAfter(self.read_bk_state)
+
+            if self.__volt != float(json_data["volt"]):
+                self.__volt = float(json_data["volt"])
+                wx.CallAfter(self.read_volt)
+                wx.CallAfter(self.page1.Layout)
+
+            if self.__curr != float(json_data["curr"]):
+                self.__curr = float(json_data["curr"])
+                wx.CallAfter(self.read_curr)
+                wx.CallAfter(self.page1.Layout)
+
+            if self.__state != int(json_data["state"]):
+                self.__state = int(json_data["state"])
+                wx.CallAfter(self.read_bk_state)
+                wx.CallAfter(self.page1.Layout)
+
             wx.CallAfter(self.check_bk_status)
-            wx.CallAfter(self.page1.Layout)
-            # print('{0}'.format(json_data))
 
     # define functions for Labjack
     # T-sensor
@@ -563,26 +571,61 @@ class NoteBook(MainFrame):
     def refresh_lj(self):
         while True:
             json_data = self.read_from_lj()
-            self.__temp = float(json_data["temp"])
-            self.__gain = float(json_data["gain"])
-            self.__serial = int(json_data["serial"])
-            self.__led_no = int(json_data["ledno"])
-            self.__eeprom1 = json_data["eeprom1"]
-            self.__eeprom2 = json_data["eeprom2"]
-            self.__eeprom3 = json_data["eeprom3"]
-            self.__eeprom4 = json_data["eeprom4"]
-            self.__eeprom5 = json_data["eeprom5"]
-            self.__eeprom6 = json_data["eeprom6"]
-            self.__eeprom7 = json_data["eeprom7"]
-            self.__eeprom8 = json_data["eeprom8"]
-            wx.CallAfter(self.update_temp)
-            wx.CallAfter(self.update_gain)
-            wx.CallAfter(self.update_eeprom)
-            wx.CallAfter(self.update_serial)
-            wx.CallAfter(self.update_led)
+
+            if self.__temp != float(json_data["temp"]):
+                self.__temp = float(json_data["temp"])
+                wx.CallAfter(self.update_temp)
+                wx.CallAfter(self.page1.Layout)
+
+            if self.__gain != float(json_data["gain"]):
+                self.__gain = float(json_data["gain"])
+                wx.CallAfter(self.update_gain)
+                wx.CallAfter(self.page1.Layout)
+
+            if self.__serial != int(json_data["serial"]):
+                self.__serial = int(json_data["serial"])
+                wx.CallAfter(self.update_serial)
+                wx.CallAfter(self.page1.Layout)
+
+            if self.__led_no != int(json_data["ledno"]):
+                self.__led_no = int(json_data["ledno"])
+                wx.CallAfter(self.update_led)
+                wx.CallAfter(self.page1.Layout)
+
+            if self.__eeprom1 != json_data["eeprom1"]:
+                self.__eeprom1 = json_data["eeprom1"]
+                wx.CallAfter(self.update_eeprom)
+                wx.CallAfter(self.page3.Layout)
+
+            if self.__eeprom2 != json_data["eeprom2"]:
+                self.__eeprom2 = json_data["eeprom2"]
+                wx.CallAfter(self.update_eeprom)
+
+            if self.__eeprom3 != json_data["eeprom3"]:
+                self.__eeprom3 = json_data["eeprom3"]
+                wx.CallAfter(self.update_eeprom)
+
+            if self.__eeprom4 != json_data["eeprom4"]:
+                self.__eeprom4 = json_data["eeprom4"]
+                wx.CallAfter(self.update_eeprom)
+
+            if self.__eeprom5 != json_data["eeprom5"]:
+                self.__eeprom5 = json_data["eeprom5"]
+                wx.CallAfter(self.update_eeprom)
+
+            if self.__eeprom6 != json_data["eeprom6"]:
+                self.__eeprom6 = json_data["eeprom6"]
+                wx.CallAfter(self.update_eeprom)
+
+            if self.__eeprom7 != json_data["eeprom7"]:
+                self.__eeprom7 = json_data["eeprom7"]
+                wx.CallAfter(self.update_eeprom)
+
+            if self.__eeprom8 != json_data["eeprom8"]:
+                self.__eeprom8 = json_data["eeprom8"]
+                wx.CallAfter(self.update_eeprom)
+
             wx.CallAfter(self.check_sipm_status)
-            wx.CallAfter(self.page1.Layout)
-            wx.CallAfter(self.page3.Layout)
 
     # LED Board
     def set_led(self, event):
@@ -604,18 +647,21 @@ class NoteBook(MainFrame):
 
         if label[0:7] == 'Run DRS':
             self.__type = 'test'
+            volt = self.__volt
         elif label[0:7] == 'Run LED':
             self.__type = 'led'
+            volt = self.__volt
         elif label[0:8] == 'Run Volt':
             self.__type = 'volt'
-            self.__volt = 65.25 + 0.25 * self.__subrun_no
+            volt = 65.8 + 0.2 * self.__subrun_no
 
         print self.__subrun_no
+        volt = float('{0:.2f}'.format(volt))
 
         # initialize the gauge, increment the run_no, send command to drs4
         string = '[{0}][Run#:{1}] Run SiPM with Bias = {2:.2f} V (LED# {3})\n'
         self.msg_logger(string.format(self.get_time(), self.__run_no,
-                                      self.__volt, self.__subrun_no))
+                                      volt, self.__subrun_no))
 
         string = '{0:04d} {1} {2:02d} {3:04d} '
         self.send_to_drs4(string.format(self.__serial, self.__type,
@@ -624,7 +670,7 @@ class NoteBook(MainFrame):
         self.update_plot(self.__run_no, self.__subrun_no,
                          self.__serial, self.__type)
 
-        self.dump_run_log(self.__volt, self.__subrun_no)
+        self.dump_run_log(volt, self.__subrun_no)
         event.Skip()
 
     def test_scan(self, event):
@@ -655,10 +701,10 @@ class NoteBook(MainFrame):
     def volt_scan(self, event):
         self.__run_no += 1
         count = 1
-        for volt in frange(65.50, 69.50, 0.25):
+        for volt in frange(66.0, 69.2, 0.2):
             self.send_to_bk('set volt {}'.format(volt))
             self.__subrun_no = count
-            time.sleep(1)
+            time.sleep(1.5)
             self.__volt == volt
             print 'Start Bias Scan {} V'.format(volt)
             self.page1.volt_gauge.SetValue(count)
@@ -679,9 +725,8 @@ class NoteBook(MainFrame):
         log = string.format(self.get_time(), run, serial, self.__volt, subrun)
         self.msg_logger(log)
 
-        string = './data/sipm_{0:04d}/sipm_{0:04d}_{1}_{2:02d}_{3:04d}'
-        ext = '_full.txt'
-        fname = ''.join(string, ext).format(serial, runtype, subrun, run)
+        string = './data/sipm_{0:04d}/sipm_{0:04d}_{1}_{2:02d}_{3:04d}_full.txt'
+        fname = string.format(serial, runtype, subrun, run)
         self.page1.plot_waveform(fname)
 
         string = './data/sipm_{0:04d}/sipm_{0:04d}_{1}_{2:02d}_{3:04d}.txt'

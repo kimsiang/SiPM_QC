@@ -18,8 +18,19 @@ class SlowControl():
         self.bk = BKPrecision('/dev/ttyUSB0')
         self.lj = Labjack()
 
+        self.temp=0.0
+        self.volt=0.0
+        self.curr=0.0
+        self.gain=0
+        self.serial=0
+        self.led_no=0
+        self.state=0
+
     def get_time(self):
         return datetime.strftime(datetime.now(), "%Y-%m-%d %H:%M:%S")
+
+    def get_day(self):
+        return datetime.strftime(datetime.now(), "%Y%m%d")
 
     def lj_server(self):
         # define socket numbers for push and publish ports
@@ -43,12 +54,12 @@ class SlowControl():
 
         # work on requests from SiPM GUI
         while True:
-            socks = dict(poller.poll(2000))
+            socks = dict(poller.poll(1000))
 
             if socket_pull in socks and socks[socket_pull] == zmq.POLLIN:
                 msg = socket_pull.recv()
                 print '{0} Received control command: {1}'.format(
-                    self.get_time(), msg)
+                        self.get_time(), msg)
 
                 # interpret the GUI messages here
                 if msg == "read temp":
@@ -71,8 +82,8 @@ class SlowControl():
                     print "Unknown command! Try again."
 
             else:
-                temp = self.lj.read_temp()
-                gain = self.lj.read_gain()
+                self.temp = self.lj.read_temp()
+                self.gain = self.lj.read_gain()
                 eeprom1 = self.lj.read_eeprom(1)
                 eeprom2 = self.lj.read_eeprom(2)
                 eeprom3 = self.lj.read_eeprom(3)
@@ -81,24 +92,24 @@ class SlowControl():
                 eeprom6 = self.lj.read_eeprom(6)
                 eeprom7 = self.lj.read_eeprom(7)
                 eeprom8 = self.lj.read_eeprom(8)
-                serial = self.lj.read_serial()
-                led_no = self.lj.read_led()
+                self.serial = self.lj.read_serial()
+                self.led_no = self.lj.read_led()
 
                 lj_data = {
-                    'time': self.get_time(),
-                    'temp': temp,
-                    'gain': gain,
-                    'eeprom1': eeprom1,
-                    'eeprom2': eeprom2,
-                    'eeprom3': eeprom3,
-                    'eeprom4': eeprom4,
-                    'eeprom5': eeprom5,
-                    'eeprom6': eeprom6,
-                    'eeprom7': eeprom7,
-                    'eeprom8': eeprom8,
-                    'serial': serial,
-                    'ledno': led_no
-                }
+                        'time': self.get_time(),
+                        'temp': self.temp,
+                        'gain': self.gain,
+                        'eeprom1': eeprom1,
+                        'eeprom2': eeprom2,
+                        'eeprom3': eeprom3,
+                        'eeprom4': eeprom4,
+                        'eeprom5': eeprom5,
+                        'eeprom6': eeprom6,
+                        'eeprom7': eeprom7,
+                        'eeprom8': eeprom8,
+                        'serial': self.serial,
+                        'ledno': self.led_no
+                        }
 
                 socket_pub.send_json(lj_data)
 
@@ -124,12 +135,12 @@ class SlowControl():
 
         # work on requests from SiPM GUI
         while True:
-            socks = dict(poller.poll(2000))
+            socks = dict(poller.poll(1000))
 
             if socket_pull in socks and socks[socket_pull] == zmq.POLLIN:
                 msg = socket_pull.recv()
                 print '{0} Received control command: {1}'.format(
-                    self.get_time(), msg)
+                        self.get_time(), msg)
 
                 # interpret the GUI messages here
                 if msg == "power on":
@@ -150,16 +161,16 @@ class SlowControl():
                     print "Unknown command, try again."
 
             else:
-                volt = self.bk.meas_volt()
-                curr = self.bk.meas_curr()
-                state = self.bk.get_state()
+                self.volt = self.bk.meas_volt()
+                self.curr = self.bk.meas_curr()
+                self.state = self.bk.get_state()
 
                 bk_data = {
-                    'time': self.get_time(),
-                    'volt': volt,
-                    'curr': curr,
-                    'state': state
-                }
+                        'time': self.get_time(),
+                        'volt': self.volt,
+                        'curr': self.curr,
+                        'state': self.state
+                        }
 
                 socket_pub.send_json(bk_data)
 
