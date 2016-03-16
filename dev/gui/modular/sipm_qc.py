@@ -83,7 +83,6 @@ class NoteBook(MainFrame):
         grid.Add(self.page4, pos=(0, 2), flag=wx.TE_RIGHT)
         self.SetSizerAndFit(grid)
 
-
         # initialize all the environment and do the layout
         self.init_zmq()
         self.init_variable()
@@ -135,7 +134,6 @@ class NoteBook(MainFrame):
         self.socket_sub_lj.connect("tcp://localhost:%s" % lj_port_pub)
         self.socket_sub_lj.setsockopt(zmq.SUBSCRIBE, "")
 
-
     def init_variable(self):
 
         # define private variabls for status checking
@@ -167,14 +165,13 @@ class NoteBook(MainFrame):
         if os.path.isfile(lastrun_file):
             with open(lastrun_file, 'r') as f:
                 self.__run_no = json.load(f)["Lastrun_No"]
-            string='[{0}] Previous Run# is {1}\n'
+            string = '[{0}] Previous Run# is {1}\n'
             self.page4.logger.AppendText(string.format(self.get_time(),
-                self.__run_no))
+                                                       self.__run_no))
         else:
-            string='[{0}] There is no previous Run#\n'
+            string = '[{0}] There is no previous Run#\n'
             self.page4.logger.AppendText(string.format(self.get_time(),
-                self.__run_no))
-
+                                                       self.__run_no))
 
     def init_thread(self):
         # initialize thread for bk to refresh variables
@@ -197,9 +194,9 @@ class NoteBook(MainFrame):
 
     def bind_bk(self):
         # bind the BK buttons to update the display and call bk.set_volt etc
-        self.Bind(wx.EVT_BUTTON, self.update_bk_state, self.page1.lblname1s)
-        self.Bind(wx.EVT_BUTTON, self.update_volt, self.page1.lblname2s)
-        self.Bind(wx.EVT_BUTTON, self.update_curr, self.page1.lblname3s)
+        self.Bind(wx.EVT_BUTTON, self.update_bk_state, self.page1.lbl1s)
+        self.Bind(wx.EVT_BUTTON, self.update_volt, self.page1.lbl2s)
+        self.Bind(wx.EVT_BUTTON, self.update_curr, self.page1.lbl3s)
 
     def bind_led(self):
         # bind the LED buttons to update the display and call labjack.set_led()
@@ -220,16 +217,16 @@ class NoteBook(MainFrame):
         self.Bind(wx.EVT_BUTTON, self.set_led, self.page1.led15)
         self.Bind(wx.EVT_BUTTON, self.set_led, self.page1.led16)
         self.Bind(wx.EVT_BUTTON, self.set_led, self.page1.led16)
-        self.Bind(wx.EVT_BUTTON, self.set_led, self.page1.lblname7s)
+        self.Bind(wx.EVT_BUTTON, self.set_led, self.page1.lbl7s)
 
     def bind_pga(self):
         # bind the PGA buttons to update the display and call
         # labjack.update_gain()
-        self.Bind(wx.EVT_BUTTON, self.set_gain, self.page1.button1)
-        self.Bind(wx.EVT_BUTTON, self.set_gain, self.page1.button2)
-        self.Bind(wx.EVT_BUTTON, self.set_gain, self.page1.button3)
-        self.Bind(wx.EVT_BUTTON, self.set_gain, self.page1.button4)
-        self.Bind(wx.EVT_BUTTON, self.set_gain, self.page1.lblname6s)
+        self.Bind(wx.EVT_BUTTON, self.set_gain, self.page1.btn1)
+        self.Bind(wx.EVT_BUTTON, self.set_gain, self.page1.btn2)
+        self.Bind(wx.EVT_BUTTON, self.set_gain, self.page1.btn3)
+        self.Bind(wx.EVT_BUTTON, self.set_gain, self.page1.btn4)
+        self.Bind(wx.EVT_BUTTON, self.set_gain, self.page1.lbl6s)
 
     def bind_eeprom(self):
         self.Bind(wx.EVT_BUTTON, self.set_eeprom, self.page3.mem1s)
@@ -240,7 +237,7 @@ class NoteBook(MainFrame):
         self.Bind(wx.EVT_BUTTON, self.set_eeprom, self.page3.mem6s)
         self.Bind(wx.EVT_BUTTON, self.set_eeprom, self.page3.mem7s)
         self.Bind(wx.EVT_BUTTON, self.set_eeprom, self.page3.mem8s)
-        self.Bind(wx.EVT_BUTTON, self.set_serial, self.page1.lblname4s)
+        self.Bind(wx.EVT_BUTTON, self.set_serial, self.page1.lbl4s)
 
     def bind_drs4(self):
         self.Bind(wx.EVT_BUTTON, self.test_scan, self.page1.drs4_button)
@@ -251,23 +248,23 @@ class NoteBook(MainFrame):
         # do all the logger bindings
         self.Bind(wx.EVT_BUTTON, self.on_click, self.page1.drs4_button)
 
-        self.Bind(wx.EVT_SPINCTRLDOUBLE, self.on_spin, self.page1.lblname2w)
-        self.Bind(wx.EVT_SPINCTRL, self.on_spin, self.page1.lblname3w)
-        self.Bind(wx.EVT_SPINCTRL, self.on_spin, self.page1.lblname4w)
-        self.Bind(wx.EVT_SPINCTRL, self.on_spin, self.page1.lblname6w)
-        self.Bind(wx.EVT_SPINCTRL, self.on_spin, self.page1.lblname7w)
+        self.Bind(wx.EVT_SPINCTRLDOUBLE, self.on_spin, self.page1.lbl2w)
+        self.Bind(wx.EVT_SPINCTRL, self.on_spin, self.page1.lbl3w)
+        self.Bind(wx.EVT_SPINCTRL, self.on_spin, self.page1.lbl4w)
+        self.Bind(wx.EVT_SPINCTRL, self.on_spin, self.page1.lbl6w)
+        self.Bind(wx.EVT_SPINCTRL, self.on_spin, self.page1.lbl7w)
 
-        self.Bind(wx.EVT_BUTTON, self.on_switch, self.page1.lblname1s)
-        self.Bind(wx.EVT_BUTTON, self.on_set, self.page1.lblname2s)
-        self.Bind(wx.EVT_BUTTON, self.on_set, self.page1.lblname3s)
-        self.Bind(wx.EVT_BUTTON, self.on_set, self.page1.lblname4s)
-        self.Bind(wx.EVT_BUTTON, self.on_set, self.page1.lblname6s)
-        self.Bind(wx.EVT_BUTTON, self.on_set, self.page1.lblname7s)
+        self.Bind(wx.EVT_BUTTON, self.on_switch, self.page1.lbl1s)
+        self.Bind(wx.EVT_BUTTON, self.on_set, self.page1.lbl2s)
+        self.Bind(wx.EVT_BUTTON, self.on_set, self.page1.lbl3s)
+        self.Bind(wx.EVT_BUTTON, self.on_set, self.page1.lbl4s)
+        self.Bind(wx.EVT_BUTTON, self.on_set, self.page1.lbl6s)
+        self.Bind(wx.EVT_BUTTON, self.on_set, self.page1.lbl7s)
 
-        self.Bind(wx.EVT_BUTTON, self.on_click, self.page1.button1)
-        self.Bind(wx.EVT_BUTTON, self.on_click, self.page1.button2)
-        self.Bind(wx.EVT_BUTTON, self.on_click, self.page1.button3)
-        self.Bind(wx.EVT_BUTTON, self.on_click, self.page1.button4)
+        self.Bind(wx.EVT_BUTTON, self.on_click, self.page1.btn1)
+        self.Bind(wx.EVT_BUTTON, self.on_click, self.page1.btn2)
+        self.Bind(wx.EVT_BUTTON, self.on_click, self.page1.btn3)
+        self.Bind(wx.EVT_BUTTON, self.on_click, self.page1.btn4)
 
         self.Bind(wx.EVT_BUTTON, self.on_click, self.page1.led1)
         self.Bind(wx.EVT_BUTTON, self.on_click, self.page1.led2)
@@ -297,52 +294,55 @@ class NoteBook(MainFrame):
 
     def on_click(self, event):
         labeltext = event.GetEventObject().GetLabelText()
-        self.msg_logger('[{0}] Clicked on {1}\n'.format(self.get_time(), labeltext))
+        self.msg_logger(
+            '[{0}] Clicked on {1}\n'.format(self.get_time(), labeltext))
         event.Skip()
 
     def on_spin(self, event):
-        self.msg_logger('[{0}] {1} to {2:.1f}\n'.format(self.get_time(),
-                    event.GetEventObject().GetName(), event.GetValue()))
+        string = '[{0}] {1} to {2:.1f}\n'
+        self.msg_logger(string.format(self.get_time(),
+                                      event.GetEventObject().GetName(),
+                                      event.GetValue()))
         event.Skip()
 
     def on_switch(self, event):
-        labeltext=event.GetEventObject().GetLabelText()
+        labeltext = event.GetEventObject().GetLabelText()
         self.msg_logger(
             '[{0}] Clicked on {1}\n'.format(self.get_time(), labeltext))
         event.Skip()
 
     def on_set(self, event):
-        labeltext=event.GetEventObject().GetLabelText()
-        unit=''
+        labeltext = event.GetEventObject().GetLabelText()
+        unit = ''
         if labeltext == 'Set V':
-            value=self.page1.lblname2w.GetValue()
-            unit='V'
+            value = self.page1.lbl2w.GetValue()
+            unit = 'V'
         elif labeltext == 'Set I':
-            value=self.page1.lblname3w.GetValue()
-            unit='mA'
+            value = self.page1.lbl3w.GetValue()
+            unit = 'mA'
         elif labeltext == 'Set SiPM#':
-            value=self.page1.lblname4w.GetValue()
+            value = self.page1.lbl4w.GetValue()
         elif labeltext == 'Set Gain':
-            value=self.page1.lblname6w.GetValue()
-            unit='dB'
+            value = self.page1.lbl6w.GetValue()
+            unit = 'dB'
         elif labeltext == 'Set LED#':
-            value=self.page1.lblname7w.GetValue()
+            value = self.page1.lbl7w.GetValue()
         elif labeltext == 'Set Page1':
-            value=self.page3.mem1w.GetValue()
+            value = self.page3.mem1w.GetValue()
         elif labeltext == 'Set Page2':
-            value=self.page3.mem2w.GetValue()
+            value = self.page3.mem2w.GetValue()
         elif labeltext == 'Set Page3':
-            value=self.page3.mem3w.GetValue()
+            value = self.page3.mem3w.GetValue()
         elif labeltext == 'Set Page4':
-            value=self.page3.mem4w.GetValue()
+            value = self.page3.mem4w.GetValue()
         elif labeltext == 'Set Page5':
-            value=self.page3.mem5w.GetValue()
+            value = self.page3.mem5w.GetValue()
         elif labeltext == 'Set Page6':
-            value=self.page3.mem6w.GetValue()
+            value = self.page3.mem6w.GetValue()
         elif labeltext == 'Set Page7':
-            value=self.page3.mem7w.GetValue()
+            value = self.page3.mem7w.GetValue()
         elif labeltext == 'Set Page8':
-            value=self.page3.mem8w.GetValue()
+            value = self.page3.mem8w.GetValue()
 
         self.msg_logger('[{0}] {1} to {2} {3}\n'.format(
             self.get_time(), labeltext, value, unit))
@@ -363,21 +363,21 @@ class NoteBook(MainFrame):
 
     def send_to_drs4(self, string):
         self.socket_req_drs4.send(string)
-        message=self.socket_req_drs4.recv()
+        message = self.socket_req_drs4.recv()
         print("Received reply [%s]" % (message))
 
     def bk_on(self, event):
         self.send_to_bk("power on")
-        self.page1.lblname2r.SetLabel('ON')
+        self.page1.lbl2r.SetLabel('ON')
         event.Skip()
 
     def bk_off(self, event):
         self.send_to_bk("power off")
-        self.page1.lblname2r.SetLabel('OFF')
+        self.page1.lbl2r.SetLabel('OFF')
         event.Skip()
 
     def update_bk_state(self, event):
-        label=event.GetEventObject().GetLabelText()
+        label = event.GetEventObject().GetLabelText()
         if label == 'Set ON':
             self.send_to_bk("power on")
         elif label == 'Set OFF':
@@ -386,54 +386,54 @@ class NoteBook(MainFrame):
         event.Skip()
 
     def read_bk_state(self):
-        state=self.__state
+        state = self.__state
         if state == 1:
-            self.page1.lblname1r.SetLabel('ON')
-            self.page1.lblname1s.SetLabel('Set OFF')
+            self.page1.lbl1r.SetLabel('ON')
+            self.page1.lbl1s.SetLabel('Set OFF')
         else:
-            self.page1.lblname1r.SetLabel('OFF')
-            self.page1.lblname1s.SetLabel('Set ON')
+            self.page1.lbl1r.SetLabel('OFF')
+            self.page1.lbl1s.SetLabel('Set ON')
 
     def read_volt(self):
-        volt=self.__volt
-        self.page1.lblname2r.SetLabel('{:.2f}'.format(float(volt)))
+        volt = self.__volt
+        self.page1.lbl2r.SetLabel('{:.2f}'.format(float(volt)))
 
     def update_volt(self, event):
-        setvalue=self.page1.lblname2w.GetValue()
+        setvalue = self.page1.lbl2w.GetValue()
         self.send_to_bk('set volt {}'.format(setvalue))
         event.Skip()
 
     def read_curr(self):
-        curr=self.__curr
-        self.page1.lblname3r.SetLabel('{:.2f}'.format(float(curr)))
+        curr = self.__curr
+        self.page1.lbl3r.SetLabel('{:.2f}'.format(float(curr)))
 
     def update_curr(self, event):
-        setvalue=self.page1.lblname3w.GetValue()
+        setvalue = self.page1.lbl3w.GetValue()
         self.send_to_bk('set curr {}'.format(setvalue/1000.))
         event.Skip()
 
     def check_bk_status(self):
-        bk_status=self.__bk_status
+        bk_status = self.__bk_status
         if self.__volt < 0 and self.__curr < 0:
-            self.page1.lblname9r.SetLabel('NO')
-            self.__bk_status=False
+            self.page1.lbl9r.SetLabel('NO')
+            self.__bk_status = False
             if bk_status == True:
-                string='[{0}] BK Precision is powered off!\n'
+                string = '[{0}] BK Precision is powered off!\n'
                 self.msg_logger(string.format(self.get_time()))
 
         elif self.__volt > -1 and self.__curr > -1:
-            self.page1.lblname9r.SetLabel('YES')
-            self.__bk_status=True
+            self.page1.lbl9r.SetLabel('YES')
+            self.__bk_status = True
             if bk_status == False:
-                string='[{0}] BK Precision is powered on!\n'
+                string = '[{0}] BK Precision is powered on!\n'
                 self.msg_logger(string.format(self.get_time()))
 
     def refresh_bk(self):
         while True:
-            json_data=self.read_from_bk()
-            self.__volt=float(json_data["volt"])
-            self.__curr=float(json_data["curr"])
-            self.__state=int(json_data["state"])
+            json_data = self.read_from_bk()
+            self.__volt = float(json_data["volt"])
+            self.__curr = float(json_data["curr"])
+            self.__state = int(json_data["state"])
             wx.CallAfter(self.read_volt)
             wx.CallAfter(self.read_curr)
             wx.CallAfter(self.read_bk_state)
@@ -444,14 +444,14 @@ class NoteBook(MainFrame):
     # define functions for Labjack
     # T-sensor
     def update_temp(self):
-        temp=self.__temp
-        self.page1.lblname5r.SetLabel(str(temp))
-        string='./data/log/slowctrl_{}.log'
+        temp = self.__temp
+        self.page1.lbl5r.SetLabel(str(temp))
+        string = './data/log/slowctrl_{}.log'
         self.page2.plot_temp(string.format(self.get_day()))
 
     # PGA
     def set_gain(self, event):
-        label=event.GetEventObject().GetLabelText()
+        label = event.GetEventObject().GetLabelText()
 
         # fast buttons (Gain10, Gain16, Gain20, Gain26)
         if label[0:4] == 'Gain':
@@ -459,13 +459,13 @@ class NoteBook(MainFrame):
 
         # Spin Control Text (G = 6 - 26)
         if label[0:8] == 'Set Gain':
-            setvalue=self.page1.lblname6w.GetValue()
+            setvalue = self.page1.lbl6w.GetValue()
             self.send_to_lj('set gain {}'.format(int(setvalue)))
             event.Skip()
 
     def update_gain(self):
-        gain=self.__gain
-        self.page1.lblname6r.SetLabel(str(gain))
+        gain = self.__gain
+        self.page1.lbl6r.SetLabel(str(gain))
 
     # EEPROM
     def update_eeprom(self):
@@ -480,29 +480,29 @@ class NoteBook(MainFrame):
         self.page3.mem8r.SetLabel(self.__eeprom8)
 
     def set_eeprom(self, event):
-        label=event.GetEventObject().GetLabelText()
+        label = event.GetEventObject().GetLabelText()
         if label[0:8] == 'Set Page':
-            page=int(label[8:])
+            page = int(label[8:])
             if page == 1:
-                string=self.page3.mem1w.GetValue()
+                string = self.page3.mem1w.GetValue()
             elif page == 2:
-                string=self.page3.mem2w.GetValue()
+                string = self.page3.mem2w.GetValue()
             elif page == 3:
-                string=self.page3.mem3w.GetValue()
+                string = self.page3.mem3w.GetValue()
             elif page == 4:
-                string=self.page3.mem4w.GetValue()
+                string = self.page3.mem4w.GetValue()
             elif page == 5:
-                string=self.page3.mem5w.GetValue()
+                string = self.page3.mem5w.GetValue()
             elif page == 6:
-                string=self.page3.mem6w.GetValue()
+                string = self.page3.mem6w.GetValue()
             elif page == 7:
-                string=self.page3.mem7w.GetValue()
+                string = self.page3.mem7w.GetValue()
             elif page == 8:
-                string=self.page3.mem8w.GetValue()
+                string = self.page3.mem8w.GetValue()
 
             # Get the first 16 characters
-            string_list=list(string[:16])
-            int_array=[ord(s) for s in string_list]
+            string_list = list(string[:16])
+            int_array = [ord(s) for s in string_list]
 
             # Add spaces if the length is smaller than 16
             while len(int_array) < 16:
@@ -515,65 +515,66 @@ class NoteBook(MainFrame):
             pass
 
     def update_serial(self):
-        serial=self.__serial
+        serial = self.__serial
         if serial > 0:
-            self.page1.lblname4r.SetLabel(str(serial))
+            self.page1.lbl4r.SetLabel(str(serial))
         else:
-            self.page1.lblname4r.SetLabel('')
+            self.page1.lbl4r.SetLabel('')
 
     def set_serial(self, event):
-        sn_string=self.page1.lblname4r.GetLabel()
+        sn_string = self.page1.lbl4r.GetLabel()
         if sn_string == '':
-            sn=self.page1.lblname4w.GetValue()
-            string=('%04d UWSiPM %04d') % (sn, sn)
+            sn = self.page1.lbl4w.GetValue()
+            string = ('%04d UWSiPM %04d') % (sn, sn)
             # str_list = list(string)
             # int_array = [ord(s) for s in str_list]
             self.send_to_lj('set eeprom {0} {1}'.format(1, string))
         elif int(sn_string):
-            string='[{0}] SiPM# {1} found! Please don\'t alter it.\n'
+            string = '[{0}] SiPM# {1} found! Please don\'t alter it.\n'
             self.msg_logger(string.format(self.get_time(), int(sn_string)))
         event.Skip()
 
     def check_sipm_status(self):
-        old_sipm_status=self.__sipm_status
+        old_sipm_status = self.__sipm_status
         if self.__temp > 50.0 and self.__gain == 26.0:
-            self.page1.lblname8r.SetLabel('NO')
-            self.__sipm_status=False
+            self.page1.lbl8r.SetLabel('NO')
+            self.__sipm_status = False
             if old_sipm_status == True:
-                string='[{0}] SiPM #{1} is being taken off!\n'
+                string = '[{0}] SiPM #{1} is being taken off!\n'
                 self.msg_logger(string.format(
-                        self.get_time(), self.__serial))
+                    self.get_time(), self.__serial))
 
         elif self.__temp < 50.0 and self.__gain < 26.1:
-            self.page1.lblname8r.SetLabel('YES')
-            self.__sipm_status=True
+            self.page1.lbl8r.SetLabel('YES')
+            self.__sipm_status = True
             if old_sipm_status == False:
                 if self.__serial == 0:
-                    string='[{0}] A new SiPM is inserted!\n'
+                    string = '[{0}] A new SiPM is inserted!\n'
                     self.msg_logger(string.format(self.get_time()))
                     self.send_to_lj('set gain 10')
                 else:
-                    string='[{0}] SiPM #{1} is inserted!\n'
-                    self.msg_logger(string.format(self.get_time(), self.__serial))
-                    string='[{0}] Labjack communication established!\n'
+                    string = '[{0}] SiPM #{1} is inserted!\n'
+                    self.msg_logger(string.format(
+                        self.get_time(), self.__serial))
+                    string = '[{0}] Labjack communication established!\n'
                     self.msg_logger(string.format(self.get_time()))
                     self.send_to_lj('set gain 10')
 
     def refresh_lj(self):
         while True:
-            json_data=self.read_from_lj()
-            self.__temp=float(json_data["temp"])
-            self.__gain=float(json_data["gain"])
-            self.__serial=int(json_data["serial"])
-            self.__led_no=int(json_data["ledno"])
-            self.__eeprom1=json_data["eeprom1"]
-            self.__eeprom2=json_data["eeprom2"]
-            self.__eeprom3=json_data["eeprom3"]
-            self.__eeprom4=json_data["eeprom4"]
-            self.__eeprom5=json_data["eeprom5"]
-            self.__eeprom6=json_data["eeprom6"]
-            self.__eeprom7=json_data["eeprom7"]
-            self.__eeprom8=json_data["eeprom8"]
+            json_data = self.read_from_lj()
+            self.__temp = float(json_data["temp"])
+            self.__gain = float(json_data["gain"])
+            self.__serial = int(json_data["serial"])
+            self.__led_no = int(json_data["ledno"])
+            self.__eeprom1 = json_data["eeprom1"]
+            self.__eeprom2 = json_data["eeprom2"]
+            self.__eeprom3 = json_data["eeprom3"]
+            self.__eeprom4 = json_data["eeprom4"]
+            self.__eeprom5 = json_data["eeprom5"]
+            self.__eeprom6 = json_data["eeprom6"]
+            self.__eeprom7 = json_data["eeprom7"]
+            self.__eeprom8 = json_data["eeprom8"]
             wx.CallAfter(self.update_temp)
             wx.CallAfter(self.update_gain)
             wx.CallAfter(self.update_eeprom)
@@ -582,59 +583,63 @@ class NoteBook(MainFrame):
             wx.CallAfter(self.check_sipm_status)
             wx.CallAfter(self.page1.Layout)
             wx.CallAfter(self.page3.Layout)
-            # print('{0}'.format(json_data))
 
     # LED Board
     def set_led(self, event):
-        label=event.GetEventObject().GetLabelText()
+        label = event.GetEventObject().GetLabelText()
         if label[0:3] == 'LED':
             self.send_to_lj('set led {}'.format(int(label[3:])))
         elif label[0:8] == 'Set LED#':
-            setvalue=self.page1.lblname7w.GetValue()
+            setvalue = self.page1.lbl7w.GetValue()
             self.send_to_lj('set led {}'.format(int(setvalue)))
         event.Skip()
 
     def update_led(self):
-        self.__subrun_no=self.__led_no
-        self.page1.lblname7r.SetLabel(str(self.__led_no))
+        self.__subrun_no = self.__led_no
+        self.page1.lbl7r.SetLabel(str(self.__led_no))
 
     def run_drs4(self, event):
         # decide runtype here from the pressed button label
-        label=event.GetEventObject().GetLabelText()
+        label = event.GetEventObject().GetLabelText()
+
         if label[0:7] == 'Run DRS':
-            self.__type='test'
+            self.__type = 'test'
         elif label[0:7] == 'Run LED':
-            self.__type='led'
+            self.__type = 'led'
         elif label[0:8] == 'Run Volt':
-            self.__type='volt'
-            self.__volt=65.25 + 0.25 * self.__subrun_no
+            self.__type = 'volt'
+            self.__volt = 65.25 + 0.25 * self.__subrun_no
+
         print self.__subrun_no
 
         # initialize the gauge, increment the run_no, send command to drs4
-        string='[{0}][Run#:{1}] Running SiPM with Bias = {2:.2f} V (and LED# {3})\n'
+        string = '[{0}][Run#:{1}] Run SiPM with Bias = {2:.2f} V (LED# {3})\n'
         self.msg_logger(string.format(self.get_time(), self.__run_no,
-            self.__volt, self.__subrun_no))
+                                      self.__volt, self.__subrun_no))
 
-        string='{0:04d} {1} {2:02d} {3:05d} '
+        string = '{0:04d} {1} {2:02d} {3:04d} '
         self.send_to_drs4(string.format(self.__serial, self.__type,
-            self.__subrun_no, self.__run_no))
-        self.update_plot(self.__run_no, self.__subrun_no, self.__serial, self.__type)
+                                        self.__subrun_no, self.__run_no))
+
+        self.update_plot(self.__run_no, self.__subrun_no,
+                         self.__serial, self.__type)
+
         self.dump_run_log(self.__volt, self.__subrun_no)
         event.Skip()
 
     def test_scan(self, event):
-        self.page1.singlescan_gauge.SetValue(0)
+        self.page1.single_gauge.SetValue(0)
         self.__run_no += 1
         print 'Start Test Scan'
-        self.__subrun_no=1
-        self.page1.singlescan_gauge.SetValue(1)
+        self.__subrun_no = 1
+        self.page1.single_gauge.SetValue(1)
         self.run_drs4(event)
         event.Skip()
 
     def led_scan(self, event):
         self.__run_no += 1
         for led_no in range(1, 19):
-            self.__subrun_no=led_no
+            self.__subrun_no = led_no
             if led_no == 17:
                 self.send_to_lj('set gain 16')
             elif led_no == 18:
@@ -649,10 +654,10 @@ class NoteBook(MainFrame):
 
     def volt_scan(self, event):
         self.__run_no += 1
-        count=1
+        count = 1
         for volt in frange(65.50, 69.50, 0.25):
             self.send_to_bk('set volt {}'.format(volt))
-            self.__subrun_no=count
+            self.__subrun_no = count
             time.sleep(1)
             self.__volt == volt
             print 'Start Bias Scan {} V'.format(volt)
@@ -670,31 +675,33 @@ class NoteBook(MainFrame):
 
     def update_plot(self, run, subrun, serial, runtype):
 
-        string='[{0}][Run#:{1}] Plotting SiPM#: {2}, Bias: {3:.2f}, LED#: {4}!\n'
-        log=string.format(self.get_time(), run, serial, self.__volt, subrun)
+        string = '[{0}][Run#:{1}] Plot SiPM#: {2}, Bias: {3:.2f}, LED#: {4}!\n'
+        log = string.format(self.get_time(), run, serial, self.__volt, subrun)
         self.msg_logger(log)
 
-        string='./data/sipm_{0:04d}/sipm_{0:04d}_{1}_{2:02d}_{3:05d}_full.txt'
-        fname=string.format(serial,runtype,subrun,run)
+        string = './data/sipm_{0:04d}/sipm_{0:04d}_{1}_{2:02d}_{3:04d}'
+        ext = '_full.txt'
+        fname = ''.join(string, ext).format(serial, runtype, subrun, run)
         self.page1.plot_waveform(fname)
 
-        string='./data/sipm_{0:04d}/sipm_{0:04d}_{1}_{2:02d}_{3:05d}.txt'
-        fname=string.format(serial,runtype,subrun,run)
-        amp_avg=self.page1.get_amp_avg(fname)
+        string = './data/sipm_{0:04d}/sipm_{0:04d}_{1}_{2:02d}_{3:04d}.txt'
+        fname = string.format(serial, runtype, subrun, run)
+        amp_avg = self.page1.get_amp_avg(fname)
 
         # result = self.page1.get_fit_result()
         # self.msg_logger('[{0}][Run#:{1}] Fit Results: Norm={2:.2f},
         # Mean={3:.2f}, Sig={4:.2f}\n'.format(self.get_time(),
         # data["Run"],result[0], result[1], result[2]))
 
-        self.__amp_avg=float('{0:.2f}'.format(amp_avg))
-        string='[{0}][Run#:{1}] Scan Result: Amp={2:.2f}\n'
-        log=string.format(self.get_time(), run, self.__amp_avg)
+        self.__amp_avg = float('{0:.2f}'.format(amp_avg))
+        string = '[{0}][Run#:{1}] Scan Result: Amp={2:.2f}\n'
+        log = string.format(self.get_time(), run, self.__amp_avg)
         self.msg_logger(log)
 
     def dump_run_log(self, volt, subrun):
 
-        log_dict={
+        # dictionary for run log
+        log_dict = {
             'Datetime': self.get_time(),
             'Temperature': self.__temp,
             'Voltage': volt,
@@ -707,36 +714,39 @@ class NoteBook(MainFrame):
             'Amp_Avg': self.__amp_avg
         }
 
-        string='./data/log/run_{0:05d}_{1:02d}.json'
-        fname=string.format(self.__run_no, subrun)
-        json_outfile1=open(fname, 'w')
+        string = './data/log/run_{0:04d}_{1:02d}.json'
+        fname = string.format(self.__run_no, subrun)
+        json_outfile1 = open(fname, 'w')
         json.dump(log_dict, json_outfile1, indent=4, sort_keys=True)
         json_outfile1.close()
 
-        lastrun_dict={
+        # create a last run dictionary to keep track of last run number
+        lastrun_dict = {
             'Lastrun_No': self.__run_no
         }
 
-        json_outfile2=open('./data/log/lastrun.json', 'w')
+        json_outfile2 = open('./data/log/lastrun.json', 'w')
         json.dump(lastrun_dict, json_outfile2, indent=4, sort_keys=True)
         json_outfile2.close()
-      #  time.sleep(1)
+
+        # insert the created run log into sqlite database
         self.insert_to_sql(fname)
         self.page5.setupDB()
 
     def dump_log(self):
 
         while True:
-            string='./data/log/slowctrl_{}.log'
-            fdata=open(string.format(self.get_day()), "a+")
-            string="{0} {1} {2} {3} {4} {5} {6} {7} {8}"
-            data=string.format(self.get_time(), self.__temp, self.__volt,
-                    self.__curr, self.__gain, self.__serial,
-                    self.__subrun_no, self.__type, self.__run_no)
+            string = './data/log/slowctrl_{}.log'
+            fdata = open(string.format(self.get_day()), "a+")
+            string = "{0} {1} {2} {3} {4} {5} {6} {7} {8}"
+            data = string.format(self.get_time(), self.__temp, self.__volt,
+                                 self.__curr, self.__gain, self.__serial,
+                                 self.__subrun_no, self.__type, self.__run_no)
             print >> fdata, data
             time.sleep(5)
 
-    def insert_to_sql(self,json_file):
+    def insert_to_sql(self, json_file):
+        # connect to sqlite and insert the runlog
         db = sqlite3.connect('runlog.db')
         traffic = json.load(open(json_file))
 
@@ -755,24 +765,26 @@ class NoteBook(MainFrame):
                 subrun_no, temp, run_type,  volt]
 
         c = db.cursor()
-        string = "amp_avg, curr, date, gain, run_no, serial_no, subrun_no, temp, run_type, volt"
+        string = 'amp_avg, curr, date, gain, run_no, ' \
+                 'serial_no, subrun_no, temp, run_type, volt'
         c.execute('create table if not exists runlog ({})'.format(string))
         c.execute('insert into runlog values (?,?,?,?,?,?,?,?,?,?)', data)
         db.commit()
         c.close()
 
     def on_close(self, event):
-        self.t1.stopped=True
-        self.t2.stopped=True
-        self.t3.stopped=True
-        # self.Close()
+        # stop the threads
+        self.t1.stopped = True
+        self.t2.stopped = True
+        self.t3.stopped = True
+        self.Close()
         self.Destroy()
         event.Skip()
 
 
 def main():
-    app=wx.App()
-    window=NoteBook(None)
+    app = wx.App()
+    window = NoteBook(None)
     window.Layout()
     window.Show(True)
     app.MainLoop()

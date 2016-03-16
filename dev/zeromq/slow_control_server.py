@@ -14,7 +14,6 @@ import json
 class SlowControl():
 
     def __init__(self):
-
         print 'Slow control initiated!'
         self.bk = BKPrecision('/dev/ttyUSB0')
         self.lj = Labjack()
@@ -23,10 +22,11 @@ class SlowControl():
         return datetime.strftime(datetime.now(), "%Y-%m-%d %H:%M:%S")
 
     def lj_server(self):
-
+        # define socket numbers for push and publish ports
         lj_port_push = "5556"
         lj_port_pub = "5566"
 
+        # create pull socket for receiving commands from GUI
         context = zmq.Context()
         socket_pull = context.socket(zmq.PULL)
         socket_pull.connect("tcp://localhost:%s" % lj_port_push)
@@ -43,13 +43,14 @@ class SlowControl():
 
         # work on requests from SiPM GUI
         while True:
-            socks = dict(poller.poll(1000))
+            socks = dict(poller.poll(2000))
 
             if socket_pull in socks and socks[socket_pull] == zmq.POLLIN:
                 msg = socket_pull.recv()
                 print '{0} Received control command: {1}'.format(
                     self.get_time(), msg)
 
+                # interpret the GUI messages here
                 if msg == "read temp":
                     print self.lj.read_temp()
                 elif msg == "read gain":
@@ -67,7 +68,7 @@ class SlowControl():
                 elif msg[0:8] == "set gain":
                     print self.lj.set_gain(int(msg[9:]))
                 else:
-                    print "Unknown command, try again."
+                    print "Unknown command! Try again."
 
             else:
                 temp = self.lj.read_temp()
@@ -102,10 +103,11 @@ class SlowControl():
                 socket_pub.send_json(lj_data)
 
     def bk_server(self):
-
+        # define socket numbers for push and publish ports
         bk_port_push = "5557"
         bk_port_pub = "5567"
 
+        # create pull socket for receiving commands from GUI
         context = zmq.Context()
         socket_pull = context.socket(zmq.PULL)
         socket_pull.connect("tcp://localhost:%s" % bk_port_push)
@@ -120,15 +122,16 @@ class SlowControl():
         socket_pub.bind("tcp://*:%s" % bk_port_pub)
         print "Publish info with port %s" % bk_port_pub
 
-        # work on requests from server
+        # work on requests from SiPM GUI
         while True:
-            socks = dict(poller.poll(1000))
+            socks = dict(poller.poll(2000))
 
             if socket_pull in socks and socks[socket_pull] == zmq.POLLIN:
                 msg = socket_pull.recv()
                 print '{0} Received control command: {1}'.format(
                     self.get_time(), msg)
 
+                # interpret the GUI messages here
                 if msg == "power on":
                     print self.bk.power_on()
                 elif msg == "power off":

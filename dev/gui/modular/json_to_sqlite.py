@@ -1,6 +1,7 @@
 import json
 import sqlite3
 
+
 def insert_to_sql(json_file):
     db = sqlite3.connect('runlog.db')
     traffic = json.load(open(json_file))
@@ -20,7 +21,8 @@ def insert_to_sql(json_file):
             subrun_no, temp, run_type,  volt]
 
     c = db.cursor()
-    string = "amp_avg, curr, date, gain, run_no, serial_no, subrun_no, temp, run_type, volt"
+    string = 'amp_avg, curr, date, gain, run_no, ' \
+             'serial_no, subrun_no, temp, run_type, volt'
     c.execute('create table runlog ({})'.format(string))
     c.execute('insert into runlog values (?,?,?,?,?,?,?,?,?,?)', data)
     db.commit()

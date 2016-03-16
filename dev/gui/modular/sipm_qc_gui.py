@@ -32,19 +32,17 @@ class sql_panel(wx.Panel):
         sizer = wx.BoxSizer()
         self.SetBackgroundColour("Light Grey")
 
-
-        #for allowing sorting in descending order
+        # for allowing sorting in descending order
         self.oldC = -1
         self.reverse = False
         self.command = "SELECT * FROM runlog ORDER by date DESC"
 
         self.database = wx.ListCtrl(self, -1,
-                style=wx.LC_REPORT|wx.SUNKEN_BORDER|wx.CENTER)
+                                    style=wx.LC_REPORT | wx.SUNKEN_BORDER)
 
         self.__set_properties()
         self.__do_layout()
         self.setupDB()
-
 
     def __do_layout(self):
         self.Bind(wx.EVT_LIST_COL_CLICK, self.setupSort, self.database)
@@ -79,7 +77,8 @@ class sql_panel(wx.Panel):
     def setupDB(self):
         self.con = sqlite.connect("runlog.db")
         c = self.con.cursor()
-        string = "amp_avg, curr, date, gain, run_no, serial_no, subrun_no, temp, run_type, volt"
+        string = 'amp_avg, curr, date, gain, run_no, ' \
+                 'serial_no, subrun_no, temp, run_type, volt'
         c.execute('create table if not exists runlog ({})'.format(string))
         self.fillDB()
 
@@ -87,46 +86,46 @@ class sql_panel(wx.Panel):
         """Sets the command for filling the list control, based on
         what column is clicked
         """
-        c = event.GetColumn()   #get the column that was clicked on
+        c = event.GetColumn()  # get the column that was clicked on
 
-        if c==0:
-            #order by first column
+        if c == 0:
+            # order by first column
             self.command = "SELECT * FROM runlog ORDER BY amp_avg"
-        elif c==1:
-            #order by second column
+        elif c == 1:
+            # order by second column
             self.command = "SELECT * FROM runlog ORDER BY curr"
-        elif c==2:
-            #order by third column
+        elif c == 2:
+            # order by third column
             self.command = "SELECT * FROM runlog ORDER BY date"
-        elif c==3:
-            #order by third column
+        elif c == 3:
+            # order by third column
             self.command = "SELECT * FROM runlog ORDER BY gain"
-        elif c==4:
-            #order by third column
+        elif c == 4:
+            # order by third column
             self.command = "SELECT * FROM runlog ORDER BY run_no"
-        elif c==5:
-            #order by third column
+        elif c == 5:
+            # order by third column
             self.command = "SELECT * FROM runlog ORDER BY serial_no"
-        elif c==6:
-            #order by third column
+        elif c == 6:
+            # order by third column
             self.command = "SELECT * FROM runlog ORDER BY subrun_no"
-        elif c==7:
-            #order by third column
+        elif c == 7:
+            # order by third column
             self.command = "SELECT * FROM runlog ORDER BY temp"
-        elif c==8:
-            #order by third column
+        elif c == 8:
+            # order by third column
             self.command = "SELECT * FROM runlog ORDER BY run_type"
-        elif c==9:
-            #order by third column
+        elif c == 9:
+            # order by third column
             self.command = "SELECT * FROM runlog ORDER BY volt"
 
-        #Toggle reverse
+        # Toggle reverse
         if c == self.oldC:
             self.reverse = not self.reverse
         else:
             self.reverse = False
 
-        #if reverse, append "DESC" to the select command
+        # if reverse, append "DESC" to the select command
         if self.reverse:
             self.command += " DESC"
 
@@ -135,11 +134,11 @@ class sql_panel(wx.Panel):
         event.Skip()
 
     def fillDB(self):
-        self.database.DeleteAllItems()  #since we're sorting, must delete all
-        #then get a list of tuples of all the data
+        self.database.DeleteAllItems()  # since we're sorting, must delete all
+        # then get a list of tuples of all the data
         data = self.con.execute(self.command).fetchall()
         for i in data:
-            #loop through and add it
+            # loop through and add it
             self.database.Append(i[0:])
 
 
@@ -152,10 +151,11 @@ class logger_panel(wx.Panel):
         self.SetBackgroundColour("Light Grey")
 
         # a multiline TextCtrl for logging purpose
-        self.logger = wx.TextCtrl(self, size=(500, 1000), style=wx.TE_MULTILINE |
-                                  wx.TE_READONLY | wx.TE_RICH2 | wx.BORDER_SUNKEN)
+        self.logger = wx.TextCtrl(self, size=(500, 1000))
+        self.logger.SetDefaultStyle(wx.TE_MULTILINE | wx.TE_READONLY
+                                    | wx.TE_RICH2 | wx.BORDER_SUNKEN)
 
-        # set the properties of the items created
+        # set black background and white fonts
         self.logger.SetBackgroundColour("Black")
         self.logger.SetForegroundColour("White")
 
@@ -210,7 +210,10 @@ class display_panel(wx.Panel):
     def plot_temp(self, _filename):
         if os.path.isfile(_filename):
 
-            time, temp, volt, curr, gain = np.loadtxt(_filename, usecols=(1, 2, 3, 4, 5), converters={1: strpdate2num('%H:%M:%S')},unpack=True)
+            readout = np.loadtxt(_filename, usecols=(1, 2, 3, 4, 5),
+                                 converters={1: strpdate2num('%H:%M:%S')},
+                                 unpack=True)
+            time, temp, volt, curr, gain = readout
 
             self.axes3.clear()
             plt.figure(3)
@@ -267,7 +270,7 @@ class control_panel(wx.Panel):
     def __init__(self, parent):
         wx.Panel.__init__(self, parent)
 
-        self._singlescan_gauge_max = 1
+        self._single_gauge_max = 1
         self._led_gauge_max = 18
         self._volt_gauge_max = 16
 
@@ -283,71 +286,71 @@ class control_panel(wx.Panel):
         self.quote1 = wx.StaticText(self, label="BK Precision")
 
         # bk status
-        self.lblname9 = wx.StaticText(self, label="Status")
-        self.lblname9r = wx.StaticText(self, label="NO")
-        self.lblname9w = wx.StaticText(self, label="")
+        self.lbl9 = wx.StaticText(self, label="Status")
+        self.lbl9r = wx.StaticText(self, label="NO")
+        self.lbl9w = wx.StaticText(self, label="")
 
         # bk output
-        self.lblname1 = wx.StaticText(self, label='OUTPUT')
-        self.lblname1r = wx.StaticText(self, label='OFF')
-        self.lblname1w = wx.StaticText(self, label="")
-        self.lblname1s = wx.Button(self, label="Set ON")
+        self.lbl1 = wx.StaticText(self, label='OUTPUT')
+        self.lbl1r = wx.StaticText(self, label='OFF')
+        self.lbl1w = wx.StaticText(self, label="")
+        self.lbl1s = wx.Button(self, label="Set ON")
 
         # bk V[V]
-        self.lblname2 = wx.StaticText(self, label='V [V]')
-        self.lblname2r = wx.StaticText(self, label='0.00')
-        self.lblname2w = wx.SpinCtrlDouble(
+        self.lbl2 = wx.StaticText(self, label='V [V]')
+        self.lbl2r = wx.StaticText(self, label='0.00')
+        self.lbl2w = wx.SpinCtrlDouble(
             self, value='0.00', name="Roll V [V]")
-        self.lblname2s = wx.Button(self, label="Set V")
+        self.lbl2s = wx.Button(self, label="Set V")
 
         # bk I[A]
-        self.lblname3 = wx.StaticText(self, label='I [mA]')
-        self.lblname3r = wx.StaticText(self, label='0.00')
-        self.lblname3w = wx.SpinCtrl(self, value='5.00', name="Roll I [mA]")
-        self.lblname3s = wx.Button(self, label="Set I")
+        self.lbl3 = wx.StaticText(self, label='I [mA]')
+        self.lbl3r = wx.StaticText(self, label='0.00')
+        self.lbl3w = wx.SpinCtrl(self, value='5.00', name="Roll I [mA]")
+        self.lbl3s = wx.Button(self, label="Set I")
 
         # sipm Board Label
         self.quote2 = wx.StaticText(self, label="SiPM Board")
 
         # sipm status
-        self.lblname8 = wx.StaticText(self, label="Status")
-        self.lblname8r = wx.StaticText(self, label="NO")
-        self.lblname8w = wx.StaticText(self, label="")
+        self.lbl8 = wx.StaticText(self, label="Status")
+        self.lbl8r = wx.StaticText(self, label="NO")
+        self.lbl8w = wx.StaticText(self, label="")
 
         # sipm number
-        self.lblname4 = wx.StaticText(self, label="SiPM#")
-        self.lblname4r = wx.StaticText(self, label="1")
-        self.lblname4w = wx.SpinCtrl(self, value='1', name="Roll SiPM#")
-        self.lblname4s = wx.Button(self, label="Set SiPM#")
+        self.lbl4 = wx.StaticText(self, label="SiPM#")
+        self.lbl4r = wx.StaticText(self, label="1")
+        self.lbl4w = wx.SpinCtrl(self, value='1', name="Roll SiPM#")
+        self.lbl4s = wx.Button(self, label="Set SiPM#")
 
         # T [C]
-        self.lblname5 = wx.StaticText(self, label='T [' + u'\u2103]')
-        self.lblname5r = wx.StaticText(self, label="25.00")
-        self.lblname5w = wx.StaticText(self, label="")
+        self.lbl5 = wx.StaticText(self, label='T [' + u'\u2103]')
+        self.lbl5r = wx.StaticText(self, label="25.00")
+        self.lbl5w = wx.StaticText(self, label="")
 
         # gain [dB]
-        self.lblname6 = wx.StaticText(self, label='Gain [dB]')
-        self.lblname6r = wx.StaticText(self, label="10.0")
-        self.lblname6w = wx.SpinCtrl(self, value='10', name="Roll Gain [dB]")
-        self.lblname6s = wx.Button(self, label="Set Gain")
+        self.lbl6 = wx.StaticText(self, label='Gain [dB]')
+        self.lbl6r = wx.StaticText(self, label="10.0")
+        self.lbl6w = wx.SpinCtrl(self, value='10', name="Roll Gain [dB]")
+        self.lbl6s = wx.Button(self, label="Set Gain")
 
         # led Board Label
         self.quote3 = wx.StaticText(self, label="LED Board")
 
         # led #
-        self.lblname7 = wx.StaticText(self, label="LED#")
-        self.lblname7r = wx.StaticText(self, label="1")
-        self.lblname7w = wx.SpinCtrl(self, value='1', name="Roll LED#")
-        self.lblname7s = wx.Button(self, label="Set LED#")
+        self.lbl7 = wx.StaticText(self, label="LED#")
+        self.lbl7r = wx.StaticText(self, label="1")
+        self.lbl7w = wx.SpinCtrl(self, value='1', name="Roll LED#")
+        self.lbl7s = wx.Button(self, label="Set LED#")
 
         # end of grid1
 
         # sipm Board Label
         self.quote4 = wx.StaticText(self, label="SiPM Board")
-        self.button1 = wx.Button(self, label="Gain10")
-        self.button2 = wx.Button(self, label="Gain16")
-        self.button3 = wx.Button(self, label="Gain20")
-        self.button4 = wx.Button(self, label="Gain26")
+        self.btn1 = wx.Button(self, label="Gain10")
+        self.btn2 = wx.Button(self, label="Gain16")
+        self.btn3 = wx.Button(self, label="Gain20")
+        self.btn4 = wx.Button(self, label="Gain26")
 
         # led Board Label
         self.quote5 = wx.StaticText(self, label="LED Board")
@@ -380,9 +383,9 @@ class control_panel(wx.Panel):
         self.gaugelbl2 = wx.StaticText(self, label="LED")
         self.gaugelbl3 = wx.StaticText(self, label="Bias")
 
-        self.singlescan_gauge = wx.Gauge(self,
-                                         range=self._singlescan_gauge_max,
-                                         size=(250, 25))
+        self.single_gauge = wx.Gauge(self,
+                                     range=self._single_gauge_max,
+                                     size=(250, 25))
         self.led_gauge = wx.Gauge(self, range=self._led_gauge_max,
                                   size=(250, 25))
         self.volt_gauge = wx.Gauge(self, range=self._volt_gauge_max,
@@ -393,17 +396,15 @@ class control_panel(wx.Panel):
         self.do_layout()
 
     def set_properties(self):
-
         # set the properties of the items created
+        self.lbl2w.SetDigits(1)
+        self.lbl2w.SetRange(0.0, 70.0)
+        self.lbl2w.SetIncrement(0.1)
 
-        self.lblname2w.SetDigits(1)
-        self.lblname2w.SetRange(0.0, 70.0)
-        self.lblname2w.SetIncrement(0.1)
-
-        self.lblname3w.SetRange(0, 5)
-        self.lblname4w.SetRange(1, 1500)
-        self.lblname6w.SetRange(6, 26)
-        self.lblname7w.SetRange(1, 16)
+        self.lbl3w.SetRange(0, 5)
+        self.lbl4w.SetRange(1, 1500)
+        self.lbl6w.SetRange(6, 26)
+        self.lbl7w.SetRange(1, 16)
 
         _font = wx.Font(16, wx.ROMAN, wx.NORMAL, wx.NORMAL,
                         False, u'Consolas')
@@ -423,52 +424,52 @@ class control_panel(wx.Panel):
         self.quote5.SetFont(_big_font)
         self.quote6.SetFont(_big_font)
 
-        self.lblname9.SetFont(_font)
-        self.lblname9r.SetFont(_bold_font)
-        self.lblname9w.SetFont(_font)
+        self.lbl9.SetFont(_font)
+        self.lbl9r.SetFont(_bold_font)
+        self.lbl9w.SetFont(_font)
 
-        self.lblname1.SetFont(_font)
-        self.lblname1r.SetFont(_bold_font)
-        self.lblname1w.SetFont(_font)
-        self.lblname1s.SetFont(_font)
+        self.lbl1.SetFont(_font)
+        self.lbl1r.SetFont(_bold_font)
+        self.lbl1w.SetFont(_font)
+        self.lbl1s.SetFont(_font)
 
-        self.lblname2.SetFont(_font)
-        self.lblname2r.SetFont(_bold_font)
-        self.lblname2w.SetFont(_font)
-        self.lblname2s.SetFont(_font)
+        self.lbl2.SetFont(_font)
+        self.lbl2r.SetFont(_bold_font)
+        self.lbl2w.SetFont(_font)
+        self.lbl2s.SetFont(_font)
 
-        self.lblname3.SetFont(_font)
-        self.lblname3r.SetFont(_bold_font)
-        self.lblname3w.SetFont(_font)
-        self.lblname3s.SetFont(_font)
+        self.lbl3.SetFont(_font)
+        self.lbl3r.SetFont(_bold_font)
+        self.lbl3w.SetFont(_font)
+        self.lbl3s.SetFont(_font)
 
-        self.lblname8.SetFont(_font)
-        self.lblname8r.SetFont(_bold_font)
-        self.lblname8w.SetFont(_font)
+        self.lbl8.SetFont(_font)
+        self.lbl8r.SetFont(_bold_font)
+        self.lbl8w.SetFont(_font)
 
-        self.lblname4.SetFont(_font)
-        self.lblname4r.SetFont(_bold_font)
-        self.lblname4w.SetFont(_font)
-        self.lblname4s.SetFont(_font)
+        self.lbl4.SetFont(_font)
+        self.lbl4r.SetFont(_bold_font)
+        self.lbl4w.SetFont(_font)
+        self.lbl4s.SetFont(_font)
 
-        self.lblname5.SetFont(_font)
-        self.lblname5r.SetFont(_bold_font)
-        self.lblname5w.SetFont(_font)
+        self.lbl5.SetFont(_font)
+        self.lbl5r.SetFont(_bold_font)
+        self.lbl5w.SetFont(_font)
 
-        self.lblname6.SetFont(_font)
-        self.lblname6r.SetFont(_bold_font)
-        self.lblname6w.SetFont(_font)
-        self.lblname6s.SetFont(_font)
+        self.lbl6.SetFont(_font)
+        self.lbl6r.SetFont(_bold_font)
+        self.lbl6w.SetFont(_font)
+        self.lbl6s.SetFont(_font)
 
-        self.lblname7.SetFont(_font)
-        self.lblname7r.SetFont(_bold_font)
-        self.lblname7w.SetFont(_font)
-        self.lblname7s.SetFont(_font)
+        self.lbl7.SetFont(_font)
+        self.lbl7r.SetFont(_bold_font)
+        self.lbl7w.SetFont(_font)
+        self.lbl7s.SetFont(_font)
 
-        self.button1.SetFont(_font)
-        self.button2.SetFont(_font)
-        self.button3.SetFont(_font)
-        self.button4.SetFont(_font)
+        self.btn1.SetFont(_font)
+        self.btn2.SetFont(_font)
+        self.btn3.SetFont(_font)
+        self.btn4.SetFont(_font)
 
         self.led1.SetFont(_font)
         self.led2.SetFont(_font)
@@ -495,7 +496,6 @@ class control_panel(wx.Panel):
         self.gaugelbl3.SetFont(_font)
 
     def do_layout(self):
-
         # create some sizers
         mainSizer = wx.BoxSizer(wx.VERTICAL)
         grid = wx.GridBagSizer(hgap=10, vgap=10)
@@ -507,74 +507,60 @@ class control_panel(wx.Panel):
         # start of grid1
         grid.Add(self.quote1, pos=(0, 1), span=(1, 2), flag=wx.TE_CENTER)
 
-        grid.Add(self.lblname9, pos=(1, 0), flag=wx.TE_RIGHT | wx.ALIGN_CENTER)
-        grid.Add(
-            self.lblname9r, pos=(1, 1), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
-        grid.Add(self.lblname9w, pos=(1, 2), flag=wx.TE_CENTER)
+        grid.Add(self.lbl9, pos=(1, 0), flag=wx.TE_RIGHT | wx.ALIGN_CENTER)
+        grid.Add(self.lbl9r, pos=(1, 1), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
+        grid.Add(self.lbl9w, pos=(1, 2), flag=wx.TE_CENTER)
 
-        grid.Add(self.lblname1, pos=(2, 0), flag=wx.TE_RIGHT | wx.ALIGN_CENTER)
-        grid.Add(
-            self.lblname1r, pos=(2, 1), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
-        grid.Add(self.lblname1w, pos=(2, 2), flag=wx.TE_CENTER)
-        grid.Add(self.lblname1s, pos=(2, 3), flag=wx.TE_CENTER | wx.EXPAND)
+        grid.Add(self.lbl1, pos=(2, 0), flag=wx.TE_RIGHT | wx.ALIGN_CENTER)
+        grid.Add(self.lbl1r, pos=(2, 1), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
+        grid.Add(self.lbl1w, pos=(2, 2), flag=wx.TE_CENTER)
+        grid.Add(self.lbl1s, pos=(2, 3), flag=wx.TE_CENTER | wx.EXPAND)
 
-        grid.Add(self.lblname2, pos=(3, 0), flag=wx.TE_RIGHT | wx.ALIGN_CENTER)
-        grid.Add(
-            self.lblname2r, pos=(3, 1), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
-        grid.Add(self.lblname2w, pos=(3, 2), flag=wx.TE_CENTER)
-        grid.Add(self.lblname2s, pos=(3, 3), flag=wx.TE_CENTER)
+        grid.Add(self.lbl2, pos=(3, 0), flag=wx.TE_RIGHT | wx.ALIGN_CENTER)
+        grid.Add(self.lbl2r, pos=(3, 1), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
+        grid.Add(self.lbl2w, pos=(3, 2), flag=wx.TE_CENTER)
+        grid.Add(self.lbl2s, pos=(3, 3), flag=wx.TE_CENTER)
 
-        grid.Add(self.lblname3, pos=(4, 0), flag=wx.TE_RIGHT | wx.ALIGN_CENTER)
-        grid.Add(
-            self.lblname3r, pos=(4, 1), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
-        grid.Add(self.lblname3w, pos=(4, 2), flag=wx.TE_CENTER)
-        grid.Add(self.lblname3s, pos=(4, 3), flag=wx.TE_CENTER)
+        grid.Add(self.lbl3, pos=(4, 0), flag=wx.TE_RIGHT | wx.ALIGN_CENTER)
+        grid.Add(self.lbl3r, pos=(4, 1), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
+        grid.Add(self.lbl3w, pos=(4, 2), flag=wx.TE_CENTER)
+        grid.Add(self.lbl3s, pos=(4, 3), flag=wx.TE_CENTER)
 
         grid.Add(self.quote2, pos=(5, 1), span=(1, 2), flag=wx.TE_CENTER)
 
-        grid.Add(self.lblname8, pos=(6, 0), flag=wx.TE_RIGHT | wx.ALIGN_CENTER)
-        grid.Add(
-            self.lblname8r, pos=(6, 1), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
-        grid.Add(self.lblname8w, pos=(6, 2), flag=wx.TE_CENTER)
+        grid.Add(self.lbl8, pos=(6, 0), flag=wx.TE_RIGHT | wx.ALIGN_CENTER)
+        grid.Add(self.lbl8r, pos=(6, 1), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
+        grid.Add(self.lbl8w, pos=(6, 2), flag=wx.TE_CENTER)
 
-        grid.Add(self.lblname4, pos=(7, 0), flag=wx.TE_RIGHT | wx.ALIGN_CENTER)
-        grid.Add(
-            self.lblname4r, pos=(7, 1), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
-        grid.Add(self.lblname4w, pos=(7, 2), flag=wx.TE_CENTER)
-        grid.Add(self.lblname4s, pos=(7, 3), flag=wx.TE_CENTER)
+        grid.Add(self.lbl4, pos=(7, 0), flag=wx.TE_RIGHT | wx.ALIGN_CENTER)
+        grid.Add(self.lbl4r, pos=(7, 1), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
+        grid.Add(self.lbl4w, pos=(7, 2), flag=wx.TE_CENTER)
+        grid.Add(self.lbl4s, pos=(7, 3), flag=wx.TE_CENTER)
 
-        grid.Add(self.lblname5, pos=(8, 0), flag=wx.TE_RIGHT | wx.ALIGN_CENTER)
-        grid.Add(
-            self.lblname5r, pos=(8, 1), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
-        grid.Add(self.lblname5w, pos=(8, 2), flag=wx.TE_CENTER)
+        grid.Add(self.lbl5, pos=(8, 0), flag=wx.TE_RIGHT | wx.ALIGN_CENTER)
+        grid.Add(self.lbl5r, pos=(8, 1), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
+        grid.Add(self.lbl5w, pos=(8, 2), flag=wx.TE_CENTER)
 
-        grid.Add(self.lblname6, pos=(9, 0), flag=wx.TE_RIGHT | wx.ALIGN_CENTER)
-        grid.Add(
-            self.lblname6r, pos=(9, 1), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
-        grid.Add(self.lblname6w, pos=(9, 2), flag=wx.TE_CENTER)
-        grid.Add(self.lblname6s, pos=(9, 3), flag=wx.TE_CENTER)
+        grid.Add(self.lbl6, pos=(9, 0), flag=wx.TE_RIGHT | wx.ALIGN_CENTER)
+        grid.Add(self.lbl6r, pos=(9, 1), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
+        grid.Add(self.lbl6w, pos=(9, 2), flag=wx.TE_CENTER)
+        grid.Add(self.lbl6s, pos=(9, 3), flag=wx.TE_CENTER)
 
         grid.Add(self.quote3, pos=(10, 1), span=(1, 2), flag=wx.TE_CENTER)
 
-        grid.Add(
-            self.lblname7, pos=(11, 0), flag=wx.TE_RIGHT | wx.ALIGN_CENTER)
-        grid.Add(
-            self.lblname7r, pos=(11, 1), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
-        grid.Add(self.lblname7w, pos=(11, 2), flag=wx.TE_CENTER)
-        grid.Add(self.lblname7s, pos=(11, 3), flag=wx.TE_CENTER)
+        grid.Add(self.lbl7, pos=(11, 0), flag=wx.TE_RIGHT | wx.ALIGN_CENTER)
+        grid.Add(self.lbl7r, pos=(11, 1), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
+        grid.Add(self.lbl7w, pos=(11, 2), flag=wx.TE_CENTER)
+        grid.Add(self.lbl7s, pos=(11, 3), flag=wx.TE_CENTER)
         # end of grid1
 
         # start of grid2
         grid2.Add(self.quote4, pos=(0, 1), span=(1, 2), flag=wx.TE_CENTER)
 
-        grid2.Add(
-            self.button1, pos=(1, 0), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
-        grid2.Add(
-            self.button2, pos=(1, 1), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
-        grid2.Add(
-            self.button3, pos=(1, 2), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
-        grid2.Add(
-            self.button4, pos=(1, 3), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
+        grid2.Add(self.btn1, pos=(1, 0), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
+        grid2.Add(self.btn2, pos=(1, 1), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
+        grid2.Add(self.btn3, pos=(1, 2), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
+        grid2.Add(self.btn4, pos=(1, 3), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
 
         grid2.Add(self.quote5, pos=(2, 1), span=(1, 2), flag=wx.TE_CENTER)
 
@@ -601,8 +587,7 @@ class control_panel(wx.Panel):
         grid2.Add(self.gaugelbl2, pos=(9, 0), flag=wx.EXPAND)
         grid2.Add(self.gaugelbl3, pos=(10, 0), flag=wx.EXPAND)
 
-        grid2.Add(self.singlescan_gauge, pos=(
-            8, 1), span=(1, 3), flag=wx.EXPAND)
+        grid2.Add(self.single_gauge, pos=(8, 1), span=(1, 3), flag=wx.EXPAND)
         grid2.Add(self.led_gauge, pos=(9, 1), span=(1, 3), flag=wx.EXPAND)
         grid2.Add(self.volt_gauge, pos=(10, 1), span=(1, 3), flag=wx.EXPAND)
         # end of grid2
@@ -674,8 +659,9 @@ class control_panel(wx.Panel):
         bin_centres = (bins[:-1] + bins[1:])/2
         # p0 is the initial guess for the fitting coefficients (A, mu and
         # sigma# above)
-        self.coeff, var_matrix = curve_fit(gauss, bin_centres, n,
-                                           p0=[100., self.average, 0.05*self.average])
+        results = curve_fit(gauss, bin_centres, n,
+                            p0=[100., self.average, 0.05*self.average])
+        self.coeff, var_matrix = results
         hist_fit = gauss(bin_centres, *self.coeff)
         plt.plot(bin_centres, hist_fit, label='Fitted data', linewidth=2)
         print 'Fitted mean = ', self.coeff[1]
@@ -707,24 +693,23 @@ class eeprom_panel(wx.Panel):
         self.mem7 = wx.StaticText(self, label='Page7')
         self.mem8 = wx.StaticText(self, label='Page8')
 
-        self.mem1r = wx.StaticText(self, label='0001 UWSiPM 0001')
-        self.mem2r = wx.StaticText(self, label='0001 UWSiPM 0001')
-        self.mem3r = wx.StaticText(self, label='0001 UWSiPM 0001')
-        self.mem4r = wx.StaticText(self, label='0001 UWSiPM 0001')
-        self.mem5r = wx.StaticText(self, label='0001 UWSiPM 0001')
-        self.mem6r = wx.StaticText(self, label='0001 UWSiPM 0001')
-        self.mem7r = wx.StaticText(self, label='0001 UWSiPM 0001')
-        self.mem8r = wx.StaticText(self, label='0001 UWSiPM 0001')
+        self.mem1r = wx.StaticText(self, label='')
+        self.mem2r = wx.StaticText(self, label='')
+        self.mem3r = wx.StaticText(self, label='')
+        self.mem4r = wx.StaticText(self, label='')
+        self.mem5r = wx.StaticText(self, label='')
+        self.mem6r = wx.StaticText(self, label='')
+        self.mem7r = wx.StaticText(self, label='')
+        self.mem8r = wx.StaticText(self, label='')
 
-        self.mem1w = wx.TextCtrl(
-            self, value='0001 UWSiPM 0001', size=(280, 40))
-        self.mem2w = wx.TextCtrl(self, value='0001 UWSiPM 0001')
-        self.mem3w = wx.TextCtrl(self, value='0001 UWSiPM 0001')
-        self.mem4w = wx.TextCtrl(self, value='0001 UWSiPM 0001')
-        self.mem5w = wx.TextCtrl(self, value='0001 UWSiPM 0001')
-        self.mem6w = wx.TextCtrl(self, value='0001 UWSiPM 0001')
-        self.mem7w = wx.TextCtrl(self, value='0001 UWSiPM 0001')
-        self.mem8w = wx.TextCtrl(self, value='0001 UWSiPM 0001')
+        self.mem1w = wx.TextCtrl(self, value='', size=(280, 40))
+        self.mem2w = wx.TextCtrl(self, value='')
+        self.mem3w = wx.TextCtrl(self, value='')
+        self.mem4w = wx.TextCtrl(self, value='')
+        self.mem5w = wx.TextCtrl(self, value='')
+        self.mem6w = wx.TextCtrl(self, value='')
+        self.mem7w = wx.TextCtrl(self, value='')
+        self.mem8w = wx.TextCtrl(self, value='')
 
         self.mem1s = wx.Button(self, label="Set Page1")
         self.mem2s = wx.Button(self, label="Set Page2")

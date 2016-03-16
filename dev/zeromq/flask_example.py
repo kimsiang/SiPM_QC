@@ -10,6 +10,7 @@ from multiprocessing import Process
 
 app = Flask(__name__)
 
+
 @app.route("/")
 @app.route('/<name>')
 def hello(name=None):
@@ -22,7 +23,6 @@ def hello(name=None):
 
     socket_sub1.setsockopt(zmq.SUBSCRIBE, "")
     socket_sub2.setsockopt(zmq.SUBSCRIBE, "")
-
 
     while True:
         json_data1 = socket_sub1.recv_json()
