@@ -13,6 +13,7 @@ from datetime import date, datetime, tzinfo, timedelta
 import time
 import os
 import signal
+import sqlite3 as sqlite
 # print wx.__file__
 
 
@@ -21,6 +22,125 @@ def gauss(x, *p):
     return A*np.exp(-(x-mu)**2/(2.*sigma**2))
 
 # Define logger panel here
+
+
+class sql_panel(wx.Panel):
+
+    def __init__(self, parent):
+        wx.Panel.__init__(self, parent)
+
+        sizer = wx.BoxSizer()
+        self.SetBackgroundColour("Light Grey")
+
+
+        #for allowing sorting in descending order
+        self.oldC = -1
+        self.reverse = False
+        self.command = "SELECT * FROM runlog ORDER by date DESC"
+
+        self.database = wx.ListCtrl(self, -1,
+                style=wx.LC_REPORT|wx.SUNKEN_BORDER|wx.CENTER)
+
+        self.__set_properties()
+        self.__do_layout()
+        self.setupDB()
+
+
+    def __do_layout(self):
+        self.Bind(wx.EVT_LIST_COL_CLICK, self.setupSort, self.database)
+        sizer_1 = wx.BoxSizer(wx.VERTICAL)
+        sizer_1.Add(self.database, 1, wx.EXPAND, 0)
+        self.SetSizer(sizer_1)
+        sizer_1.Fit(self)
+        self.Layout()
+
+    def __set_properties(self):
+        self.database.InsertColumn(0, "Amp_Avg")
+        self.database.InsertColumn(1, "Current")
+        self.database.InsertColumn(2, "Datetime")
+        self.database.InsertColumn(3, "Gain")
+        self.database.InsertColumn(4, "Run_No")
+        self.database.InsertColumn(5, "Serial_No")
+        self.database.InsertColumn(6, "Subrun_No")
+        self.database.InsertColumn(7, "Temperature")
+        self.database.InsertColumn(8, "Type")
+        self.database.InsertColumn(9, "Voltage")
+        self.database.SetColumnWidth(0, 80)
+        self.database.SetColumnWidth(1, 80)
+        self.database.SetColumnWidth(2, 150)
+        self.database.SetColumnWidth(3, 100)
+        self.database.SetColumnWidth(4, 100)
+        self.database.SetColumnWidth(5, 100)
+        self.database.SetColumnWidth(6, 100)
+        self.database.SetColumnWidth(7, 100)
+        self.database.SetColumnWidth(8, 100)
+        self.database.SetColumnWidth(9, 100)
+
+    def setupDB(self):
+        self.con = sqlite.connect("runlog.db")
+        c = self.con.cursor()
+        string = "amp_avg, curr, date, gain, run_no, serial_no, subrun_no, temp, run_type, volt"
+        c.execute('create table if not exists runlog ({})'.format(string))
+        self.fillDB()
+
+    def setupSort(self, event):
+        """Sets the command for filling the list control, based on
+        what column is clicked
+        """
+        c = event.GetColumn()   #get the column that was clicked on
+
+        if c==0:
+            #order by first column
+            self.command = "SELECT * FROM runlog ORDER BY amp_avg"
+        elif c==1:
+            #order by second column
+            self.command = "SELECT * FROM runlog ORDER BY curr"
+        elif c==2:
+            #order by third column
+            self.command = "SELECT * FROM runlog ORDER BY date"
+        elif c==3:
+            #order by third column
+            self.command = "SELECT * FROM runlog ORDER BY gain"
+        elif c==4:
+            #order by third column
+            self.command = "SELECT * FROM runlog ORDER BY run_no"
+        elif c==5:
+            #order by third column
+            self.command = "SELECT * FROM runlog ORDER BY serial_no"
+        elif c==6:
+            #order by third column
+            self.command = "SELECT * FROM runlog ORDER BY subrun_no"
+        elif c==7:
+            #order by third column
+            self.command = "SELECT * FROM runlog ORDER BY temp"
+        elif c==8:
+            #order by third column
+            self.command = "SELECT * FROM runlog ORDER BY run_type"
+        elif c==9:
+            #order by third column
+            self.command = "SELECT * FROM runlog ORDER BY volt"
+
+        #Toggle reverse
+        if c == self.oldC:
+            self.reverse = not self.reverse
+        else:
+            self.reverse = False
+
+        #if reverse, append "DESC" to the select command
+        if self.reverse:
+            self.command += " DESC"
+
+        self.oldC = c
+        self.fillDB()
+        event.Skip()
+
+    def fillDB(self):
+        self.database.DeleteAllItems()  #since we're sorting, must delete all
+        #then get a list of tuples of all the data
+        data = self.con.execute(self.command).fetchall()
+        for i in data:
+            #loop through and add it
+            self.database.Append(i[0:])
 
 
 class logger_panel(wx.Panel):
@@ -90,11 +210,7 @@ class display_panel(wx.Panel):
     def plot_temp(self, _filename):
         if os.path.isfile(_filename):
 
-            time, temp, volt, curr, gain = np.loadtxt(_filename,
-                                                      usecols=(1, 2, 3, 4, 5),
-                                                      converters={
-                                                          1: strpdate2num('%H:%M:%S')},
-                                                      unpack=True)
+            time, temp, volt, curr, gain = np.loadtxt(_filename, usecols=(1, 2, 3, 4, 5), converters={1: strpdate2num('%H:%M:%S')},unpack=True)
 
             self.axes3.clear()
             plt.figure(3)

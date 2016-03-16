@@ -16,8 +16,8 @@ def insert_to_sql(json_file):
     run_type = traffic["Type"]
     volt = traffic["Voltage"]
 
-    data = [amp_avg, curr, date, gain, run_no, serial_no, subrun_no, temp, run_type,
-        volt]
+    data = [amp_avg, curr, date, gain, run_no, serial_no,
+            subrun_no, temp, run_type,  volt]
 
     c = db.cursor()
     string = "amp_avg, curr, date, gain, run_no, serial_no, subrun_no, temp, run_type, volt"

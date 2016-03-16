@@ -7,7 +7,7 @@ import wx
 import wx.lib.agw.flatnotebook as fnb
 from threading import Thread, Event
 from sipm_qc_gui import control_panel, display_panel
-from sipm_qc_gui import eeprom_panel, logger_panel
+from sipm_qc_gui import eeprom_panel, logger_panel, sql_panel
 import time
 import sys
 import subprocess
@@ -17,7 +17,8 @@ import signal
 from datetime import date, datetime, tzinfo, timedelta
 import zmq
 from multiprocessing import Process
-import json
+import simplejson as json
+import sqlite3
 
 
 def frange(start, stop, step):
@@ -64,11 +65,13 @@ class NoteBook(MainFrame):
         self.page2 = display_panel(self.nb)
         self.page3 = eeprom_panel(self.nb)
         self.page4 = logger_panel(self)
+        self.page5 = sql_panel(self)
 
         # add the pages to the notebook with the label to show on the tab
         self.nb.AddPage(self.page1, 'Control')
         self.nb.AddPage(self.page2, 'Display')
         self.nb.AddPage(self.page3, 'EEPROM')
+        self.nb.AddPage(self.page5, 'Database')
 
         # finally, put the notebook in a sizer for the panel to manage the
         # layout
@@ -80,35 +83,11 @@ class NoteBook(MainFrame):
         grid.Add(self.page4, pos=(0, 2), flag=wx.TE_RIGHT)
         self.SetSizerAndFit(grid)
 
-        # initialize for zmq
-        drs4_port = "5555"
-        lj_port_push = "5556"
-        lj_port_pub = "5566"
-        bk_port_push = "5557"
-        bk_port_pub = "5567"
-
-        context = zmq.Context()
-
-        self.socket_req_drs4 = context.socket(zmq.REQ)
-        self.socket_req_drs4.connect("tcp://localhost:%s" % drs4_port)
-
-        self.socket_push_bk = context.socket(zmq.PUSH)
-        self.socket_push_bk.bind("tcp://*:%s" % bk_port_push)
-
-        self.socket_push_lj = context.socket(zmq.PUSH)
-        self.socket_push_lj.bind("tcp://*:%s" % lj_port_push)
-
-        self.socket_sub_bk = context.socket(zmq.SUB)
-        self.socket_sub_lj = context.socket(zmq.SUB)
-
-        self.socket_sub_bk.connect("tcp://localhost:%s" % bk_port_pub)
-        self.socket_sub_lj.connect("tcp://localhost:%s" % lj_port_pub)
-
-        self.socket_sub_bk.setsockopt(zmq.SUBSCRIBE, "")
-        self.socket_sub_lj.setsockopt(zmq.SUBSCRIBE, "")
 
         # initialize all the environment and do the layout
+        self.init_zmq()
         self.init_variable()
+        self.retrieve_runlog()
         self.bind_bk()
         self.bind_led()
         self.bind_pga()
@@ -122,7 +101,40 @@ class NoteBook(MainFrame):
         self.page2.Layout()
         self.page3.Layout()
         self.page4.Layout()
+        self.page5.Layout()
         # end of __init__
+
+    def init_zmq(self):
+
+        # define port numbers
+        drs4_port = "5555"
+        lj_port_push = "5556"
+        lj_port_pub = "5566"
+        bk_port_push = "5557"
+        bk_port_pub = "5567"
+
+        context = zmq.Context()
+
+        # socket for drs4 communication
+        self.socket_req_drs4 = context.socket(zmq.REQ)
+        self.socket_req_drs4.connect("tcp://localhost:%s" % drs4_port)
+
+        # socket for bk communication
+        self.socket_push_bk = context.socket(zmq.PUSH)
+        self.socket_push_bk.bind("tcp://*:%s" % bk_port_push)
+
+        self.socket_sub_bk = context.socket(zmq.SUB)
+        self.socket_sub_bk.connect("tcp://localhost:%s" % bk_port_pub)
+        self.socket_sub_bk.setsockopt(zmq.SUBSCRIBE, "")
+
+        # socket for labjack communication
+        self.socket_push_lj = context.socket(zmq.PUSH)
+        self.socket_push_lj.bind("tcp://*:%s" % lj_port_push)
+
+        self.socket_sub_lj = context.socket(zmq.SUB)
+        self.socket_sub_lj.connect("tcp://localhost:%s" % lj_port_pub)
+        self.socket_sub_lj.setsockopt(zmq.SUBSCRIBE, "")
+
 
     def init_variable(self):
 
@@ -149,12 +161,20 @@ class NoteBook(MainFrame):
         self.__sipm_status = False
         self.__bk_status = False
 
-        lastrun_file = './data/log/lastrun.log'
+    def retrieve_runlog(self):
+
+        lastrun_file = './data/log/lastrun.json'
         if os.path.isfile(lastrun_file):
             with open(lastrun_file, 'r') as f:
                 self.__run_no = json.load(f)["Lastrun_No"]
-            self.page4.logger.AppendText('[{0}] Previous Run# is {1}\n'.format(
-                self.get_time(), self.__run_no))
+            string='[{0}] Previous Run# is {1}\n'
+            self.page4.logger.AppendText(string.format(self.get_time(),
+                self.__run_no))
+        else:
+            string='[{0}] There is no previous Run#\n'
+            self.page4.logger.AppendText(string.format(self.get_time(),
+                self.__run_no))
+
 
     def init_thread(self):
         # initialize thread for bk to refresh variables
@@ -277,13 +297,12 @@ class NoteBook(MainFrame):
 
     def on_click(self, event):
         labeltext = event.GetEventObject().GetLabelText()
-        self.msg_logger(
-            '[{0}] Clicked on {1}\n'.format(self.get_time(), labeltext))
+        self.msg_logger('[{0}] Clicked on {1}\n'.format(self.get_time(), labeltext))
         event.Skip()
 
     def on_spin(self, event):
         self.msg_logger('[{0}] {1} to {2:.1f}\n'.format(self.get_time(),
-                    event.GetEventObject().GetName(), event.GetValue())
+                    event.GetEventObject().GetName(), event.GetValue()))
         event.Skip()
 
     def on_switch(self, event):
@@ -399,15 +418,15 @@ class NoteBook(MainFrame):
             self.page1.lblname9r.SetLabel('NO')
             self.__bk_status=False
             if bk_status == True:
-                self.msg_logger('[{0}] BK Precision is powered off!\n'.format(
-                    self.get_time()))
+                string='[{0}] BK Precision is powered off!\n'
+                self.msg_logger(string.format(self.get_time()))
 
         elif self.__volt > -1 and self.__curr > -1:
             self.page1.lblname9r.SetLabel('YES')
             self.__bk_status=True
             if bk_status == False:
-                self.msg_logger('[{0}] BK Precision is powered on!\n'.format(
-                    self.get_time()))
+                string='[{0}] BK Precision is powered on!\n'
+                self.msg_logger(string.format(self.get_time()))
 
     def refresh_bk(self):
         while True:
@@ -427,8 +446,8 @@ class NoteBook(MainFrame):
     def update_temp(self):
         temp=self.__temp
         self.page1.lblname5r.SetLabel(str(temp))
-        self.page2.plot_temp(
-            './data/log/slowctrl_{}.log'.format(self.get_day()))
+        string='./data/log/slowctrl_{}.log'
+        self.page2.plot_temp(string.format(self.get_day()))
 
     # PGA
     def set_gain(self, event):
@@ -511,8 +530,8 @@ class NoteBook(MainFrame):
             # int_array = [ord(s) for s in str_list]
             self.send_to_lj('set eeprom {0} {1}'.format(1, string))
         elif int(sn_string):
-            self.msg_logger('[{0}] SiPM# {1} found! Please don\'t alter it.\n'.format(
-                self.get_time(), int(sn_string)))
+            string='[{0}] SiPM# {1} found! Please don\'t alter it.\n'
+            self.msg_logger(string.format(self.get_time(), int(sn_string)))
         event.Skip()
 
     def check_sipm_status(self):
@@ -521,7 +540,8 @@ class NoteBook(MainFrame):
             self.page1.lblname8r.SetLabel('NO')
             self.__sipm_status=False
             if old_sipm_status == True:
-                self.msg_logger('[{0}] SiPM #{1} is being taken off!\n'.format(
+                string='[{0}] SiPM #{1} is being taken off!\n'
+                self.msg_logger(string.format(
                         self.get_time(), self.__serial))
 
         elif self.__temp < 50.0 and self.__gain < 26.1:
@@ -529,14 +549,14 @@ class NoteBook(MainFrame):
             self.__sipm_status=True
             if old_sipm_status == False:
                 if self.__serial == 0:
-                    self.msg_logger('[{0}] A new SiPM is inserted!\n'.format(
-                        self.get_time()))
+                    string='[{0}] A new SiPM is inserted!\n'
+                    self.msg_logger(string.format(self.get_time()))
                     self.send_to_lj('set gain 10')
                 else:
-                    self.msg_logger('[{0}] SiPM #{1} is inserted!\n'.format(
-                        self.get_time(), self.__serial))
-                    self.msg_logger('[{0}] Labjack communication established!\n'.format(
-                        self.get_time()))
+                    string='[{0}] SiPM #{1} is inserted!\n'
+                    self.msg_logger(string.format(self.get_time(), self.__serial))
+                    string='[{0}] Labjack communication established!\n'
+                    self.msg_logger(string.format(self.get_time()))
                     self.send_to_lj('set gain 10')
 
     def refresh_lj(self):
@@ -588,14 +608,17 @@ class NoteBook(MainFrame):
         elif label[0:8] == 'Run Volt':
             self.__type='volt'
             self.__volt=65.25 + 0.25 * self.__subrun_no
+        print self.__subrun_no
 
         # initialize the gauge, increment the run_no, send command to drs4
-        self.msg_logger('[{0}][Run#:{1}] Running SiPM with Bias = {2:.2f} V (and LED# {3})\n'.format(
-            self.get_time(), self.__run_no, self.__volt, self.__subrun_no))
-        self.send_to_drs4('{0:04d} {1} {2:02d} {3:05d} '.format(
-            self.__serial, self.__type, self.__subrun_no, self.__run_no))
-        self.dump_run_log(self.__volt, self.__subrun_no)
-        self.update_plot(self.__run_no, self.__subrun_no)
+        string='[{0}][Run#:{1}] Running SiPM with Bias = {2:.2f} V (and LED# {3})\n'
+        self.msg_logger(string.format(self.get_time(), self.__run_no,
+            self.__volt, self.__subrun_no))
+
+        string='{0:04d} {1} {2:02d} {3:05d} '
+        self.send_to_drs4(string.format(self.__serial, self.__type,
+            self.__subrun_no, self.__run_no))
+        self.update_plot(self.__run_no, self.__subrun_no, self.__serial, self.__type)
         self.dump_run_log(self.__volt, self.__subrun_no)
         event.Skip()
 
@@ -636,7 +659,6 @@ class NoteBook(MainFrame):
             self.page1.volt_gauge.SetValue(count)
             self.run_drs4(event)
             count += 1
-        self.send_to_bk("set volt 65")
         event.Skip()
 
     # functions for Notebook
@@ -646,27 +668,31 @@ class NoteBook(MainFrame):
     def get_day(self):
         return datetime.strftime(datetime.now(), "%Y%m%d")
 
-    def update_plot(self, run_no, subrun_no):
-        with open('./data/log/run_{0:05d}_{1:02d}.log'.format(run_no, subrun_no), 'r') as f:
-            data=json.load(f)
+    def update_plot(self, run, subrun, serial, runtype):
 
-        self.msg_logger('[{0}][Run#:{1}] Plotting SiPM#: {2}, Bias: {3:.2f}, LED#: {4}!\n'.format(
-            self.get_time(), data["Run_No"], data["Serial_No"], data["Voltage"], data["Subrun_No"]))
+        string='[{0}][Run#:{1}] Plotting SiPM#: {2}, Bias: {3:.2f}, LED#: {4}!\n'
+        log=string.format(self.get_time(), run, serial, self.__volt, subrun)
+        self.msg_logger(log)
 
-        self.page1.plot_waveform('./data/sipm_{0:04d}/sipm_{0:04d}_{1}_{2:02d}_{3:05d}_full.txt'.format(
-            data["Serial_No"], data["Type"], data["Subrun_No"], data["Run_No"]))
+        string='./data/sipm_{0:04d}/sipm_{0:04d}_{1}_{2:02d}_{3:05d}_full.txt'
+        fname=string.format(serial,runtype,subrun,run)
+        self.page1.plot_waveform(fname)
 
-        amp_avg=self.page1.get_amp_avg('./data/sipm_{0:04d}/sipm_{0:04d}_{1}_{2:02d}_{3:05d}.txt'.format(
-            data["Serial_No"], data["Type"], data["Subrun_No"], data["Run_No"]))
+        string='./data/sipm_{0:04d}/sipm_{0:04d}_{1}_{2:02d}_{3:05d}.txt'
+        fname=string.format(serial,runtype,subrun,run)
+        amp_avg=self.page1.get_amp_avg(fname)
+
         # result = self.page1.get_fit_result()
         # self.msg_logger('[{0}][Run#:{1}] Fit Results: Norm={2:.2f},
         # Mean={3:.2f}, Sig={4:.2f}\n'.format(self.get_time(),
-        # data["Run_No"],result[0], result[1], result[2]))
-        self.__amp_avg=float('{0:.2f}'.format(amp_avg))
-        self.msg_logger('[{0}][Run#:{1}] Scan Result: Amp={2:.2f}\n'.format(
-            self.get_time(), data["Run_No"], self.__amp_avg))
+        # data["Run"],result[0], result[1], result[2]))
 
-    def dump_run_log(self, volt, subrun_no):
+        self.__amp_avg=float('{0:.2f}'.format(amp_avg))
+        string='[{0}][Run#:{1}] Scan Result: Amp={2:.2f}\n'
+        log=string.format(self.get_time(), run, self.__amp_avg)
+        self.msg_logger(log)
+
+    def dump_run_log(self, volt, subrun):
 
         log_dict={
             'Datetime': self.get_time(),
@@ -675,32 +701,65 @@ class NoteBook(MainFrame):
             'Current': self.__curr,
             'Gain': self.__gain,
             'Serial_No': self.__serial,
-            'Subrun_No': subrun_no,
+            'Subrun_No': subrun,
             'Type': self.__type,
             'Run_No': self.__run_no,
             'Amp_Avg': self.__amp_avg
         }
 
-        json_outfile1=open('./data/log/run_{0:05d}_{1:02d}.log'.format(
-            self.__run_no, subrun_no), 'w')
+        string='./data/log/run_{0:05d}_{1:02d}.json'
+        fname=string.format(self.__run_no, subrun)
+        json_outfile1=open(fname, 'w')
         json.dump(log_dict, json_outfile1, indent=4, sort_keys=True)
+        json_outfile1.close()
 
         lastrun_dict={
             'Lastrun_No': self.__run_no
         }
 
-        json_outfile2=open('./data/log/lastrun.log', 'w')
+        json_outfile2=open('./data/log/lastrun.json', 'w')
         json.dump(lastrun_dict, json_outfile2, indent=4, sort_keys=True)
+        json_outfile2.close()
+      #  time.sleep(1)
+        self.insert_to_sql(fname)
+        self.page5.setupDB()
 
     def dump_log(self):
 
         while True:
-            fdata=open('./data/log/slowctrl_{}.log'.format(
-                self.get_day()), "a+")
-            print >> fdata, self.get_time(), ' ', self.__temp, ' ',
-            self.__volt, ' ', self.__curr, ' ', self.__gain, ' ', self.__serial,
-            ' ', self.__subrun_no, ' ', self.__type, ' ', self.__run_no
+            string='./data/log/slowctrl_{}.log'
+            fdata=open(string.format(self.get_day()), "a+")
+            string="{0} {1} {2} {3} {4} {5} {6} {7} {8}"
+            data=string.format(self.get_time(), self.__temp, self.__volt,
+                    self.__curr, self.__gain, self.__serial,
+                    self.__subrun_no, self.__type, self.__run_no)
+            print >> fdata, data
             time.sleep(5)
+
+    def insert_to_sql(self,json_file):
+        db = sqlite3.connect('runlog.db')
+        traffic = json.load(open(json_file))
+
+        amp_avg = traffic["Amp_Avg"]
+        curr = traffic["Current"]
+        date = traffic["Datetime"]
+        gain = traffic["Gain"]
+        run_no = traffic["Run_No"]
+        serial_no = traffic["Serial_No"]
+        subrun_no = traffic["Subrun_No"]
+        temp = traffic["Temperature"]
+        run_type = traffic["Type"]
+        volt = traffic["Voltage"]
+
+        data = [amp_avg, curr, date, gain, run_no, serial_no,
+                subrun_no, temp, run_type,  volt]
+
+        c = db.cursor()
+        string = "amp_avg, curr, date, gain, run_no, serial_no, subrun_no, temp, run_type, volt"
+        c.execute('create table if not exists runlog ({})'.format(string))
+        c.execute('insert into runlog values (?,?,?,?,?,?,?,?,?,?)', data)
+        db.commit()
+        c.close()
 
     def on_close(self, event):
         self.t1.stopped=True
