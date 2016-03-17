@@ -36,7 +36,7 @@ class MainFrame (wx.Frame):
         wx.Frame.__init__(self, parent, id=wx.ID_ANY,
                           title=wx.EmptyString,
                           pos=wx.DefaultPosition,
-                          size=wx.Size(1300, 1000),
+                          size=wx.Size(1100, 1000),
                           style=wx.DEFAULT_FRAME_STYLE |
                           wx.TAB_TRAVERSAL)
 
@@ -75,7 +75,7 @@ class NoteBook(MainFrame):
 
         # finally, put the notebook in a sizer for the panel to manage the
         # layout
-        grid = wx.GridBagSizer(hgap=10, vgap=10)
+        grid = wx.GridBagSizer(hgap=5, vgap=5)
 
         # start of grid
         grid.Add(self.nb, pos=(0, 0), span=(
@@ -88,19 +88,13 @@ class NoteBook(MainFrame):
         self.init_variable()
         self.retrieve_runlog()
         self.bind_bk()
+        self.read_curr()
         self.bind_led()
         self.bind_pga()
         self.bind_eeprom()
         self.bind_drs4()
         self.do_logger_binding()
         self.init_thread()
-
-        # redo layout realign all the variables
-        self.page1.Layout()
-        self.page2.Layout()
-        self.page3.Layout()
-        self.page4.Layout()
-        self.page5.Layout()
         # end of __init__
 
     def init_zmq(self):
@@ -194,7 +188,7 @@ class NoteBook(MainFrame):
 
     def bind_bk(self):
         # bind the BK buttons to update the display and call bk.set_volt etc
-        self.Bind(wx.EVT_BUTTON, self.update_bk_state, self.page1.lbl1s)
+        self.Bind(wx.EVT_BUTTON, self.update_bk_output, self.page1.lbl1s)
         self.Bind(wx.EVT_BUTTON, self.update_volt, self.page1.lbl2s)
         self.Bind(wx.EVT_BUTTON, self.update_curr, self.page1.lbl3s)
 
@@ -366,37 +360,33 @@ class NoteBook(MainFrame):
         message = self.socket_req_drs4.recv()
         print("Received reply [%s]" % (message))
 
-    def bk_on(self, event):
-        self.send_to_bk("power on")
-        self.page1.lbl2r.SetLabel('ON')
-        event.Skip()
-
-    def bk_off(self, event):
-        self.send_to_bk("power off")
-        self.page1.lbl2r.SetLabel('OFF')
-        event.Skip()
-
-    def update_bk_state(self, event):
+    def update_bk_output(self, event):
         label = event.GetEventObject().GetLabelText()
         if label == 'Set ON':
             self.send_to_bk("power on")
         elif label == 'Set OFF':
             self.send_to_bk("power off")
-        self.read_bk_state()
+        self.read_bk_output()
         event.Skip()
 
-    def read_bk_state(self):
+    def read_bk_output(self):
         state = self.__state
         if state == 1:
             self.page1.lbl1r.SetLabel('ON')
+            self.page1.lbl1r.SetForegroundColour(wx.GREEN)
             self.page1.lbl1s.SetLabel('Set OFF')
         else:
             self.page1.lbl1r.SetLabel('OFF')
+            self.page1.lbl1r.SetForegroundColour(wx.RED)
             self.page1.lbl1s.SetLabel('Set ON')
 
     def read_volt(self):
         volt = self.__volt
         self.page1.lbl2r.SetLabel('{:.2f}'.format(float(volt)))
+        if volt > 0.5:
+            self.page1.lbl2r.SetForegroundColour(wx.GREEN)
+        else:
+            self.page1.lbl2r.SetForegroundColour(wx.RED)
 
     def update_volt(self, event):
         setvalue = self.page1.lbl2w.GetValue()
@@ -406,6 +396,10 @@ class NoteBook(MainFrame):
     def read_curr(self):
         curr = self.__curr
         self.page1.lbl3r.SetLabel('{:.2f}'.format(float(curr)))
+        if curr < 5:
+            self.page1.lbl3r.SetForegroundColour(wx.GREEN)
+        else:
+            self.page1.lbl3r.SetForegroundColour(wx.RED)
 
     def update_curr(self, event):
         setvalue = self.page1.lbl3w.GetValue()
@@ -416,6 +410,8 @@ class NoteBook(MainFrame):
         bk_status = self.__bk_status
         if self.__volt < 0 and self.__curr < 0:
             self.page1.lbl9r.SetLabel('NO')
+            self.page1.lbl9r.SetForegroundColour(wx.RED)
+            self.page1.lbl9r.Refresh()
             self.__bk_status = False
             if bk_status == True:
                 string = '[{0}] BK Precision is powered off!\n'
@@ -423,6 +419,8 @@ class NoteBook(MainFrame):
 
         elif self.__volt > -1 and self.__curr > -1:
             self.page1.lbl9r.SetLabel('YES')
+            self.page1.lbl9r.SetForegroundColour(wx.GREEN)
+            self.page1.lbl9r.Refresh()
             self.__bk_status = True
             if bk_status == False:
                 string = '[{0}] BK Precision is powered on!\n'
@@ -444,7 +442,7 @@ class NoteBook(MainFrame):
 
             if self.__state != int(json_data["state"]):
                 self.__state = int(json_data["state"])
-                wx.CallAfter(self.read_bk_state)
+                wx.CallAfter(self.read_bk_output)
                 wx.CallAfter(self.page1.Layout)
 
             wx.CallAfter(self.check_bk_status)
@@ -454,6 +452,10 @@ class NoteBook(MainFrame):
     def update_temp(self):
         temp = self.__temp
         self.page1.lbl5r.SetLabel(str(temp))
+        if temp < 50:
+            self.page1.lbl5r.SetForegroundColour(wx.GREEN)
+        else:
+            self.page1.lbl5r.SetForegroundColour(wx.RED)
         string = './data/log/slowctrl_{}.log'
         self.page2.plot_temp(string.format(self.get_day()))
 
@@ -474,6 +476,10 @@ class NoteBook(MainFrame):
     def update_gain(self):
         gain = self.__gain
         self.page1.lbl6r.SetLabel(str(gain))
+        if gain < 27:
+            self.page1.lbl6r.SetForegroundColour(wx.GREEN)
+        else:
+            self.page1.lbl6r.SetForegroundColour(wx.RED)
 
     # EEPROM
     def update_eeprom(self):
@@ -526,6 +532,7 @@ class NoteBook(MainFrame):
         serial = self.__serial
         if serial > 0:
             self.page1.lbl4r.SetLabel(str(serial))
+            self.page1.lbl4r.SetForegroundColour(wx.GREEN)
         else:
             self.page1.lbl4r.SetLabel('')
 
@@ -546,6 +553,7 @@ class NoteBook(MainFrame):
         old_sipm_status = self.__sipm_status
         if self.__temp > 50.0 and self.__gain == 26.0:
             self.page1.lbl8r.SetLabel('NO')
+            self.page1.lbl8r.SetForegroundColour(wx.RED)
             self.__sipm_status = False
             if old_sipm_status == True:
                 string = '[{0}] SiPM #{1} is being taken off!\n'
@@ -554,6 +562,7 @@ class NoteBook(MainFrame):
 
         elif self.__temp < 50.0 and self.__gain < 26.1:
             self.page1.lbl8r.SetLabel('YES')
+            self.page1.lbl8r.SetForegroundColour(wx.GREEN)
             self.__sipm_status = True
             if old_sipm_status == False:
                 if self.__serial == 0:
@@ -626,6 +635,7 @@ class NoteBook(MainFrame):
                 wx.CallAfter(self.update_eeprom)
 
             wx.CallAfter(self.check_sipm_status)
+            wx.CallAfter(self.Refresh)
 
     # LED Board
     def set_led(self, event):
@@ -640,18 +650,21 @@ class NoteBook(MainFrame):
     def update_led(self):
         self.__subrun_no = self.__led_no
         self.page1.lbl7r.SetLabel(str(self.__led_no))
+        if self.__led_no < 17 and self.__led_no > 0:
+            self.page1.lbl7r.SetForegroundColour(wx.GREEN)
+        else:
+            self.page1.lbl7r.SetForegroundColour(wx.RED)
 
     def run_drs4(self, event):
         # decide runtype here from the pressed button label
         label = event.GetEventObject().GetLabelText()
 
+        volt = self.__volt
         if label[0:7] == 'Run DRS':
             self.__type = 'test'
-            volt = self.__volt
         elif label[0:7] == 'Run LED':
             self.__type = 'led'
-            volt = self.__volt
-        elif label[0:8] == 'Run Volt':
+        elif label[0:8] == 'Run Bias':
             self.__type = 'volt'
             volt = 65.8 + 0.2 * self.__subrun_no
 
@@ -703,9 +716,12 @@ class NoteBook(MainFrame):
         count = 1
         for volt in frange(66.0, 69.2, 0.2):
             self.send_to_bk('set volt {}'.format(volt))
-            self.__subrun_no = count
-            time.sleep(1.5)
             self.__volt == volt
+            self.__subrun_no = count
+            if count == 1:
+                time.sleep(2.0)
+            else:
+                time.sleep(1.5)
             print 'Start Bias Scan {} V'.format(volt)
             self.page1.volt_gauge.SetValue(count)
             self.run_drs4(event)

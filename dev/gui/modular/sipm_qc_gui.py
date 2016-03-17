@@ -30,7 +30,7 @@ class sql_panel(wx.Panel):
         wx.Panel.__init__(self, parent)
 
         sizer = wx.BoxSizer()
-        self.SetBackgroundColour("Light Grey")
+        self.SetBackgroundColour(wx.WHITE)
 
         # for allowing sorting in descending order
         self.oldC = -1
@@ -148,15 +148,14 @@ class logger_panel(wx.Panel):
         wx.Panel.__init__(self, parent)
 
         sizer = wx.BoxSizer()
-        self.SetBackgroundColour("Light Grey")
 
         # a multiline TextCtrl for logging purpose
         self.logger = wx.TextCtrl(self, size=(500, 1000),
                 style=wx.TE_MULTILINE | wx.TE_READONLY |wx.TE_RICH2 | wx.BORDER_SUNKEN)
 
         # set black background and white fonts
-        self.logger.SetBackgroundColour("Black")
-        self.logger.SetForegroundColour("White")
+        self.logger.SetBackgroundColour(wx.BLACK)
+        self.logger.SetForegroundColour(wx.WHITE)
 
         sizer.Add(self.logger, 0, wx.ALL, 5)
         self.SetSizerAndFit(sizer)
@@ -171,7 +170,7 @@ class display_panel(wx.Panel):
 
     def __init__(self, parent):
         wx.Panel.__init__(self, parent)
-        self.SetBackgroundColour("Light Grey")
+        self.SetBackgroundColour(wx.WHITE)
 
         # create some sizers
         mainSizer = wx.BoxSizer(wx.VERTICAL)
@@ -268,6 +267,7 @@ class control_panel(wx.Panel):
 
     def __init__(self, parent):
         wx.Panel.__init__(self, parent)
+        self.SetBackgroundColour("WHITE")
 
         self._single_gauge_max = 1
         self._led_gauge_max = 18
@@ -376,7 +376,7 @@ class control_panel(wx.Panel):
         #  daq buttons
         self.drs4_button = wx.Button(self, label="Run DRS4")
         self.led_scan_button = wx.Button(self, label="Run LED Scan")
-        self.volt_scan_button = wx.Button(self, label="Run Voltage Scan")
+        self.volt_scan_button = wx.Button(self, label="Run Bias Scan")
 
         self.gaugelbl1 = wx.StaticText(self, label="Single")
         self.gaugelbl2 = wx.StaticText(self, label="LED")
@@ -508,7 +508,7 @@ class control_panel(wx.Panel):
 
         grid.Add(self.lbl9, pos=(1, 0), flag=wx.TE_RIGHT | wx.ALIGN_CENTER)
         grid.Add(self.lbl9r, pos=(1, 1), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
-        grid.Add(self.lbl9w, pos=(1, 2), flag=wx.TE_CENTER)
+        grid.Add(self.lbl9w, pos=(1, 2), flag=wx.TE_CENTER | wx.ALL, border=5)
 
         grid.Add(self.lbl1, pos=(2, 0), flag=wx.TE_RIGHT | wx.ALIGN_CENTER)
         grid.Add(self.lbl1r, pos=(2, 1), flag=wx.TE_CENTER | wx.ALIGN_CENTER)
@@ -599,13 +599,16 @@ class control_panel(wx.Panel):
         hSizer2.AddSpacer(10)
         hSizer2.Add(grid2, 0, wx.ALL | wx.EXPAND | wx.CENTER, 10)
 
-        hSizer3.Add(self.drs4_button, 0, wx.CENTER)
-        hSizer3.Add(self.led_scan_button, 0, wx.CENTER)
-        hSizer3.Add(self.volt_scan_button, 0, wx.CENTER)
+        hSizer3.Add(self.drs4_button, 0, wx.CENTER, 10)
+        hSizer3.AddSpacer(5)
+        hSizer3.Add(self.led_scan_button, 0, wx.CENTER, 10)
+        hSizer3.AddSpacer(5)
+        hSizer3.Add(self.volt_scan_button, 0, wx.CENTER, 10)
 
         mainSizer.Add(hSizer1, 0, wx.ALL | wx.ALIGN_CENTER, 5)
         mainSizer.Add(hSizer2, 0, wx.ALL, 5)
         mainSizer.Add(hSizer3, 0, wx.ALIGN_CENTER, 5)
+        mainSizer.AddSpacer(20)
 
         self.SetSizerAndFit(mainSizer)
         mainSizer.Layout()
