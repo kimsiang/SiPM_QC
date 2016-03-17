@@ -23,11 +23,27 @@ void plot_any(){
     double mean1[10][100]={};
     double sigma1[10][100]={};
 
-    int sipm_no[]={1,2,3,4,5,6,7,8,10};
-    int run_no[]={2,4,6,8,10,12,14,16,24};
+    /* package 1 */
+    //int sipm_no[]={1,2,3,4,5,6,7,8,9,10};
+    //int run_no[]={2,4,6,8,10,12,14,16,53,24};
 
+    /* package 2 */
     //int sipm_no[]={14, 16, 17, 18};
-    // int run_no[]={18, 22, 20, 26};
+    //int run_no[]={18, 22, 20, 26};
+
+    /* package 8 */
+    //int sipm_no[]={71, 72, 73, 74, 75, 76, 77, 79, 80};
+    //int run_no[]={29, 30, 31, 32, 33, 34, 35, 36, 37};
+
+    /* package 9 */
+    //int sipm_no[]={81, 82, 83, 84, 86, 87, 88, 89, 90};
+    //int run_no[]={38, 39, 40, 41, 42, 43, 44, 46, 47};
+
+    /* package 10 */
+    int sipm_no[]={96, 97, 98, 99};
+    int run_no[]={48, 49, 50, 51};
+
+
 
     int size = sizeof(sipm_no)/sizeof(*sipm_no);
 
@@ -87,6 +103,8 @@ void plot_any(){
 
 
         c2->cd();
+       c2->SetLogy();
+
         g1[j] = new TGraphErrors(16,volt,mean1[j],0,sigma1[j]);
         g1[j]->SetTitle("SiPM Response");
         g1[j]->GetXaxis()->SetTitle("V [V]");
@@ -94,14 +112,17 @@ void plot_any(){
         g1[j]->SetMarkerStyle(20);
         g1[j]->SetMarkerColor(j+1);
         g1[j]->SetLineColor(j+1);
-        g1[j]->SetLineWidth(2);
-        if(j==0) g1[j]->Draw("APC");
-        if(j>0) g1[j]->Draw("samePC");
+        if(j==9){ g1[j]->SetLineColor(j+2);
+            g1[j]->SetMarkerColor(j+2);}
+            g1[j]->SetLineWidth(2);
+            if(j==0) g1[j]->Draw("APC");
+            if(j>0) g1[j]->Draw("samePC");
 
-        if(j==0)leg = new TLegend(0.15,0.35,0.3,0.85);
-        char name[20];
-        sprintf(name,"SiPM %d",sipm_no[j]);
-        leg->AddEntry(g1[j],name,"lp");
+            if(j==0)leg = new TLegend(0.7,0.15,0.85,0.65);
+           // if(j==0)leg = new TLegend(0.15,0.35,0.3,0.85);
+            char name[20];
+            sprintf(name,"SiPM %d",sipm_no[j]);
+            leg->AddEntry(g1[j],name,"lp");
     }
 
     leg->Draw();
@@ -110,6 +131,6 @@ void plot_any(){
     // sprintf(out1,"sipm_%04d_vscan_run_%04d_hist.eps",sipm_no, run_no);
     //  sprintf(out2,"sipm_%04d_vscan_run_%04d_graph.eps",sipm_no, run_no);
     //  c1->Print(out1);
-       c2->Print("sipm_pack_1.pdf");
+    c2->Print("sipm_pack_10_log.pdf");
 
 }
