@@ -318,7 +318,7 @@ class control_panel(wx.Panel):
 
         # sipm number
         self.lbl4 = wx.StaticText(self, label="SiPM#")
-        self.lbl4r = wx.StaticText(self, label="1")
+        self.lbl4r = wx.StaticText(self, label="")
         self.lbl4w = wx.SpinCtrl(self, value='1', name="Roll SiPM#")
         self.lbl4s = wx.Button(self, label="Set SiPM#")
 

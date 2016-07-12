@@ -672,8 +672,8 @@ class NoteBook(MainFrame):
         volt = float('{0:.2f}'.format(volt))
 
         # initialize the gauge, increment the run_no, send command to drs4
-        string = '[{0}][Run#:{1}] Run SiPM with Bias = {2:.2f} V (LED# {3})\n'
-        self.msg_logger(string.format(self.get_time(), self.__run_no,
+        string = '[{0}][Run#:{1}] Run SiPM {2} with Bias = {3:.2f} V (LED# {4})\n'
+        self.msg_logger(string.format(self.get_time(), self.__serial, self.__run_no,
                                       volt, self.__subrun_no))
 
         string = '{0:04d} {1} {2:02d} {3:04d} '
@@ -718,10 +718,7 @@ class NoteBook(MainFrame):
             self.send_to_bk('set volt {}'.format(volt))
             self.__volt == volt
             self.__subrun_no = count
-            if count == 1:
-                time.sleep(2.0)
-            else:
-                time.sleep(1.5)
+            time.sleep(2.0)
             print 'Start Bias Scan {} V'.format(volt)
             self.page1.volt_gauge.SetValue(count)
             self.run_drs4(event)
@@ -736,10 +733,6 @@ class NoteBook(MainFrame):
         return datetime.strftime(datetime.now(), "%Y%m%d")
 
     def update_plot(self, run, subrun, serial, runtype):
-
-        string = '[{0}][Run#:{1}] Plot SiPM#: {2}, Bias: {3:.2f}, LED#: {4}!\n'
-        log = string.format(self.get_time(), run, serial, self.__volt, subrun)
-        self.msg_logger(log)
 
         string = './data/sipm_{0:04d}/sipm_{0:04d}_{1}_{2:02d}_{3:04d}_full.txt'
         fname = string.format(serial, runtype, subrun, run)

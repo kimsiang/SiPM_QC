@@ -9,7 +9,7 @@ from multiprocessing import Process
 from labjack import Labjack
 from bk_precision import BKPrecision
 import json
-
+import procname
 
 class SlowControl():
 
@@ -178,6 +178,7 @@ class SlowControl():
 # main function
 def main():
     slowctrl = SlowControl()
+    procname.setprocname("slowcontrol")
     Process(target=slowctrl.bk_server, args=()).start()
     Process(target=slowctrl.lj_server, args=()).start()
 
